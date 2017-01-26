@@ -93,7 +93,7 @@ rule determinelength:
     input:
        "trimmed/{sample}_R1.fastq"
     output:
-       temp("{sample}_LEN")
+       "{sample}_LEN"
     shell:
        "seqtk fqchk {input} | grep max_len | cut -f 2 -d ';' | cut -f 2 -d ':' > {output}"
        
