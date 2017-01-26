@@ -105,7 +105,7 @@ rule spades:
         "assembly/{sample}"
     params:
         spadesparam = spadesparam,
-        kmer = determine_kmerlength({sample}_LEN,krange),
+        kmer = determine_kmerlength("{sample}_LEN",krange),
         cov = mincov,
         version = determine_spadespath(spadesversion)
     shell:
