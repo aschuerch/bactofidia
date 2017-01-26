@@ -1,4 +1,5 @@
 
+
 SAMPLES = ["ENH-JSC-EDH-100490"]
 R = ["R1","R2"]
 
@@ -51,7 +52,6 @@ rule all:
        expand ("assembly/{sample}", sample=SAMPLES),
        expand ("{sample}_LEN", sample=SAMPLES)
 
-
 rule fastqc_before:
     input:
         "data/{sample}_{r}.fastq.gz"
@@ -73,7 +73,7 @@ rule trim:
 
 rule fastqc_after:
     input:
-	"trimmed/{sample}_{r}.fastq"
+    "trimmed/{sample}_{r}.fastq"
     output:
         temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
     shell:
@@ -96,41 +96,11 @@ rule determinelength:
        temp("{sample}_LEN")
     shell:
        "seqtk fqchk {input} | grep max_len | cut -f 2 -d ';' | cut -f 2 -d ':' > {output}"
-
-rule spades:
-    input: 
-        R1="trimmed/{sample}_R1.fastq",
-            for line in s:
-                len = line.strip()
-        if len > 151:
-           krange='57,97,127'
-        else:
-           krange='33,55,71'
-    return krange
-#determine length and kmer
-    
-rule determinelength:
-    input:
-       "trimmed/{sample}_R1.fastq"
-    output:
-       temp("{sample}_LEN")
-    shell:
-       "seqtk fqchk {input} | grep max_len | cut -f 2 -d ';' | cut -f 2 -d ':' > {output}"
-
+       
 rule spades:
     input: 
         R1="trimmed/{sample}_R1.fastq",
         R2="trimmed/{sample}_R2.fastq"
-    output:
-        "assembly/{sample}"
-    params:
-        spadesparam = spadesparam,
-        kmer = determine_kmerlength({sample}_LEN,krange),
-        cov = mincov,
-        version = determine_spadespath(spadesversion)
-    shell:
-        "python {params.version} -k {params.kmer} -cov-cutoff {params.cov} {params.spadesparam} {params.p} -1 {
-input.R1} -2 {input.R2} -o {output}"        R2="trimmed/{sample}_R2.fastq"
     output:
         "assembly/{sample}"
     params:
