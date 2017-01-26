@@ -1,0 +1,7 @@
+Samples:
+    ENH-JSC-EDH-100490: data/ENH-JSC-EDH-100490
+R:
+    R1: R1
+    R2: R2
+Seqtkparam:
+    "-q 0.01"
