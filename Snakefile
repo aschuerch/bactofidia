@@ -1,14 +1,13 @@
 
-
 SAMPLES = ["ENH-JSC-EDH-100490"]
 R = ["R1","R2"]
 
 seqtkparam = "-q 0.01  -l 30 -b 0 -e 0"
-spadesparam = "--only-assembler --careful --threads 8 -k 33,55,71 cov-cutoff 10"
+spadesparam = "--only-assembler --careful --threads 8"
 spadesversion = "3.6.2"
 minlen = 500
 mincov = 10
-krange = "default"
+krange = "57,97,127"
 quastparam = "--min-contig 500"
 
 prokkaparam = "--compliant"
@@ -33,24 +32,10 @@ def determine_spadespath(spadesversion):
         spadespath = "/hpc/local/CentOS7/dla_mm/bin/SPAdes-3.7.0-Linux/bin/spades.py"
     return spadespath
 
-def determine_kmerlength(sample_LEN, krange):
-    if krange == "default":
-        len = 0
-        with open (sample_LEN) as s:
-            for line in s:
-                len = line.strip()
-        if len > 151:
-           kmerrange='57,97,127'
-        else:
-           kmerrange='33,55,71'
-    return kmerrange
-
-
 rule all:
     input:
        "stats/Trimmingstats.tsv",
        expand ("assembly/{sample}", sample=SAMPLES),
-       expand ("{sample}_LEN", sample=SAMPLES)
 
 rule fastqc_before:
     input:
@@ -87,15 +72,6 @@ rule trimstat:
        "stats/Trimmingstats.tsv"
     shell:
        "cat {input.before} {input.after} > {output}"
-
-#determine length and kmer
-rule determinelength:
-    input:
-       "trimmed/{sample}_R1.fastq"
-    output:
-       "{sample}_LEN"
-    shell:
-       "seqtk fqchk {input} | grep max_len | cut -f 2 -d ';' | cut -f 2 -d ':' > {output}"
        
 rule spades:
     input: 
@@ -105,8 +81,8 @@ rule spades:
         "assembly/{sample}"
     params:
         spadesparam = spadesparam,
-        kmer = determine_kmerlength("{sample}_LEN",krange),
+        kmer = krange,
         cov = mincov,
         version = determine_spadespath(spadesversion)
     shell:
-        "python {params.version} -k {params.kmer} -cov-cutoff {params.cov} {params.spadesparam} {params.p} -1 {input.R1} -2 {input.R2} -o {output}"
+        "python {params.version} -1 {input.R1} -2 {input.R2} -o {output}  -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparam}"

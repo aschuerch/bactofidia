@@ -5,3 +5,9 @@ R:
     R2: R2
 Seqtkparam:
     "-q 0.01"
+
+
+SAMPLES = ["ENH-JSC-EDH-100490"]
+R = ["R1","R2"]
+SEQTKPARAM = ["-q 0.01"]
+
