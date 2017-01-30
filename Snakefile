@@ -1,4 +1,5 @@
 
+
 SAMPLES = ["ENH-JSC-EDH-100490"]
 R = ["R1","R2"]
 
@@ -9,6 +10,8 @@ minlen = 500
 mincov = 10
 krange = "57,97,127"
 quastparam = "--min-contig 500"
+version = "V022017"+spadesversion
+
 
 prokkaparam = "--compliant"
 krakenparam = "--quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/"
@@ -36,6 +39,7 @@ rule all:
     input:
        "stats/Trimmingstats.tsv",
        expand ("assembly/{sample}", sample=SAMPLES),
+       expand ("scaffolds/{sample}.fna", sample=SAMPLES)
 
 rule fastqc_before:
     input:
@@ -86,3 +90,14 @@ rule spades:
         version = determine_spadespath(spadesversion)
     shell:
         "python {params.version} -1 {input.R1} -2 {input.R2} -o {output}  -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparam}"
+
+rule rename:
+    input:
+        "assembly/{sample}/scaffolds.fasta"
+    output:
+        "scaffolds/{sample}.fna"
+    params:
+        minlen = minlen,
+        version = version
+    shell:
+        "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.version}/g > {output}"
