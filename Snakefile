@@ -12,8 +12,7 @@ krange = "57,97,127"
 quastparam = "--min-contig 500"
 version = "V022017"+spadesversion
 
-
-prokkaparam = "--compliant"
+prokkaparam = "--centre UMCU --compliant"
 krakenparam = "--quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/"
 checkmparam = ""
 
@@ -39,7 +38,10 @@ rule all:
     input:
        "stats/Trimmingstats.tsv",
        expand ("assembly/{sample}", sample=SAMPLES),
-       expand ("scaffolds/{sample}.fna", sample=SAMPLES)
+       expand ("scaffolds/{sample}.fna", sample=SAMPLES),
+       expand ("annotation/{sample}", sample=SAMPLES),
+      # expand ("{sample}", sample=SAMPLES)
+
 
 rule fastqc_before:
     input:
@@ -101,3 +103,13 @@ rule rename:
         version = version
     shell:
         "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.version}/g > {output}"
+
+rule annotation:
+   input:
+       "scaffolds/{sample}.fna"
+   output:
+       outdir = "annotation/{sample}"
+   params:
+       prokkaparam
+   shell:
+       "prokka --outdir {output.outdir} {params} {input}"
