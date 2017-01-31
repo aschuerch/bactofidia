@@ -7,4 +7,4 @@ source activate snakemake-tutorial
 # start snakefile
 
 #snakemake -np
-snakemake --verbose --cluster 'qsub -cwd -l h_vmem=24G -l h_rt=04:00:00 -e ~/logs/ -o ~/logs/' --jobs 10
+snakemake --verbose --cluster 'qsub -cwd -l h_vmem=24G -l h_rt=04:00:00 -e ~/logs/ -o ~/logs/' --jobs 15

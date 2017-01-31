@@ -1,6 +1,7 @@
-
+#SAMPLES, = glob_wildcards("data/{id}.fastq.gz")
 
 SAMPLES = ["ENH-JSC-EDH-100490"]
+
 R = ["R1","R2"]
 
 seqtkparam = "-q 0.01  -l 30 -b 0 -e 0"
@@ -37,17 +38,21 @@ def determine_spadespath(spadesversion):
 rule all:
     input:
        "stats/Trimmingstats.tsv",
-       expand ("assembly/{sample}", sample=SAMPLES),
+#       "assembly/scaffolds.fasta",
+#       expand ("trimmed/{sample}_{r}.fastq", sample=SAMPLES, r=R),
+       expand ("assembly/{sample}/scaffolds.fasta", sample=SAMPLES),
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
-       expand ("annotation/{sample}", sample=SAMPLES),
-      # expand ("{sample}", sample=SAMPLES)
+       expand ("annotation/{sample}/PROKKA.gff", sample=SAMPLES),
+#       expand ("taxonomy/{sample}.krakenout", sample=SAMPLES),
+#       expand ("taxonomy/{sample}.kronain", sample=SAMPLES),
+       expand ("taxonomy/{sample}.html", sample=SAMPLES)
 
 
 rule fastqc_before:
     input:
         "data/{sample}_{r}.fastq.gz"
     output:
-        temp("stats/{sample}_{r}_Trimmingstats_before_trimming")
+        "stats/{sample}_{r}_Trimmingstats_before_trimming"
     shell:
         "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
 
@@ -55,7 +60,7 @@ rule trim:
      input:
         "data/{sample}_{r}.fastq.gz"
      output:
-        temp("trimmed/{sample}_{r}.fastq")
+        "trimmed/{sample}_{r}.fastq"
      params:
         seqtkparam
      shell: 
@@ -64,34 +69,35 @@ rule trim:
 
 rule fastqc_after:
     input:
-    "trimmed/{sample}_{r}.fastq"
+        "trimmed/{sample}_{r}.fastq"
     output:
-        temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
+         "stats/{sample}_{r}_Trimmingstats_after_trimming"
     shell:
-        "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
+         "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
 
 rule trimstat:
     input:
-       after=expand("stats/{sample}_{r}_Trimmingstats_after.tsv", sample=SAMPLES, r=R),
-       before=expand("stats/{sample}_{r}_Trimmingstats_before.tsv", sample=SAMPLES, r=R)
+        after=expand("stats/{sample}_{r}_Trimmingstats_after_trimming", sample=SAMPLES, r=R),
+        before=expand("stats/{sample}_{r}_Trimmingstats_before_trimming", sample=SAMPLES, r=R)
     output:
-       "stats/Trimmingstats.tsv"
+        "stats/Trimmingstats.tsv"
     shell:
-       "cat {input.before} {input.after} > {output}"
+        "cat {input.before} {input.after} > {output}"
        
 rule spades:
     input: 
         R1="trimmed/{sample}_R1.fastq",
         R2="trimmed/{sample}_R2.fastq"
     output:
-        "assembly/{sample}"
+        "assembly/{sample}/scaffolds.fasta"
     params:
         spadesparam = spadesparam,
         kmer = krange,
         cov = mincov,
-        version = determine_spadespath(spadesversion)
+        version = determine_spadespath(spadesversion),
+        outfolder = "assembly/{sample}"
     shell:
-        "python {params.version} -1 {input.R1} -2 {input.R2} -o {output}  -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparam}"
+        "python {params.version} -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparam}"
 
 rule rename:
     input:
@@ -106,10 +112,38 @@ rule rename:
 
 rule annotation:
    input:
-       "scaffolds/{sample}.fna"
+        "scaffolds/{sample}.fna"
    output:
-       outdir = "annotation/{sample}"
+        "annotation/{sample}/PROKKA.gff"
    params:
-       prokkaparam
+        dir = "annotation/{sample}/",
+        param = prokkaparam
    shell:
-       "prokka --outdir {output.outdir} {params} {input}"
+        "prokka --outdir {params.dir} {params.param} {input}"
+
+rule taxonomy_1:
+   input:
+        "scaffolds/{sample}.fna"
+   output:
+        "taxonomy/{sample}.krakenout"
+   params:
+        krakenparam
+   shell:
+        "kraken {params} --output {output} --fasta_input {input}"
+
+rule taxonomy_2:
+   input:
+       "taxonomy/{sample}.krakenout"
+   output:
+       "taxonomy/{sample}.kronain"
+   shell:
+       "cut -f2,3 {input} > {output}"
+
+rule taxonomy_3:
+   input:
+       "taxonomy/{sample}.kronain"
+   output:
+       "taxonomy/{sample}.html"
+   shell:
+       "ktImportTaxonomy {input} -o {output}"
+
