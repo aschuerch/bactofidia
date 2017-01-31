@@ -1,8 +1,7 @@
-#SAMPLES, = glob_wildcards("data/{id}.fastq.gz")
+SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
 
-SAMPLES = ["ENH-JSC-EDH-100490"]
-
-R = ["R1","R2"]
+#SAMPLES = ["ENH-JSC-EDH-100490"]
+#R = ["R1","R2"]
 
 seqtkparam = "-q 0.01  -l 30 -b 0 -e 0"
 spadesparam = "--only-assembler --careful --threads 8"
@@ -11,7 +10,7 @@ minlen = 500
 mincov = 10
 krange = "57,97,127"
 quastparam = "--min-contig 500"
-version = "V022017"+spadesversion
+version = "V022017SPAdes"+spadesversion
 
 prokkaparam = "--centre UMCU --compliant"
 krakenparam = "--quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/"
@@ -38,6 +37,7 @@ def determine_spadespath(spadesversion):
 rule all:
     input:
        "stats/Trimmingstats.tsv",
+       "stats/MLST.tsv",
 #       "assembly/scaffolds.fasta",
 #       expand ("trimmed/{sample}_{r}.fastq", sample=SAMPLES, r=R),
        expand ("assembly/{sample}/scaffolds.fasta", sample=SAMPLES),
@@ -133,17 +133,25 @@ rule taxonomy_1:
 
 rule taxonomy_2:
    input:
-       "taxonomy/{sample}.krakenout"
+        "taxonomy/{sample}.krakenout"
    output:
-       "taxonomy/{sample}.kronain"
+        "taxonomy/{sample}.kronain"
    shell:
-       "cut -f2,3 {input} > {output}"
+        "cut -f2,3 {input} > {output}"
 
 rule taxonomy_3:
    input:
-       "taxonomy/{sample}.kronain"
+        "taxonomy/{sample}.kronain"
    output:
-       "taxonomy/{sample}.html"
+        "taxonomy/{sample}.html"
    shell:
-       "ktImportTaxonomy {input} -o {output}"
+        "ktImportTaxonomy {input} -o {output}"
 
+
+rule mlst:
+    input:
+        expand("scaffolds/{sample}.fna", sample=SAMPLES)
+    output:
+        "stats/MLST.tsv"
+    shell:
+        "mlst --quiet --nopath {input} >> {output}"
