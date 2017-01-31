@@ -6,5 +6,8 @@ source activate snakemake-tutorial
 # create yaml 
 # start snakefile
 
-#snakemake -np
-snakemake --verbose --cluster 'qsub -cwd -l h_vmem=24G -l h_rt=04:00:00 -e ~/logs/ -o ~/logs/' --jobs 15
+if [[ $1 == 1 ]]; then
+snakemake -np
+else
+snakemake --latency-wait 60 --verbose --cluster 'qsub -cwd -l h_vmem=24G -l h_rt=04:00:00 -e ~/logs/ -o ~/logs/' --jobs 15
+fi
