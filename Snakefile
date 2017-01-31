@@ -38,11 +38,13 @@ rule all:
     input:
        "stats/Trimmingstats.tsv",
        "stats/MLST.tsv",
+       "stats/report.html",
+       "stats/report.tsv",
 #       "assembly/scaffolds.fasta",
 #       expand ("trimmed/{sample}_{r}.fastq", sample=SAMPLES, r=R),
        expand ("assembly/{sample}/scaffolds.fasta", sample=SAMPLES),
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
-       expand ("annotation/{sample}/PROKKA.gff", sample=SAMPLES),
+       expand ("annotation/{sample}.gff", sample=SAMPLES),
 #       expand ("taxonomy/{sample}.krakenout", sample=SAMPLES),
 #       expand ("taxonomy/{sample}.kronain", sample=SAMPLES),
        expand ("taxonomy/{sample}.html", sample=SAMPLES)
@@ -114,12 +116,13 @@ rule annotation:
    input:
         "scaffolds/{sample}.fna"
    output:
-        "annotation/{sample}/PROKKA.gff"
+        "annotation/{sample}.gff"
    params:
-        dir = "annotation/{sample}/",
-        param = prokkaparam
+        dir = "annotation",
+        param = prokkaparam,
+        prefix = "{sample}"
    shell:
-        "prokka --outdir {params.dir} {params.param} {input}"
+        "prokka --force --prefix {params.prefix} --outdir {params.dir} {params.param} {input}"
 
 rule taxonomy_1:
    input:
@@ -155,3 +158,15 @@ rule mlst:
         "stats/MLST.tsv"
     shell:
         "mlst --quiet --nopath {input} >> {output}"
+
+rule quast:
+    input:
+        expand("scaffolds/{sample}.fna", sample=SAMPLES)
+    output:
+        "stats/report.html",
+        "stats/report.tsv"
+    params:
+        outfolder = "stats",
+        minlen = minlen
+    shell:
+        "quast.py --min-contig {params.minlen} -o {params.outfolder} {input}"
