@@ -38,15 +38,12 @@ rule all:
     input:
        "stats/Trimmingstats.tsv",
        "stats/MLST.tsv",
-       "stats/report.html",
-       "stats/report.tsv",
-#       "assembly/scaffolds.fasta",
-#       expand ("trimmed/{sample}_{r}.fastq", sample=SAMPLES, r=R),
-       expand ("assembly/{sample}/scaffolds.fasta", sample=SAMPLES),
+       "stats/AssemblyQC.html",
+       "stats/AssemblyQC.tsv",
+       "stats/ResFinder.tsv",
+       "stats/SpeciesDetermination.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
        expand ("annotation/{sample}.gff", sample=SAMPLES),
-#       expand ("taxonomy/{sample}.krakenout", sample=SAMPLES),
-#       expand ("taxonomy/{sample}.kronain", sample=SAMPLES),
        expand ("taxonomy/{sample}.html", sample=SAMPLES)
 
 
@@ -54,7 +51,7 @@ rule fastqc_before:
     input:
         "data/{sample}_{r}.fastq.gz"
     output:
-        "stats/{sample}_{r}_Trimmingstats_before_trimming"
+        temp("stats/{sample}_{r}_Trimmingstats_before_trimming")
     shell:
         "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
 
@@ -62,7 +59,7 @@ rule trim:
      input:
         "data/{sample}_{r}.fastq.gz"
      output:
-        "trimmed/{sample}_{r}.fastq"
+        temp("trimmed/{sample}_{r}.fastq")
      params:
         seqtkparam
      shell: 
@@ -73,7 +70,7 @@ rule fastqc_after:
     input:
         "trimmed/{sample}_{r}.fastq"
     output:
-         "stats/{sample}_{r}_Trimmingstats_after_trimming"
+         temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
     shell:
          "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
 
@@ -84,7 +81,9 @@ rule trimstat:
     output:
         "stats/Trimmingstats.tsv"
     shell:
-        "cat {input.before} {input.after} > {output}"
+        "echo -e 'Reads\t#bases\t%A\t%C\t%G\t%T\t%N\tavgQ\terrQ\t%low\t%high' > {output} ;"
+        "grep "" {input.before} >> {output} ;"
+        "grep "" {input.after} >> {output} ;"
        
 rule spades:
     input: 
@@ -96,10 +95,10 @@ rule spades:
         spadesparam = spadesparam,
         kmer = krange,
         cov = mincov,
-        version = determine_spadespath(spadesversion),
+        spadesversion = determine_spadespath(spadesversion),
         outfolder = "assembly/{sample}"
     shell:
-        "python {params.version} -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparam}"
+        "python {params.spadesversion} -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparam}"
 
 rule rename:
     input:
@@ -108,7 +107,7 @@ rule rename:
         "scaffolds/{sample}.fna"
     params:
         minlen = minlen,
-        version = version
+        version = "{sample}:"+version
     shell:
         "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.version}/g > {output}"
 
@@ -122,13 +121,13 @@ rule annotation:
         param = prokkaparam,
         prefix = "{sample}"
    shell:
-        "prokka --force --prefix {params.prefix} --outdir {params.dir} {params.param} {input}"
-
+        "prokka --force --prefix {params.prefix} --outdir {params.dir} {params.param} {input} "
+        
 rule taxonomy_1:
    input:
         "scaffolds/{sample}.fna"
    output:
-        "taxonomy/{sample}.krakenout"
+        temp("taxonomy/{sample}.krakenout")
    params:
         krakenparam
    shell:
@@ -138,7 +137,7 @@ rule taxonomy_2:
    input:
         "taxonomy/{sample}.krakenout"
    output:
-        "taxonomy/{sample}.kronain"
+        temp("taxonomy/{sample}.kronain")
    shell:
         "cut -f2,3 {input} > {output}"
 
@@ -163,10 +162,34 @@ rule quast:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES)
     output:
-        "stats/report.html",
-        "stats/report.tsv"
+        html = "stats/AssemblyQC.html",
+        tsv = "stats/AssemblyQC.tsv"
     params:
-        outfolder = "stats",
+        outfolder = "stats/quasttemp",
         minlen = minlen
     shell:
         "quast.py --min-contig {params.minlen} -o {params.outfolder} {input}"
+        " && mv stats/quasttemp/report.html {output.html}"
+        " && mv stats/quasttemp/report.tsv {output.tsv}"
+        " && rm -r stats/quasttemp" 
+rule resfinder:
+    input:
+        expand("scaffolds/{sample}.fna", sample=SAMPLES) 
+    output:
+        "stats/ResFinder.tsv"
+    shell:
+        "abricate {input} > {output}" 
+        "&& sed -i 's/scaffolds//g' {output}"
+
+
+rule checkfinder:
+    input:
+       "scaffolds/"
+    output:
+       file = "stats/SpeciesDetermination.tsv",
+       folder = temp("checkm")
+    shell:
+       "set +u; source activate checkm; set -u;"
+       "checkm lineage_wf {input} {output.folder} -x fna > {output.file} ;"
+       "source deactivate"
+

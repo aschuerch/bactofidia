@@ -7,7 +7,7 @@ source activate snakemake-tutorial
 # start snakefile
 
 if [[ $1 == 1 ]]; then
-snakemake -np
+snakemake -npr
 else
-snakemake --latency-wait 60 --verbose --cluster 'qsub -cwd -l h_vmem=24G -l h_rt=04:00:00 -e ~/logs/ -o ~/logs/' --jobs 15
+snakemake --latency-wait 60 --verbose --cluster 'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e ~/logs/ -o ~/logs/' --jobs 100
 fi
