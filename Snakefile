@@ -190,6 +190,7 @@ rule checkfinder:
        folder = temp("checkm")
     shell:
        "set +u; source activate checkm; set -u;"
-       "checkm lineage_wf {input} {output.folder} -x fna > {output.file} ;"
+       "checkm lineage_wf {input} {output.folder} --reduced_tree --tab_table -x fna > {output.file} ;"
        "source deactivate"
+
 
