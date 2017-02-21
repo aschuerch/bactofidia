@@ -1,22 +1,58 @@
-SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
-
-#SAMPLES = ["ENH-JSC-EDH-100490"]
-#R = ["R1","R2"]
-
+###################################################
+##Snakefile for Assembly pipeline version V022017##
+#############Anita Schurch#########################
+## run this snakefile on the HPC with
+## source activate snakemake-tutorial
+## snakemake \
+## --latency-wait 60 \
+## --config krange="57,97,127" \
+## --verbose \
+## --cluster \
+## 'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e logs/ -o logs/ -M $email -m e ' \
+## --jobs 100 
+##
+## Snakemake, bioconda
+##################################################################################
+#################################
+#Parameters that can be adjusted#
+#################################
+#Quality trimming with seqtk trimfq Version 1.0-r82-dirty
+seqtk_version = 1.2 #see: https://anaconda.org/bioconda/seqtk/files for available version
 seqtkparam = "-q 0.01  -l 30 -b 0 -e 0"
+
+#Assembly with SPAdes
 spadesparam = "--only-assembler --careful --threads 8"
 spadesversion = "3.6.2"
-minlen = 500
-mincov = 10
-krange = "57,97,127"
-quastparam = "--min-contig 500"
+krange = config.get("krange")
+#krange = "57,97,127" #adjust if you would like to select a different kmer range for spades assembly
 version = "V022017SPAdes"+spadesversion
 
-prokkaparam = "--centre UMCU --compliant"
-krakenparam = "--quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/"
-checkmparam = ""
+#Minimum length of contigs
+minlen = 500
 
-def determine_spadespath(spadesversion):
+#Minimum coverage depth of contigs
+mincov = 10
+
+# QUAST  
+quastparam = "--min-contig 500"
+
+# Prokka
+prokkaparam = "--centre UMCU --compliant"
+
+# Kraken
+krakenparam = "--quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/"
+
+# Checkm
+checkmparam = "--reduced_tree"
+
+##################################################################################
+# End of parameters
+########################
+
+SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
+
+
+def determine_spadespath(spadesversion): #some are not available as conda package
     spadespath = "/hpc/local/CentOS7/dla_mm/bin/spades.py" #standard
     if spadesversion == "3.9.0":
         spadespath = "/hpc/local/CentOS7/dla_mm/tools/miniconda2/envs/snakemake-tutorial/bin/spades.py"
@@ -82,8 +118,8 @@ rule trimstat:
         "stats/Trimmingstats.tsv"
     shell:
         "echo -e 'Reads\t#bases\t%A\t%C\t%G\t%T\t%N\tavgQ\terrQ\t%low\t%high' > {output} ;"
-        "grep "" {input.before} >> {output} ;"
-        "grep "" {input.after} >> {output} ;"
+        "cat {input.before} >> {output} ;"
+        "cat {input.after} >> {output} ;"
        
 rule spades:
     input: 
@@ -171,7 +207,8 @@ rule quast:
         "quast.py --min-contig {params.minlen} -o {params.outfolder} {input}"
         " && mv stats/quasttemp/report.html {output.html}"
         " && mv stats/quasttemp/report.tsv {output.tsv}"
-        " && rm -r stats/quasttemp" 
+        " && rm -r stats/quasttemp"
+ 
 rule resfinder:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES) 
@@ -179,18 +216,17 @@ rule resfinder:
         "stats/ResFinder.tsv"
     shell:
         "abricate {input} > {output}" 
-        "&& sed -i 's/scaffolds//g' {output}"
+        "&& sed -i 's/scaffolds\///g' {output}"
 
-
-rule checkfinder:
+rule checkm:
     input:
-       "scaffolds/"
+       expand("scaffolds/{sample}.fna", sample=SAMPLES)
     output:
        file = "stats/SpeciesDetermination.tsv",
        folder = temp("checkm")
+    params:
+       checkmparam
     shell:
        "set +u; source activate checkm; set -u;"
-       "checkm lineage_wf {input} {output.folder} --reduced_tree --tab_table -x fna > {output.file} ;"
+       "checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file} ;"
        "source deactivate"
-
-
