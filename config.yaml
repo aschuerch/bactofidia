@@ -1,26 +1,34 @@
-General:
-    minlen:500
-    mincov:10
 
-Seqtk:
-    seqtk_version:1.2
-    seqtkparam:"-q 0.01"
+##General parameters
+#minimum length of resulting contigs
+minlen: 500
+#minimum average coverage of contigs (to filter out low frequency contamination)
+mincov: 10
+
+seqtk:
+  version: 1.2
+  params: -q 0.01
 
 SPAdes:
-    spadesparam:"--only-assembler --careful --threads 8"
-    spadesversion:"3.6.2"
-    krange:config.get("krange")#krange = "57,97,127" #adjust if you would like to select a different kmer range for spades assembly
-    version:"V022017SPAdes"+spadesversion
+  params: --only-assembler --careful --threads 8
+  version: 3.6.2
+  versiontag: V022017SPAdes+spadesversion
 
 QUAST:
-    quastparam:"--min-contig 500"
+  version: 1.1
+  params: --min-contig 500
 
-Prokka:
-    prokkaparam:"--centre UMCU --compliant"
+mlst:
+  version: 1.1
+  params: --reduced_tree
 
-Kraken:
-    krakenversion:
-    krakenparam: "--quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/"
 
-Checkm: 
-    checkmparam: "--reduced_tree"
+prokka:
+  params: --centre UMCU --compliant
+
+kraken:
+  version: 1.1
+  params: --quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/
+
+checkm: 
+  params: --reduced_tree
