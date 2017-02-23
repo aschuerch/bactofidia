@@ -4,15 +4,15 @@ configfile: "config.yaml"
 
 
 
-seqtk_version = config["seqtk_version"] 
-seqtkparams = config["seqtkparams"]
+seqtk_version = config["seqtk"]["version"] 
+seqtkparams = config["seqtk"]["params"]
 
 #Assembly with SPAdes
-spadesparams = config["spadesparams"]
-spadesversion = ["spadesversion"]
+spadesparams = config["SPAdes"]["params"]
+spadesversion = config["SPAdes"]["version"]
 krange = config.get("krange")
 #krange = "57,97,127" #adjust if you would like to select a different kmer range for spades assembly
-version = config["version"]
+versiontag = config["SPAdes"]["versiontag"]
 
 #Minimum length of contigs
 minlen = config["minlen"]
@@ -20,31 +20,23 @@ minlen = config["minlen"]
 mincov = config["mincov"]
 
 # QUAST  
-quastparams = config["quastparams"]
+quastparams = config["QUAST"]["params"]
 
 # Prokka
-prokkaparams = config["prokkaparams"] 
+prokkaparams = config["prokka"]["params"] 
 
 # Kraken
-krakenparams = config["krakenparams"] 
+krakenparams = config["kraken"]["params"] 
 
 # Checkm
-checkmparams = ["checkmparams"] 
+checkmparams = config["checkm"]["params"] 
 
 
-
-
-
-
-
-
-
-
-
+mlstparams = config["mlst"]["params"]
 
 
 SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
-
+SAMPLES = set(SAMPLES)
 
 def determine_spadespath(spadesversion): #some are not available as conda package
     spadespath = "/hpc/local/CentOS7/dla_mm/bin/spades.py" #standard
@@ -137,9 +129,9 @@ rule rename:
         "scaffolds/{sample}.fna"
     params:
         minlen = minlen,
-        version = "{sample}:"+version
+        versiontag = "{sample}:"+versiontag
     shell:
-        "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.version}/g > {output}"
+        "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
 
 rule annotation:
    input:
