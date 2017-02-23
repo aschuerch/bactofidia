@@ -80,7 +80,7 @@ rule all:
        "stats/SpeciesDetermination.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
        expand ("annotation/{sample}.gff", sample=SAMPLES),
-       expand ("taxonomy/{sample}.html", sample=SAMPLES)
+       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES)
 
 
 rule fastqc_before:
@@ -181,7 +181,7 @@ rule taxonomy_3:
    input:
         "taxonomy/{sample}.kronain"
    output:
-        "taxonomy/{sample}.html"
+        "stats/Taxonomy_{sample}.html"
    shell:
         "ktImportTaxonomy {input} -o {output}"
 
