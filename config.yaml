@@ -1,13 +1,26 @@
-Samples:
-    ENH-JSC-EDH-100490: data/ENH-JSC-EDH-100490
-R:
-    R1: R1
-    R2: R2
-Seqtkparam:
-    "-q 0.01"
+General:
+    minlen:500
+    mincov:10
 
+Seqtk:
+    seqtk_version:1.2
+    seqtkparam:"-q 0.01"
 
-SAMPLES = ["ENH-JSC-EDH-100490"]
-R = ["R1","R2"]
-SEQTKPARAM = ["-q 0.01"]
+SPAdes:
+    spadesparam:"--only-assembler --careful --threads 8"
+    spadesversion:"3.6.2"
+    krange:config.get("krange")#krange = "57,97,127" #adjust if you would like to select a different kmer range for spades assembly
+    version:"V022017SPAdes"+spadesversion
 
+QUAST:
+    quastparam:"--min-contig 500"
+
+Prokka:
+    prokkaparam:"--centre UMCU --compliant"
+
+Kraken:
+    krakenversion:
+    krakenparam: "--quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/"
+
+Checkm: 
+    checkmparam: "--reduced_tree"

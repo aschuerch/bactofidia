@@ -1,53 +1,47 @@
-###################################################
-##Snakefile for Assembly pipeline version V022017##
-#############Anita Schurch#########################
-## run this snakefile on the HPC with
-## source activate snakemake-tutorial
-## snakemake \
-## --latency-wait 60 \
-## --config krange="57,97,127" \
-## --verbose \
-## --cluster \
-## 'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e logs/ -o logs/ -M $email -m e ' \
-## --jobs 100 
-##
-## Snakemake, bioconda
-##################################################################################
-#################################
-#Parameters that can be adjusted#
-#################################
-#Quality trimming with seqtk trimfq Version 1.0-r82-dirty
-seqtk_version = 1.2 #see: https://anaconda.org/bioconda/seqtk/files for available version
-seqtkparam = "-q 0.01  -l 30 -b 0 -e 0"
+from snakemake.utils import min_version
+min_version("3.2")
+configfile: "config.yaml"
+
+
+
+seqtk_version = config["seqtk_version"] 
+seqtkparams = config["seqtkparams"]
 
 #Assembly with SPAdes
-spadesparam = "--only-assembler --careful --threads 8"
-spadesversion = "3.6.2"
+spadesparams = config["spadesparams"]
+spadesversion = ["spadesversion"]
 krange = config.get("krange")
 #krange = "57,97,127" #adjust if you would like to select a different kmer range for spades assembly
-version = "V022017SPAdes"+spadesversion
+version = config["version"]
 
 #Minimum length of contigs
-minlen = 500
-
+minlen = config["minlen"]
 #Minimum coverage depth of contigs
-mincov = 10
+mincov = config["mincov"]
 
 # QUAST  
-quastparam = "--min-contig 500"
+quastparams = config["quastparams"]
 
 # Prokka
-prokkaparam = "--centre UMCU --compliant"
+prokkaparams = config["prokkaparams"] 
 
 # Kraken
-krakenparam = "--quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/"
+krakenparams = config["krakenparams"] 
 
 # Checkm
-checkmparam = "--reduced_tree"
+checkmparams = ["checkmparams"] 
 
-##################################################################################
-# End of parameters
-########################
+
+
+
+
+
+
+
+
+
+
+
 
 SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
 
@@ -97,7 +91,7 @@ rule trim:
      output:
         temp("trimmed/{sample}_{r}.fastq")
      params:
-        seqtkparam
+        seqtkparams
      shell: 
         "seqtk trimfq {params} {input} > {output}"
 
@@ -128,13 +122,13 @@ rule spades:
     output:
         "assembly/{sample}/scaffolds.fasta"
     params:
-        spadesparam = spadesparam,
+        spadesparams = spadesparams,
         kmer = krange,
         cov = mincov,
         spadesversion = determine_spadespath(spadesversion),
         outfolder = "assembly/{sample}"
     shell:
-        "python {params.spadesversion} -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparam}"
+        "python {params.spadesversion} -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
 
 rule rename:
     input:
@@ -154,10 +148,10 @@ rule annotation:
         "annotation/{sample}.gff"
    params:
         dir = "annotation",
-        param = prokkaparam,
+        params = prokkaparams,
         prefix = "{sample}"
    shell:
-        "prokka --force --prefix {params.prefix} --outdir {params.dir} {params.param} {input} "
+        "prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
         
 rule taxonomy_1:
    input:
@@ -165,7 +159,7 @@ rule taxonomy_1:
    output:
         temp("taxonomy/{sample}.krakenout")
    params:
-        krakenparam
+        krakenparams
    shell:
         "kraken {params} --output {output} --fasta_input {input}"
 
@@ -191,8 +185,10 @@ rule mlst:
         expand("scaffolds/{sample}.fna", sample=SAMPLES)
     output:
         "stats/MLST.tsv"
+    params:
+        mlstparams
     shell:
-        "mlst --quiet --nopath {input} >> {output}"
+        "mlst {params} {input} >> {output}"
 
 rule quast:
     input:
@@ -225,7 +221,7 @@ rule checkm:
        file = "stats/SpeciesDetermination.tsv",
        folder = temp("checkm")
     params:
-       checkmparam
+       checkmparams
     shell:
        "set +u; source activate checkm; set -u;"
        "checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file} ;"
