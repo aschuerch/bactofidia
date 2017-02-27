@@ -5,6 +5,8 @@ minlen: 500
 #minimum average coverage of contigs (to filter out low frequency contamination)
 mincov: 10
 
+#Please consult bioconda package manager for possible versions
+
 seqtk:
   version: 1.2
   params: -q 0.01
@@ -15,20 +17,24 @@ SPAdes:
   versiontag: V022017SPAdes+spadesversion
 
 QUAST:
-  version: 1.1
+  version: 4.1
   params: --min-contig 500
 
 mlst:
-  version: 1.1
+  version: 2.6
   params: --reduced_tree
-
 
 prokka:
   params: --centre UMCU --compliant
+  version: 1.11
 
 kraken:
-  version: 1.1
+  version: 0.10.5beta
   params: --quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/
+
+krona:
+  version: 2.6
 
 checkm: 
   params: --reduced_tree
+  version: 1.0.5
