@@ -42,7 +42,7 @@ See bioconda.github.io for available packages.
 
 The pipeline can be dry-run with 
 
- snakemake -np
+ snakemake -np --use-conda
 
 Or on the HPC with 
  snakemake \
