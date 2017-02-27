@@ -37,6 +37,8 @@ Finally, to create a virtual environment for snakemake
 Activate the environment
  source activate snakemake
 
+ snakemake --bash-completion
+
 The config.yml file of the pipeline can be adjusted for desired version of software. 
 See bioconda.github.io for available packages.
 
