@@ -25,6 +25,12 @@ kronaversion = config["krona"]["version"]
 # Checkm
 checkmversion = config["checkm"]["version"]
 
+def kmer_determination():
+    if (config.get("krange")):
+        kmer = config.get("krange")
+    else:
+        kmer = config["SPAdes"] ["krange"]
+    return kmer
 
 # python 2 virtual environments
 os.system ( "conda create -y -n bactofidia  python=2.7  checkm-genome={} quast={} seqtk={} spades={} prokka={} mlst={} kraken={} krona={}".format ( checkmversion, quastversion, seqtkversion, spadesversion, prokkaversion, mlstversion, krakenversion, kronaversion)    )
@@ -40,13 +46,13 @@ SAMPLES = set(SAMPLES)
 
 onsuccess:
     # delete virtual environment
-    os.system ( "conda-env remove -n bactofidia") 
+    os.system ( "conda-env remove -y -n bactofidia") 
     print("Workflow finished!")
 
 
 onerror:
     # delete virtual environment
-    os.system ( "conda-env remove -n bactofidia") 
+    os.system ( "conda-env remove -y -n bactofidia") 
     print("Workflow finished")
 
 
@@ -118,8 +124,7 @@ rule spades:
         "assembly/{sample}/scaffolds.fasta"
     params:
         spadesparams = config["SPAdes"]["params"],
-        kmer = config.get("krange"),  #if else statement desired
-        #kmer = config["krange"],
+        kmer = kmer_determination(),
         cov = config["mincov"],
        # spadesversion = spadesversion,
         outfolder = "assembly/{sample}"
