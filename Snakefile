@@ -121,12 +121,12 @@ rule spades:
         kmer = config.get("krange"),  #if else statement desired
         #kmer = config["krange"],
         cov = config["mincov"],
-        spadesversion = spadesversion,
+       # spadesversion = spadesversion,
         outfolder = "assembly/{sample}"
     conda:
         "bactofidia.yml"
     shell:
-        "python {params.spadesversion} -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
+        "spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
 
 rule rename:
     input:
