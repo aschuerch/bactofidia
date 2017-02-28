@@ -1,11 +1,16 @@
 
 ##General parameters
-#minimum length of resulting contigs
+#####################
+# minimum length of resulting contigs
 minlen: 500
-#minimum average coverage of contigs (to filter out low frequency contamination)
+
+# minimum average coverage of contigs (to filter out low frequency contamination)
 mincov: 10
 
-#Please consult bioconda package manager for possible versions
+
+##Package-specific parameters
+#############################
+# Please consult bioconda package manager for possible package versions
 
 seqtk:
   version: 1.2
@@ -15,6 +20,7 @@ SPAdes:
   params: --only-assembler --careful --threads 8
   version: 3.6.2
   versiontag: V022017SPAdes+spadesversion
+  krange: 57,97,127 #adjust if you would like to select a different kmer range for spades assembly
 
 QUAST:
   version: 4.1

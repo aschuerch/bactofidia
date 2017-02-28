@@ -10,32 +10,26 @@ spadesversion = config["SPAdes"]["version"]
 versiontag = config["SPAdes"]["versiontag"]
 
 # Prokka
-prokkaparams = config["prokka"]["params"] 
 prokkaversion = config["prokka"]["version"]
 # mlst
-mlstparams = config["mlst"]["params"]
 mlstversion = config["mlst"]["version"]
 
 # QUAST  
-quastparams = config["QUAST"]["params"]
 quastversion = config["QUAST"]["version"]
 
 # Kraken
-krakenparams = config["kraken"]["params"] 
 krakenversion = config["kraken"]["version"] 
 
 # Krona
 kronaversion = config["krona"]["version"]
 # Checkm
-checkmparams = config["checkm"]["params"]
 checkmversion = config["checkm"]["version"]
 
-rand=random.random()
 
 # python 2 virtual environments
 os.system ( "conda create -y -n bactofidia  python=2.7  checkm-genome={} quast={} seqtk={} spades={} prokka={} mlst={} kraken={} krona={}".format ( checkmversion, quastversion, seqtkversion, spadesversion, prokkaversion, mlstversion, krakenversion, kronaversion)    )
 
-os.system ( "conda-env export -n bactofidia > condaenv.yml") 
+os.system ( "conda-env export -n bactofidia > bactofidia.yml") 
 
 
 # Collect samples
@@ -87,7 +81,7 @@ rule trim:
         temp("trimmed/{sample}_{r}.fastq")
      params:
         p = config["seqtk"]["params"]
-    conda:
+     conda:
         "bactofidia.yml"
      shell: 
         "seqtk trimfq {params.p} {input} > {output}"
@@ -124,8 +118,8 @@ rule spades:
         "assembly/{sample}/scaffolds.fasta"
     params:
         spadesparams = config["SPAdes"]["params"],
-        kmer = if ( config.get("krange"))  #if else statement 
-        #kmer = config["krange"]
+        kmer = config.get("krange"),  #if else statement desired
+        #kmer = config["krange"],
         cov = config["mincov"],
         spadesversion = spadesversion,
         outfolder = "assembly/{sample}"
@@ -140,7 +134,7 @@ rule rename:
     output:
         "scaffolds/{sample}.fna"
     params:
-        minlen = config["minlen"]
+        minlen = config["minlen"],
         versiontag = "{sample}:"+versiontag
     conda:
         "bactofidia.yml"
@@ -154,7 +148,7 @@ rule annotation:
         "annotation/{sample}.gff"
     params:
         dir = "annotation",
-        params = prokkaparams,
+        params = config["prokka"]["params"],
         prefix = "{sample}"
     conda:
         "bactofidia.yml"
@@ -168,7 +162,7 @@ rule taxonomy_1:
     output:
         temp("taxonomy/{sample}.krakenout")
     params:
-        p=krakenparams,
+        p=config["kraken"]["params"]
     conda:
         "bactofidia.yml"
     shell:
@@ -202,7 +196,7 @@ rule mlst:
     output:
         "stats/MLST.tsv"
     params:
-        mlstparams,
+        config["mlst"]["params"]
     conda:
         "bactofidia.yml"
     shell:
@@ -217,11 +211,11 @@ rule quast:
         tsv = "stats/AssemblyQC.tsv"
     params:
         outfolder = "stats/quasttemp",
-        minlen = config["minlen"]
+        p = config["QUAST"]["params"]
     conda:
         "bactofidia.yml"
     shell:
-        "quast.py --min-contig {params.minlen} -o {params.outfolder} {input}"
+        "quast.py {params.p} -o {params.outfolder} {input}"
         " && mv stats/quasttemp/report.html {output.html}"
         " && mv stats/quasttemp/report.tsv {output.tsv}"
         " && rm -r stats/quasttemp"
@@ -246,7 +240,7 @@ rule checkm:
         file = "stats/SpeciesDetermination.tsv",
         folder = temp("checkm")
     params:
-        checkmparams,
+        config["checkm"]["params"]
     conda:
         "bactofidia.yml"
     shell:
