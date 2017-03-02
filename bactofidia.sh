@@ -4,7 +4,7 @@
 
 
 #activate snakemake env
-source activate snakemake-tutorial
+source activate snakemake
 
 ##Checks
 ##Check for command line arguments
@@ -136,6 +136,8 @@ echo "snakemake \
 --latency-wait 60 \
 --config krange="57,97,127" \
 --verbose \
+--keep-going \
+--use-conda \
 --cluster \
 'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
 --jobs 100 " 
@@ -144,9 +146,12 @@ snakemake \
 --latency-wait 60 \
 --config krange="57,97,127" \
 --verbose \
+--keep-going \
+--use-conda \
 --cluster \
 'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
 --jobs 100
 
-snakemake -npr
+#snakemake -npr
+
 fi
