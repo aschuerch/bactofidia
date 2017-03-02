@@ -1,6 +1,9 @@
 import os
 import sys
-	
+import glob
+import subprocess
+import shutil
+
 from snakemake.utils import min_version
 
 min_version("3.9")
@@ -27,6 +30,9 @@ kronaversion = config["krona"]["version"]
 # Checkm
 checkmversion = config["checkm"]["version"]
 
+# abricate
+abricateversion = config["abricate"]["version"]
+
 def kmer_determination():
     if (config.get("krange")):
         kmer = config.get("krange")
@@ -34,36 +40,54 @@ def kmer_determination():
         kmer = config["SPAdes"] ["krange"]
     return kmer
 
-# python 2 virtual environments
-virtenvs = "checkm-genome={} quast={} seqtk={} spades={} prokka={} mlst={} kraken={} krona={}".format ( checkmversion, quastversion, seqtkversion, spadesversion, prokkaversion, mlstversion, krakenversion, kronaversion).split()
+# virtual environments
+virtenvs = "checkm-genome={} quast={} seqtk={} spades={} prokka={} mlst={} kraken={} krona={} abricate={}".format ( checkmversion, quastversion, seqtkversion, spadesversion, prokkaversion, mlstversion, krakenversion, kronaversion, abricateversion).split()
+
+os.makedirs ("virtenvs", exist_ok=True )
+
+def spec_virtenv(program):
+    print (program)
+    """ Create conda enviroment for every job. """
+    if shutil.which("conda") is None:
+        raise CreateCondaEnvironmentException("The 'conda' command is not available in $PATH.")
+
+    i = (list( filter(lambda x: program in x, virtenvs))[0])         
+    print (i)
+    try: 
+        subprocess.check_output([ "conda", "create","-y", "-n", i, i ]  , stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print ("Virtual environment for {} exists".format(i))
+    
+
+    stdout = open("virtenvs/{}.txt".format(program),"wb")
+    try: 
+        x = subprocess.check_output(["conda", "list", "-n", i, "--explicit" ]) 
+        stdout.write(x)
+    except subprocess.CalledProcessError as e:
+        print ("Virtual environment file for {} exists".format(program))
+
+    return "virtenvs/{}.txt".format(program)
 
 
-for i in virtenvs:
-#    os.system
-     print ( "conda create -y -n bactofidia{} {}".format(i,i)    )
 
-     print ( "conda list -n bactofidia{} --explicit --json > virtenvs/bactofidia{}.json".format (i,i)) 
-
-sys.exit()
 
 # Collect samples
-
 SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
 SAMPLES = set(SAMPLES)
 
 
-onsuccess:
-    # delete virtual environment
-    for i in virtenvs:
-        os.system ( "conda-env remove -y -n bactofidia{}".format (i)) 
-    print("Workflow finished!")
+#onsuccess:
+#    # delete virtual environment
+#    for i in virtenvs:
+ #       os.system ( "conda-env remove -y -n {}".format (i)) 
+  #  print("Workflow finished!")
 
 
-onerror:
-    # delete virtual environment
-    for i in virtenvs:
-        os.system ( "conda-env remove -y -n bactofidia{}".format(i)) 
-    print("Workflow finished")
+#onerror:
+ #   # delete virtual environment
+  #  for i in virtenvs:
+   #     os.system ( "conda-env remove -y -n {}".format(i)) 
+    #print("Workflow finished")
 
 
 
@@ -86,7 +110,7 @@ rule fastqc_before:
     output:
         temp("stats/{sample}_{r}_Trimmingstats_before_trimming")
     conda:
-        "virtenvs/bactofidiaseqtk*.json"
+        spec_virtenv('seqtk')
     shell:
         "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
 
@@ -98,7 +122,7 @@ rule trim:
      params:
         p = config["seqtk"]["params"]
      conda:
-        "virtenvs/bactofidiasetqk*.json"
+        spec_virtenv('seqtk')
      shell: 
         "seqtk trimfq {params.p} {input} > {output}"
 
@@ -108,7 +132,7 @@ rule fastqc_after:
     output:
          temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
     conda:
-        "bactofidia.json"
+        spec_virtenv('seqtk')
     shell:
         "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
 
@@ -119,8 +143,6 @@ rule trimstat:
         before=expand("stats/{sample}_{r}_Trimmingstats_before_trimming", sample=SAMPLES, r=R)
     output:
         "stats/Trimmingstats.tsv"
-    conda:
-        "bactofidia.json"
     shell:
         "echo -e 'Reads\t#bases\t%A\t%C\t%G\t%T\t%N\tavgQ\terrQ\t%low\t%high' > {output} ;"
         "cat {input.before} >> {output} ;"
@@ -136,10 +158,9 @@ rule spades:
         spadesparams = config["SPAdes"]["params"],
         kmer = kmer_determination(),
         cov = config["mincov"],
-       # spadesversion = spadesversion,
         outfolder = "assembly/{sample}"
     conda:
-        "bactofidia.json"
+        spec_virtenv('spades')
     shell:
         "spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
 
@@ -152,7 +173,7 @@ rule rename:
         minlen = config["minlen"],
         versiontag = "{sample}:"+versiontag
     conda:
-        "bactofidia.json"
+        spec_virtenv('seqtk')
     shell:
         "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
 
@@ -166,7 +187,7 @@ rule annotation:
         params = config["prokka"]["params"],
         prefix = "{sample}"
     conda:
-        "bactofidia.json"
+        spec_virtenv('prokka')
     shell:
         "prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
 
@@ -179,7 +200,7 @@ rule taxonomy_1:
     params:
         p=config["kraken"]["params"]
     conda:
-        "bactofidia.json"
+        spec_virtenv('kraken')
     shell:
         "kraken {params.p} --output {output} --fasta_input {input}"
         "source deactivate"
@@ -189,8 +210,6 @@ rule taxonomy_2:
         "taxonomy/{sample}.krakenout"
     output:
         temp("taxonomy/{sample}.kronain")
-    conda:
-        "bactofidia.json"
     shell:
         "cut -f2,3 {input} > {output}"
 
@@ -201,7 +220,7 @@ rule taxonomy_3:
     output:
         "stats/Taxonomy_{sample}.html"
     conda:
-        "bactofidia.json"
+        spec_virtenv('krona')
     shell:
         "ktImportTaxonomy {input} -o {output}"
 
@@ -213,7 +232,7 @@ rule mlst:
     params:
         config["mlst"]["params"]
     conda:
-        "bactofidia.json"
+        spec_virtenv('mlst')
     shell:
         "mlst {params} {input} >> {output}"
 
@@ -228,7 +247,7 @@ rule quast:
         outfolder = "stats/quasttemp",
         p = config["QUAST"]["params"]
     conda:
-        "bactofidia.json"
+        spec_virtenv('quast')
     shell:
         "quast.py {params.p} -o {params.outfolder} {input}"
         " && mv stats/quasttemp/report.html {output.html}"
@@ -242,7 +261,7 @@ rule resfinder:
     output:
         "stats/ResFinder.tsv"
     conda:
-        "bactofidia.json"
+        spec_virtenv('abricate')
     shell:
         "abricate {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
@@ -257,7 +276,7 @@ rule checkm:
     params:
         config["checkm"]["params"]
     conda:
-        "bactofidia.json"
+        spec_virtenv('checkm')
     shell:
         "checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file}"
 

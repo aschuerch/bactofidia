@@ -44,3 +44,6 @@ krona:
 checkm: 
   params: --reduced_tree
   version: 1.0.5
+
+abricate:
+  version: 0.3
