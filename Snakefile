@@ -1,4 +1,6 @@
 import os
+import sys
+	
 from snakemake.utils import min_version
 
 min_version("3.9")
@@ -33,10 +35,16 @@ def kmer_determination():
     return kmer
 
 # python 2 virtual environments
-os.system ( "conda create -y -n bactofidia  python=2.7  checkm-genome={} quast={} seqtk={} spades={} prokka={} mlst={} kraken={} krona={}".format ( checkmversion, quastversion, seqtkversion, spadesversion, prokkaversion, mlstversion, krakenversion, kronaversion)    )
+virtenvs = "checkm-genome={} quast={} seqtk={} spades={} prokka={} mlst={} kraken={} krona={}".format ( checkmversion, quastversion, seqtkversion, spadesversion, prokkaversion, mlstversion, krakenversion, kronaversion).split()
 
-os.system ( "conda-env export -n bactofidia > bactofidia.yml") 
 
+for i in virtenvs:
+#    os.system
+     print ( "conda create -y -n bactofidia{} {}".format(i,i)    )
+
+     print ( "conda list -n bactofidia{} --explicit --json > virtenvs/bactofidia{}.json".format (i,i)) 
+
+sys.exit()
 
 # Collect samples
 
@@ -46,13 +54,15 @@ SAMPLES = set(SAMPLES)
 
 onsuccess:
     # delete virtual environment
-    os.system ( "conda-env remove -y -n bactofidia") 
+    for i in virtenvs:
+        os.system ( "conda-env remove -y -n bactofidia{}".format (i)) 
     print("Workflow finished!")
 
 
 onerror:
     # delete virtual environment
-    os.system ( "conda-env remove -y -n bactofidia") 
+    for i in virtenvs:
+        os.system ( "conda-env remove -y -n bactofidia{}".format(i)) 
     print("Workflow finished")
 
 
@@ -76,7 +86,7 @@ rule fastqc_before:
     output:
         temp("stats/{sample}_{r}_Trimmingstats_before_trimming")
     conda:
-        "bactofidia.yml"
+        "virtenvs/bactofidiaseqtk*.json"
     shell:
         "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
 
@@ -88,7 +98,7 @@ rule trim:
      params:
         p = config["seqtk"]["params"]
      conda:
-        "bactofidia.yml"
+        "virtenvs/bactofidiasetqk*.json"
      shell: 
         "seqtk trimfq {params.p} {input} > {output}"
 
@@ -98,7 +108,7 @@ rule fastqc_after:
     output:
          temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
 
@@ -110,7 +120,7 @@ rule trimstat:
     output:
         "stats/Trimmingstats.tsv"
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "echo -e 'Reads\t#bases\t%A\t%C\t%G\t%T\t%N\tavgQ\terrQ\t%low\t%high' > {output} ;"
         "cat {input.before} >> {output} ;"
@@ -129,7 +139,7 @@ rule spades:
        # spadesversion = spadesversion,
         outfolder = "assembly/{sample}"
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
 
@@ -142,7 +152,7 @@ rule rename:
         minlen = config["minlen"],
         versiontag = "{sample}:"+versiontag
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
 
@@ -156,7 +166,7 @@ rule annotation:
         params = config["prokka"]["params"],
         prefix = "{sample}"
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
 
@@ -169,7 +179,7 @@ rule taxonomy_1:
     params:
         p=config["kraken"]["params"]
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "kraken {params.p} --output {output} --fasta_input {input}"
         "source deactivate"
@@ -180,7 +190,7 @@ rule taxonomy_2:
     output:
         temp("taxonomy/{sample}.kronain")
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "cut -f2,3 {input} > {output}"
 
@@ -191,7 +201,7 @@ rule taxonomy_3:
     output:
         "stats/Taxonomy_{sample}.html"
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "ktImportTaxonomy {input} -o {output}"
 
@@ -203,7 +213,7 @@ rule mlst:
     params:
         config["mlst"]["params"]
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "mlst {params} {input} >> {output}"
 
@@ -218,7 +228,7 @@ rule quast:
         outfolder = "stats/quasttemp",
         p = config["QUAST"]["params"]
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "quast.py {params.p} -o {params.outfolder} {input}"
         " && mv stats/quasttemp/report.html {output.html}"
@@ -232,7 +242,7 @@ rule resfinder:
     output:
         "stats/ResFinder.tsv"
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "abricate {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
@@ -247,7 +257,7 @@ rule checkm:
     params:
         config["checkm"]["params"]
     conda:
-        "bactofidia.yml"
+        "bactofidia.json"
     shell:
         "checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file}"
 
