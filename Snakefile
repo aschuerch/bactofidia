@@ -61,7 +61,7 @@ def spec_virtenv(program):
 
     stdout = open("virtenvs/{}.txt".format(program),"wb")
     try: 
-        x = subprocess.check_output(["conda", "list", "-n", i, "--explicit" ]) 
+        x = subprocess.check_output(["conda", "env", "export", "-n", i]) 
         stdout.write(x)
     except subprocess.CalledProcessError as e:
         print ("Virtual environment file for {} exists".format(program))
