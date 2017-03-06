@@ -23,11 +23,11 @@ if [ $# -eq 0 ]; then
 ##                                                                       ##
 ##                                                                       ##
 ## If parameters different from the standard parameters will be used,    ##
-## you can copy AssemblyParameters.txt file by calling the script with   ##
+## you can copy the configuration file by calling the script with        ##
 ##                                                                       ##  
 ## call_assembly.sh AssemblyParameters                                   ##
 ##                                                                       ##
-## adjust it to your needs,save it as AssemblyParameters_[version].txt   ##
+## adjust it to your needs,save it as config.yaml                        ##
 ## Place it in the same folder in which your sequencing files are.       ##
 ##                                                                       ##     
               
@@ -36,21 +36,16 @@ if [ $# -eq 0 ]; then
     exit 
 fi
 
+SHARED_OUTPUT=/hpc/dla_mm/automatedassembly
 
-## copy AssemblyParameters if requested.
-#if [[ $1 == "AssemblyParameters" ]]; then
-# cp $SHARED_OUTPUT/parameterfiles/AssemblyParameter.txt $CURRENTDIR/AssemblyParameter_$timestamp.txt
-# exit 0
-#fi 
-
-#defines user, determines who to send the email
-#user=$(whoami)
-
-#declare -A emaildict=( ["aschurch"]="a.c.schurch@umcutrecht.nl" \
-#["jbayjanov"]="J.Bayjanov@umcutrecht.nl" \
-#["mrogers"]="M.R.C.Rogers-2@umcutrecht.nl" \
-#["salonso"]="S.ArredondoAlonso@umcutrecht.nl")
-#email="${emaildict[$user]}"
+##copy AssemblyParameters if requested.
+if [[ $1 == "AssemblyParameters" ]]; then
+ cp $SHARED_OUTPUT/parameterfiles/config.yml .
+ exit 0
+else
+ cp $SHARED_OUTPUT/parameterfiles/config.yml .
+# cp $SHARED_OUTPUT/parameterfiles/Snakefile .
+fi 
 
 
 ##Check for *fastq.gz
@@ -97,11 +92,13 @@ sleep 1
 seq='miseq'
 if [[ 2*$# > $(ls -1 *fastq.gz) ]];then
   echo  2>&1| tee -a $log
-  echo "Sequencing type is HiSeq"
+  echo "Sequencing type is HiSeq"  2>&1| tee -a $log
+
   seq='hiseq'
 else
   echo  2>&1| tee -a $log
-  echo "Sequencing type is MiSeq"
+  echo "Sequencing type is MiSeq"  2>&1| tee -a $log
+
   seq='miseq'
 fi
 
@@ -115,8 +112,6 @@ for i in "$@"
    cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz
 done
 
-# create yaml 
-# start snakefile
 
 if [[ seq == 'hiseq' ]]; then
 
@@ -149,7 +144,7 @@ snakemake \
 --keep-going \
 --use-conda \
 --cluster \
-'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
+'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
 --jobs 100
 
 #snakemake -npr

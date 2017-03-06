@@ -55,8 +55,10 @@ def spec_virtenv(program):
     print (i)
     try: 
         subprocess.check_output([ "conda", "create","-y", "-n", i, i ]  , stderr=subprocess.STDOUT)
+
     except subprocess.CalledProcessError as e:
         print ("Virtual environment for {} exists".format(i))
+        print e
     
 
     stdout = open("virtenvs/{}.txt".format(program),"wb")
@@ -74,7 +76,7 @@ def spec_virtenv(program):
 # Collect samples
 SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
 SAMPLES = set(SAMPLES)
-
+R = set(R)
 
 #onsuccess:
 #    # delete virtual environment
@@ -144,9 +146,11 @@ rule trimstat:
     output:
         "stats/Trimmingstats.tsv"
     shell:
-        "echo -e 'Reads\t#bases\t%A\t%C\t%G\t%T\t%N\tavgQ\terrQ\t%low\t%high' > {output} ;"
-        "cat {input.before} >> {output} ;"
-        "cat {input.after} >> {output} ;"
+        "echo -e 'Reads\t#bases\t%A\t%C\t%G\t%T\t%N\tavgQ\terrQ\t%low\t%high' > {output} "
+        "&&echo -en {input.before}  >> {output} "
+        "&&cat {input.before} >> {output} "
+        "&&echo -en {input.after} >> {output} "
+        "&&cat {input.after} >> {output} "
        
 rule spades:
     input: 
