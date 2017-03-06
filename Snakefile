@@ -76,18 +76,18 @@ SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
 SAMPLES = set(SAMPLES)
 
 
-#onsuccess:
-#    # delete virtual environment
+onsuccess:
+    # delete virtual environment
 #    for i in virtenvs:
  #       os.system ( "conda-env remove -y -n {}".format (i)) 
-  #  print("Workflow finished!")
+    print("Workflow finished!")
 
 
-#onerror:
+onerror:
  #   # delete virtual environment
   #  for i in virtenvs:
    #     os.system ( "conda-env remove -y -n {}".format(i)) 
-    #print("Workflow finished")
+    print("Workflow finished")
 
 
 
