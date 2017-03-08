@@ -53,20 +53,15 @@ def spec_virtenv(program):
 
     i = (list( filter(lambda x: program in x, virtenvs))[0])         
     print (i)
-    try: 
-        subprocess.check_output([ "conda", "create","-y", "-n", i, i ]  , stderr=subprocess.STDOUT)
-
-    except subprocess.CalledProcessError as e:
-        print ("Virtual environment for {} exists".format(i))
-        print (e)
-    
-
     stdout = open("virtenvs/{}.txt".format(program),"wb")
+
     try: 
         x = subprocess.check_output(["conda", "env", "export", "-n", i]) 
         stdout.write(x)
-    except subprocess.CalledProcessError as e:
-        print ("Virtual environment file for {} exists".format(program))
+    except: 
+        subprocess.check_output([ "conda", "create","-y", "-n", i, i ]  , stderr=subprocess.STDOUT)
+        x = subprocess.check_output(["conda", "env", "export", "-n", i]) 
+        stdout.write(x)
 
     return "virtenvs/{}.txt".format(program)
 
@@ -102,7 +97,7 @@ rule all:
        "stats/SpeciesDetermination.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
        expand ("annotation/{sample}.gff", sample=SAMPLES),
-       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES)
+#       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES)
 
 
 rule fastqc_before:
@@ -252,7 +247,7 @@ rule quast:
     conda:
         spec_virtenv('quast')
     shell:
-        "quast.py {params.p} -o {params.outfolder} {input}"
+        "quast {params.p} -o {params.outfolder} {input}"
         " && mv stats/quasttemp/report.html {output.html}"
         " && mv stats/quasttemp/report.tsv {output.tsv}"
         " && rm -r stats/quasttemp"
