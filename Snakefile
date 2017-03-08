@@ -12,7 +12,8 @@ configfile: "config.yaml"
 ##to build a virt env
 seqtkversion = config["seqtk"]["version"] 
 spadesversion = config["SPAdes"]["version"]
-versiontag = config["SPAdes"]["versiontag"]
+versiontag = "V022017SPAdes"+spadesversion
+
 
 # Prokka
 prokkaversion = config["prokka"]["version"]
@@ -46,15 +47,13 @@ virtenvs = "checkm-genome={} quast={} seqtk={} spades={} prokka={} mlst={} krake
 os.makedirs ("virtenvs", exist_ok=True )
 
 def spec_virtenv(program):
-    print (program)
     """ Create conda enviroment for every job. """
     if shutil.which("conda") is None:
         raise CreateCondaEnvironmentException("The 'conda' command is not available in $PATH.")
 
     i = (list( filter(lambda x: program in x, virtenvs))[0])         
-    print (i)
     stdout = open("virtenvs/{}.txt".format(program),"wb")
-
+    print (program, "version", i)
     try: 
         x = subprocess.check_output(["conda", "env", "export", "-n", i]) 
         stdout.write(x)
@@ -166,7 +165,7 @@ rule rename:
     input:
         "assembly/{sample}/scaffolds.fasta"
     output:
-        "scaffolds/{sample}.fna"
+        "scaffolds/{sample}.fna",
     params:
         minlen = config["minlen"],
         versiontag = "{sample}:"+versiontag
@@ -179,7 +178,8 @@ rule annotation:
     input:
         "scaffolds/{sample}.fna"
     output:
-        "annotation/{sample}.gff"
+        "annotation/{sample}.gff",
+        temp=temp("annotation/{sample}.fna")
     params:
         dir = "annotation",
         params = config["prokka"]["params"],
@@ -187,7 +187,8 @@ rule annotation:
     conda:
         spec_virtenv('prokka')
     shell:
-        "prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
+        "cut -f 1,8 sed s/input > {output.temp}"
+        "&&prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {output.temp} "
 
         
 rule taxonomy_1:
