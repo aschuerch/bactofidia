@@ -58,7 +58,7 @@ def spec_virtenv(program):
 
     except subprocess.CalledProcessError as e:
         print ("Virtual environment for {} exists".format(i))
-        print e
+        print (e)
     
 
     stdout = open("virtenvs/{}.txt".format(program),"wb")
@@ -90,7 +90,6 @@ onerror:
   #  for i in virtenvs:
    #     os.system ( "conda-env remove -y -n {}".format(i)) 
     print("Workflow finished")
-
 
 
 rule all:
