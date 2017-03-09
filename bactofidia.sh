@@ -1,51 +1,32 @@
 #!/bin/bash
 
-#calls snakefile for bacterial paired-end WGS Illumina data
+##Script to call snakefile for bacterial paired-end WGS Illumina data
 
-
-#activate snakemake env
-source activate snakemake
-
-##Checks
+##1. Checks
 ##Check for command line arguments
 
 if [ $# -eq 0 ]; then
     echo "
 ###########################################################################
-## #######      Assembly pipeline       ###########                      ##
+############      Basic microbial WGS analysis pipeline    ################
 ## for all available samples in this folder.                             ##
 ## Compressed sequencing files (.gz)                                     ##
 ## must be present in the same folder from where the script is called.   ##
+## Use only the sample name to call the script                           ##
 ##                                                                       ##
 ## Example                                                               ##
 ##                                                                       ##
-## call_assembly.sh  ECO-RES-PR1-00001 ECO-RES-PR1-00002                 ##
+## bactofidia.sh  ECO-RES-PR1-00001 ECO-RES-PR1-00002                    ##
 ##                                                                       ##
 ##                                                                       ##
 ## If parameters different from the standard parameters will be used,    ##
-## you can copy the configuration file by calling the script with        ##
-##                                                                       ##  
-## call_assembly.sh AssemblyParameters                                   ##
+## you can adjust config.yaml to your needs before running this script   ##
 ##                                                                       ##
-## adjust it to your needs,save it as config.yaml                        ##
-## Place it in the same folder in which your sequencing files are.       ##
-##                                                                       ##     
-              
+ #                                                                       ##
 ## Anita Schurch Feb 2017                                                ##
 ###########################################################################"
-    exit 
+    exit
 fi
-
-SHARED_OUTPUT=/hpc/dla_mm/automatedassembly
-
-##copy AssemblyParameters if requested.
-if [[ $1 == "AssemblyParameters" ]]; then
- cp $SHARED_OUTPUT/parameterfiles/config.yml .
- exit 0
-else
- cp $SHARED_OUTPUT/parameterfiles/config.yml .
-# cp $SHARED_OUTPUT/parameterfiles/Snakefile .
-fi 
 
 
 ##Check for *fastq.gz
@@ -62,6 +43,26 @@ Exiting."
    exit 0
   fi
  done
+
+#if needed download fresh miniconda installation
+if [[ ! -d ~/tmp/Miniconda2 ]]; then
+ wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+ chmod +x Miniconda2-latest-Linux-x86_64.sh
+ mkdir -p ~/tmp
+ ./Miniconda2-latest-Linux-x86_64.sh -b -p ~/tmp/Miniconda2
+ rm Miniconda2-latest-Linux-x86_64.sh
+ export PATH=~/tmp/Miniconda2/bin:$PATH 
+ export PYTHONPATH=~/tmp/Miniconda2/pkgs/
+ conda config --add channels conda-forge
+ conda config --add channels defaults
+ conda config --add channels r
+ conda config --add channels bioconda
+ conda create -y -n snakemake python=3.5 snakemake
+fi
+
+
+#activate snakemake env
+source activate snakemake
 
 
 log=$(pwd)/log/call_assembly.txt
@@ -113,40 +114,46 @@ for i in "$@"
 done
 
 
-if [[ seq == 'hiseq' ]]; then
+#check if it is on hpc
+if ! type qstat > /dev/null ; then
 
-echo "snakemake \
---latency-wait 60 \
---config krange="33,55,71" \
---verbose \
---cluster \
-'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
---jobs 100 "
-
-snakemake -npr
+snakemake --keep-going --use-conda
 
 else
 
-echo "snakemake \
---latency-wait 60 \
---config krange="57,97,127" \
---verbose \
---keep-going \
---use-conda \
---cluster \
-'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
---jobs 100 " 
+ if [[ seq == 'hiseq' ]]; then
 
-snakemake \
---latency-wait 60 \
---config krange="57,97,127" \
---verbose \
---keep-going \
---use-conda \
---cluster \
-'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
---jobs 100
+ echo "snakemake \
+ --latency-wait 60 \
+ --config krange="33,55,71" \
+ --verbose \
+ --cluster \
+ 'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
+ --jobs 100 "
 
-#snakemake -npr
+ else #miseq
+
+ echo "snakemake \
+ --latency-wait 60 \
+ --config krange="57,97,127" \
+ --verbose \
+ --keep-going \
+ --use-conda \
+ --cluster \
+ 'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
+ --jobs 100 " 
+
+ snakemake \
+ --latency-wait 60 \
+ --config krange="57,97,127" \
+ --verbose \
+ --keep-going \
+ --use-conda \
+ --cluster \
+ 'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
+ --jobs 100
+
+ fi
 
 fi
+
