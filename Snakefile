@@ -168,27 +168,27 @@ rule rename:
         "scaffolds/{sample}.fna",
     params:
         minlen = config["minlen"],
-        versiontag = "{sample}:"+versiontag
+        versiontag = "{sample}_"+versiontag
     conda:
         spec_virtenv('seqtk')
     shell:
         "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
-
+      
 rule annotation:
     input:
         "scaffolds/{sample}.fna"
     output:
         "annotation/{sample}.gff",
-        temp=temp("annotation/{sample}.fna")
     params:
         dir = "annotation",
         params = config["prokka"]["params"],
-        prefix = "{sample}"
+        prefix = "{sample}",
+        div1 = "_",
+        div2 = "-"
     conda:
         spec_virtenv('prokka')
     shell:
-        "cut -f 1,8 sed s/input > {output.temp}"
-        "&&prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {output.temp} "
+        "prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
 
         
 rule taxonomy_1:
