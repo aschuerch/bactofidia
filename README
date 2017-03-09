@@ -12,48 +12,12 @@ Currently it runs:
  -resistance gene finding with abricate
  -assessing completeness and contamination of genome with checkm
 
-Requirements for the pipelien are bioconda and a virtual environment with snakemake
-
-To install these: 
- wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
- chmod +x Miniconda2-latest-Linux-x86_64.sh
- ./Miniconda2-latest-Linux-x86_64.sh -b -p /cvmfs/softdrive.nl/$USER/Miniconda2
-
-In the file /home/$USER/.bashrc add the following lines:
-
- export PATH=/cvmfs/softdrive.nl/$USER/Miniconda2/bin:$PATH 
- export PYTHONPATH=/cvmfs/softdrive.nl/$USER/Miniconda2/pkgs/
-
- conda config --add channels conda-forge
- conda config --add channels defaults
- conda config --add channels r
- conda config --add channels bioconda
-
-
-Finally, to create a virtual environment for snakemake
-
- conda create -n snakemake python=3.5 snakemake
-
-Activate the environment
- source activate snakemake
-
- snakemake --bash-completion
+When running the script bactofidia.sh it installs its own bioconda package manager and creates a virtual environment with snakemake
 
 The config.yml file of the pipeline can be adjusted for desired version of software. 
 See bioconda.github.io for available packages.
 
-The pipeline can be dry-run with 
+The pipeline itself can be dry-run with 
 
  snakemake -np --use-conda
 
-Or on the HPC with 
- snakemake \
- --latency-wait 60 \
- --config krange="57,97,127" \
- --verbose \
- --cluster \
- --use-conda \
- 'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
- --jobs 100
-
-for MiSeq paired-end reads
