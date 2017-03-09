@@ -115,7 +115,7 @@ done
 
 
 #check if it is on hpc
-if ! type qstat > /dev/null ; then
+if command -v qstat > /dev/null; then
 
 snakemake --keep-going --use-conda
 
