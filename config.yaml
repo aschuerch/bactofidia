@@ -19,7 +19,6 @@ seqtk:
 SPAdes:
   params: --only-assembler --careful --threads 8
   version: 3.6.2
-  versiontag: V022017SPAdes+spadesversion
   krange: 57,97,127 #adjust if you would like to select a different kmer range for spades assembly
 
 QUAST:
@@ -31,7 +30,7 @@ mlst:
   params: --reduced_tree
 
 prokka:
-  params: --centre UMCU --compliant
+  params: --centre U --locustag C --compliant
   version: 1.11
 
 kraken:
