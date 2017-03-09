@@ -117,10 +117,6 @@ done
 #check if it is on hpc
 if command -v qstat > /dev/null; then
 
-snakemake --keep-going --use-conda
-
-else
-
  if [[ seq == 'hiseq' ]]; then
 
  echo "snakemake \
@@ -154,6 +150,10 @@ else
  --jobs 100
 
  fi
+else
+
+snakemake --keep-going --use-conda
+
 
 fi
 
