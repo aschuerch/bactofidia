@@ -52,15 +52,18 @@ def spec_virtenv(program):
         raise CreateCondaEnvironmentException("The 'conda' command is not available in $PATH.")
 
     i = (list( filter(lambda x: program in x, virtenvs))[0])         
-    stdout = open("virtenvs/{}.txt".format(program),"wb")
+   # stdout = open("virtenvs/{}.txt".format(program),"wb")
+
     print (program, "version", i)
     try: 
-        x = subprocess.check_output(["conda", "env", "export", "-n", i]) 
-        stdout.write(x)
+  #      x = subprocess.check_output(["conda", "env", "export", "--prefix", "virtenvs/"+program]) 
+   #     stdout.write(x)
+   # except: 
+        subprocess.check_output([ "conda", "create","-y", "--prefix", "virtenvs/"+program, i, "--copy"]  , stderr=subprocess.STDOUT)
+    #    x = subprocess.check_output(["conda", "env", "export", "--prefix", "virtenvs/"+program]) 
+     #   stdout.write(x)
     except: 
-        subprocess.check_output([ "conda", "create","-y", "-n", i, i ]  , stderr=subprocess.STDOUT)
-        x = subprocess.check_output(["conda", "env", "export", "-n", i]) 
-        stdout.write(x)
+        print ('not possible')
 
     return "virtenvs/{}.txt".format(program)
 
@@ -104,10 +107,10 @@ rule fastqc_before:
         "data/{sample}_{r}.fastq.gz"
     output:
         temp("stats/{sample}_{r}_Trimmingstats_before_trimming")
-    conda:
-        spec_virtenv('seqtk')
     shell:
-        "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
+        "source activate virtenvs/seqtk"
+        "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
+        "&& source deactivate"
 
 rule trim:
      input:
@@ -116,21 +119,20 @@ rule trim:
         temp("trimmed/{sample}_{r}.fastq")
      params:
         p = config["seqtk"]["params"]
-     conda:
-        spec_virtenv('seqtk')
      shell: 
-        "seqtk trimfq {params.p} {input} > {output}"
+        "source activate virtenvs/seqtk "
+        "&& seqtk trimfq {params.p} {input} > {output} "
+        "&& source deactivate "
 
 rule fastqc_after:
     input:
         "trimmed/{sample}_{r}.fastq"
     output:
          temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
-    conda:
-        spec_virtenv('seqtk')
     shell:
-        "seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
-
+        "source activate virtenvs/seqtk"
+        "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
+        "&& source deactivate"       
 
 rule trimstat:
     input:
@@ -140,10 +142,10 @@ rule trimstat:
         "stats/Trimmingstats.tsv"
     shell:
         "echo -e 'Reads\t#bases\t%A\t%C\t%G\t%T\t%N\tavgQ\terrQ\t%low\t%high' > {output} "
-        "&&echo -en {input.before}  >> {output} "
-        "&&cat {input.before} >> {output} "
-        "&&echo -en {input.after} >> {output} "
-        "&&cat {input.after} >> {output} "
+        "&& echo -en {input.before}  >> {output} "
+        "&& cat {input.before} >> {output} "
+        "&& echo -en {input.after} >> {output} "
+        "&& cat {input.after} >> {output} "
        
 rule spades:
     input: 
@@ -156,10 +158,10 @@ rule spades:
         kmer = kmer_determination(),
         cov = config["mincov"],
         outfolder = "assembly/{sample}"
-    conda:
-        spec_virtenv('spades')
     shell:
-        "spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
+        "source activate virtenvs/spades"
+        "&& spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
+        "&& source deactivate"
 
 rule rename:
     input:
@@ -169,10 +171,10 @@ rule rename:
     params:
         minlen = config["minlen"],
         versiontag = "{sample}_"+versiontag
-    conda:
-        spec_virtenv('seqtk')
     shell:
-        "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
+        "source activate virtenvs/seqtk"
+        "&& seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
+        "&& source deactivate"
       
 rule annotation:
     input:
@@ -185,11 +187,10 @@ rule annotation:
         prefix = "{sample}",
         div1 = "_",
         div2 = "-"
-    conda:
-        spec_virtenv('prokka')
     shell:
-        "prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
-
+        "source activate virtenvs/prokka"
+        "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
+        "&& source deactivate"
         
 rule taxonomy_1:
     input:
@@ -198,11 +199,10 @@ rule taxonomy_1:
         temp("taxonomy/{sample}.krakenout")
     params:
         p=config["kraken"]["params"]
-    conda:
-        spec_virtenv('kraken')
     shell:
-        "kraken {params.p} --output {output} --fasta_input {input}"
-        "source deactivate"
+        "source activate virtenvs/kraken"
+        "&& kraken {params.p} --output {output} --fasta_input {input}"
+        "&& source deactivate"
 
 rule taxonomy_2:
     input:
@@ -218,10 +218,11 @@ rule taxonomy_3:
         "taxonomy/{sample}.kronain"
     output:
         "stats/Taxonomy_{sample}.html"
-    conda:
-        spec_virtenv('krona')
     shell:
-        "ktImportTaxonomy {input} -o {output}"
+        "source activate virtenvs/krona"
+        "&& ktImportTaxonomy {input} -o {output}"
+        "&& source deactivate"
+
 
 rule mlst:
     input:
@@ -230,11 +231,10 @@ rule mlst:
         "stats/MLST.tsv"
     params:
         config["mlst"]["params"]
-    conda:
-        spec_virtenv('mlst')
     shell:
-        "mlst {params} {input} >> {output}"
-
+        "source activate virtenvs/mlst"
+        "&& mlst {params} {input} >> {output}"
+        "&& source deactivate"
 
 rule quast:
     input:
@@ -245,26 +245,24 @@ rule quast:
     params:
         outfolder = "stats/quasttemp",
         p = config["QUAST"]["params"]
-    conda:
-        spec_virtenv('quast')
     shell:
-        "quast {params.p} -o {params.outfolder} {input}"
-        " && mv stats/quasttemp/report.html {output.html}"
-        " && mv stats/quasttemp/report.tsv {output.tsv}"
-        " && rm -r stats/quasttemp"
-
+        "source activate virtenvs/quast"
+        "&& quast {params.p} -o {params.outfolder} {input}"
+        "&& mv stats/quasttemp/report.html {output.html}"
+        "&& mv stats/quasttemp/report.tsv {output.tsv}"
+        "&& rm -r stats/quasttemp"
+        "&& source deactivate"
 
 rule resfinder:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES) 
     output:
         "stats/ResFinder.tsv"
-    conda:
-        spec_virtenv('abricate')
     shell:
-        "abricate {input} > {output}" 
+        "source activate virtenvs/abricate"
+        "&& abricate {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
-
+        "&& source deactivate"
 
 rule checkm:
     input:
@@ -274,8 +272,7 @@ rule checkm:
         folder = temp("checkm")
     params:
         config["checkm"]["params"]
-    conda:
-        spec_virtenv('checkm')
     shell:
-        "checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file}"
-
+        "source activate virtenvs/checkm"
+        "&& checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file}"
+        "&& source deactivate"
