@@ -65,7 +65,7 @@ def spec_virtenv(program):
     except: 
         print ('not possible')
 
-    return "virtenvs/{}.txt".format(program)
+    return "virtenvs/{}".format(program)
 
 
 
@@ -107,8 +107,10 @@ rule fastqc_before:
         "data/{sample}_{r}.fastq.gz"
     output:
         temp("stats/{sample}_{r}_Trimmingstats_before_trimming")
+    params:
+        virtenv=spec_virtenv("seqtk")
     shell:
-        "source activate virtenvs/seqtk"
+        "source activate {params.virtenv}"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
         "&& source deactivate"
 
@@ -118,9 +120,10 @@ rule trim:
      output:
         temp("trimmed/{sample}_{r}.fastq")
      params:
-        p = config["seqtk"]["params"]
+        p = config["seqtk"]["params"],
+        virtenv=spec_virtenv("seqtk")
      shell: 
-        "source activate virtenvs/seqtk "
+        "source activate {params.virtenv} "
         "&& seqtk trimfq {params.p} {input} > {output} "
         "&& source deactivate "
 
@@ -129,8 +132,10 @@ rule fastqc_after:
         "trimmed/{sample}_{r}.fastq"
     output:
          temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
+    params:
+        virtenv=spec_virtenv("seqtk")
     shell:
-        "source activate virtenvs/seqtk"
+        "source activate {params.virtenv}"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
         "&& source deactivate"       
 
@@ -157,9 +162,10 @@ rule spades:
         spadesparams = config["SPAdes"]["params"],
         kmer = kmer_determination(),
         cov = config["mincov"],
-        outfolder = "assembly/{sample}"
+        outfolder = "assembly/{sample}",
+        virtenv=spec_virtenv("spades")
     shell:
-        "source activate virtenvs/spades"
+        "source activate {params.virtenv}"
         "&& spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
         "&& source deactivate"
 
@@ -170,9 +176,10 @@ rule rename:
         "scaffolds/{sample}.fna",
     params:
         minlen = config["minlen"],
-        versiontag = "{sample}_"+versiontag
+        versiontag = "{sample}_"+versiontag,
+        virtenv=spec_virtenv("seqtk")
     shell:
-        "source activate virtenvs/seqtk"
+        "source activate {params.virtenv}"
         "&& seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
         "&& source deactivate"
       
@@ -185,10 +192,9 @@ rule annotation:
         dir = "annotation",
         params = config["prokka"]["params"],
         prefix = "{sample}",
-        div1 = "_",
-        div2 = "-"
+        virtenv=spec_virtenv("prokka")
     shell:
-        "source activate virtenvs/prokka"
+        "source activate {params.virtenv}"
         "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
         "&& source deactivate"
         
@@ -198,9 +204,10 @@ rule taxonomy_1:
     output:
         temp("taxonomy/{sample}.krakenout")
     params:
-        p=config["kraken"]["params"]
+        p=config["kraken"]["params"],
+        virtenv=spec_virtenv("kraken")
     shell:
-        "source activate virtenvs/kraken"
+        "source activate  {params.virtenv}"
         "&& kraken {params.p} --output {output} --fasta_input {input}"
         "&& source deactivate"
 
@@ -218,8 +225,10 @@ rule taxonomy_3:
         "taxonomy/{sample}.kronain"
     output:
         "stats/Taxonomy_{sample}.html"
+    params:
+        virtenv=spec_virtenv("krona")
     shell:
-        "source activate virtenvs/krona"
+        "source activate  {params.virtenv}"
         "&& ktImportTaxonomy {input} -o {output}"
         "&& source deactivate"
 
@@ -230,9 +239,10 @@ rule mlst:
     output:
         "stats/MLST.tsv"
     params:
-        config["mlst"]["params"]
+        config["mlst"]["params"],
+        virtenv=spec_virtenv("mlst")
     shell:
-        "source activate virtenvs/mlst"
+        "source activate  {params.virtenv}"
         "&& mlst {params} {input} >> {output}"
         "&& source deactivate"
 
@@ -244,9 +254,10 @@ rule quast:
         tsv = "stats/AssemblyQC.tsv"
     params:
         outfolder = "stats/quasttemp",
-        p = config["QUAST"]["params"]
+        p = config["QUAST"]["params"],
+        virtenv=spec_virtenv("quast")
     shell:
-        "source activate virtenvs/quast"
+        "source activate  {params.virtenv}"
         "&& quast {params.p} -o {params.outfolder} {input}"
         "&& mv stats/quasttemp/report.html {output.html}"
         "&& mv stats/quasttemp/report.tsv {output.tsv}"
@@ -258,8 +269,10 @@ rule resfinder:
         expand("scaffolds/{sample}.fna", sample=SAMPLES) 
     output:
         "stats/ResFinder.tsv"
+    params:
+        virtenv = spec_virtenv("abricate")
     shell:
-        "source activate virtenvs/abricate"
+        "source activate  {params.virtenv}"
         "&& abricate {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
         "&& source deactivate"
@@ -271,8 +284,9 @@ rule checkm:
         file = "stats/SpeciesDetermination.tsv",
         folder = temp("checkm")
     params:
-        config["checkm"]["params"]
+        config["checkm"]["params"],
+        virtenv = spec_virtenv("checkm")        
     shell:
-        "source activate virtenvs/checkm"
+        "source activate  {params.virtenv}"
         "&& checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file}"
         "&& source deactivate"
