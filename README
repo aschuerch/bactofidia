@@ -1,23 +1,37 @@
-bactofidia is a bacterial assembly pipeline using Snakemake and bioconda.
+### bactofidia: Basic microbial WGS analysis pipeline    
+
+**bactofidia** is a bacterial assembly pipeline using Snakemake and bioconda.
 It is flexible and easily transferable
 
+How to use:
+
+Run the whole pipeline with:
+
+`bactofidia.sh Test`
+
+Running only 
+
+`bactofidia.sh`
+
+will give an explanation of the (limited) options.
+
 Currently it runs:
- -quality check before and after trimming
- -trimming
+ -quality check before and after trimming using seqtk
+ -trimming with seqtk
  -assembly with spades
  -annotation with prokka
  -taxonomy determination with kraken, vizualization with krona
- -mlst
+ -mlst with mlst
  -quality assessment of assembly with quast
  -resistance gene finding with abricate
  -assessing completeness and contamination of genome with checkm
 
-When running the script bactofidia.sh it installs its own bioconda package manager and creates a virtual environment with snakemake
+When running the script it installs the bioconda package manager if necessary and creates a virtual environment with snakemake
 
-The config.yml file of the pipeline can be adjusted for desired version of software. 
-See bioconda.github.io for available packages.
+The config.yml file of the pipeline can be adjusted for desired version of software. See bioconda.github.io for available packages.
 
-The pipeline itself can be dry-run with 
+For debugging or testing purposes, the pipeline itself can be dry-run with 
 
- snakemake -np --use-conda
+ `snakemake -np`
+
 
