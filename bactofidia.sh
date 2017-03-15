@@ -44,8 +44,12 @@ Exiting."
   fi
  done
 
-#if needed download fresh miniconda installation
-if [[ ! -d ~/tmp/Miniconda2 ]]; then
+#if needed download miniconda installation
+if command -v conda > /dev/null; then
+ echo  2>&1| tee -a $log
+
+else
+
  wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
  chmod +x Miniconda2-latest-Linux-x86_64.sh
  mkdir -p ~/tmp
@@ -58,6 +62,7 @@ if [[ ! -d ~/tmp/Miniconda2 ]]; then
  conda config --add channels r
  conda config --add channels bioconda
  conda create -y -n snakemake python=3.5 snakemake
+
 fi
 
 
@@ -93,9 +98,9 @@ sleep 1
 seq='miseq'
 if [[ 2*$# > $(ls -1 *fastq.gz) ]];then
   echo  2>&1| tee -a $log
-  echo "Sequencing type is HiSeq"  2>&1| tee -a $log
+  echo "Sequencing type is NextSeq"  2>&1| tee -a $log
 
-  seq='hiseq'
+  seq='nextseq'
 else
   echo  2>&1| tee -a $log
   echo "Sequencing type is MiSeq"  2>&1| tee -a $log
@@ -117,7 +122,7 @@ done
 #check if it is on hpc
 if command -v qstat > /dev/null; then
 
- if [[ seq == 'hiseq' ]]; then
+ if [[ seq == 'nextseq' ]]; then
 
  echo "snakemake \
  --latency-wait 60 \
@@ -134,7 +139,6 @@ if command -v qstat > /dev/null; then
  --config krange="57,97,127" \
  --verbose \
  --keep-going \
- --use-conda \
  --cluster \
  'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 " 
@@ -144,7 +148,6 @@ if command -v qstat > /dev/null; then
  --config krange="57,97,127" \
  --verbose \
  --keep-going \
- --use-conda \
  --cluster \
  'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
  --jobs 100
@@ -152,8 +155,7 @@ if command -v qstat > /dev/null; then
  fi
 else
 
-snakemake --keep-going --use-conda
-
+snakemake --keep-going 
 
 fi
 
