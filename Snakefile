@@ -112,7 +112,7 @@ rule fastqc_before:
     shell:
         "set +u; source activate {params.virtenv}; set -u;"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
-        ""&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u;"
 
 rule trim:
      input:
