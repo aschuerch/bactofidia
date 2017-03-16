@@ -112,7 +112,7 @@ rule fastqc_before:
     shell:
         "set +u; source activate {params.virtenv}; set -u;"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
-        "&& source deactivate"
+        ""&& set +u; source deactivate; set -u;"
 
 rule trim:
      input:
@@ -125,7 +125,7 @@ rule trim:
      shell: 
         "set +u; source activate {params.virtenv}; set -u;"
         "&& seqtk trimfq {params.p} {input} > {output} "
-        "&& source deactivate "
+        "&& set +u; source deactivate; set -u;"
 
 rule fastqc_after:
     input:
@@ -137,7 +137,7 @@ rule fastqc_after:
     shell:
         "set +u; source activate {params.virtenv}; set -u;"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
-        "&& source deactivate"       
+        "&& set +u; source deactivate; set -u;"       
 
 rule trimstat:
     input:
@@ -167,7 +167,7 @@ rule spades:
     shell:
         "set +u; source activate {params.virtenv}; set -u;"
         "&& spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
-        "&& source deactivate"
+        "&& set +u; source deactivate; set -u;"
 
 rule rename:
     input:
@@ -181,7 +181,7 @@ rule rename:
     shell:
         "set +u; source activate {params.virtenv}; set -u;"
         "&& seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
-        "&& source deactivate"
+        "&& set +u; source deactivate; set -u;"
       
 rule annotation:
     input:
@@ -196,7 +196,7 @@ rule annotation:
     shell:
         "set +u; source activate {params.virtenv}; set -u;"
         "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
-        "&& source deactivate"
+        "&& set +u; source deactivate; set -u;"
         
 rule taxonomy_1:
     input:
@@ -209,7 +209,7 @@ rule taxonomy_1:
     shell:
         "set +u; source activate  {params.virtenv}; set -u;"
         "&& kraken {params.p} --output {output} --fasta_input {input}"
-        "&& source deactivate"
+        "&& set +u; source deactivate; set -u;"
 
 rule taxonomy_2:
     input:
@@ -230,7 +230,7 @@ rule taxonomy_3:
     shell:
         "set +u; source activate  {params.virtenv}; set -u;"
         "&& ktImportTaxonomy {input} -o {output}"
-        "&& source deactivate"
+        "&& set +u; source deactivate; set -u;"
 
 
 rule mlst:
@@ -244,7 +244,7 @@ rule mlst:
     shell:
         "set +u; source activate  {params.virtenv}; set -u;"
         "&& mlst {params} {input} >> {output}"
-        "&& source deactivate"
+        "&& set +u; source deactivate; set -u;"
 
 rule quast:
     input:
@@ -262,7 +262,7 @@ rule quast:
         "&& mv stats/quasttemp/report.html {output.html}"
         "&& mv stats/quasttemp/report.tsv {output.tsv}"
         "&& rm -r stats/quasttemp"
-        "&& source deactivate"
+        "&& set +u; source deactivate; set -u;"
 
 rule resfinder:
     input:
@@ -275,7 +275,7 @@ rule resfinder:
         "set +u; source activate  {params.virtenv}; set -u;"
         "&& abricate {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
-        "&& source deactivate"
+        "&& set +u; source deactivate; set -u;"
 
 rule checkm:
     input:
@@ -289,4 +289,4 @@ rule checkm:
     shell:
         "set +u; source activate  {params.virtenv}; set -u;"
         "&& checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file}"
-        "&& source deactivate"
+        "&& set +u; source deactivate; set -u;"
