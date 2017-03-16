@@ -63,7 +63,7 @@ def spec_virtenv(program):
     #    x = subprocess.check_output(["conda", "env", "export", "--prefix", "virtenvs/"+program]) 
      #   stdout.write(x)
     except: 
-        print ('not possible')
+        print ('Virtual environment already present')
 
     return "virtenvs/{}".format(program)
 
