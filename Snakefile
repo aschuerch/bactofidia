@@ -110,7 +110,7 @@ rule fastqc_before:
     params:
         virtenv=spec_virtenv("seqtk")
     shell:
-        "source activate {params.virtenv}"
+        "set +u; source activate {params.virtenv}; set -u;"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
         "&& source deactivate"
 
@@ -123,7 +123,7 @@ rule trim:
         p = config["seqtk"]["params"],
         virtenv=spec_virtenv("seqtk")
      shell: 
-        "source activate {params.virtenv} "
+        "set +u; source activate {params.virtenv}; set -u;"
         "&& seqtk trimfq {params.p} {input} > {output} "
         "&& source deactivate "
 
@@ -135,7 +135,7 @@ rule fastqc_after:
     params:
         virtenv=spec_virtenv("seqtk")
     shell:
-        "source activate {params.virtenv}"
+        "set +u; source activate {params.virtenv}; set -u;"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
         "&& source deactivate"       
 
@@ -165,7 +165,7 @@ rule spades:
         outfolder = "assembly/{sample}",
         virtenv=spec_virtenv("spades")
     shell:
-        "source activate {params.virtenv}"
+        "set +u; source activate {params.virtenv}; set -u;"
         "&& spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
         "&& source deactivate"
 
@@ -179,7 +179,7 @@ rule rename:
         versiontag = "{sample}_"+versiontag,
         virtenv=spec_virtenv("seqtk")
     shell:
-        "source activate {params.virtenv}"
+        "set +u; source activate {params.virtenv}; set -u;"
         "&& seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
         "&& source deactivate"
       
@@ -194,7 +194,7 @@ rule annotation:
         prefix = "{sample}",
         virtenv=spec_virtenv("prokka")
     shell:
-        "source activate {params.virtenv}"
+        "set +u; source activate {params.virtenv}; set -u;"
         "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
         "&& source deactivate"
         
@@ -207,7 +207,7 @@ rule taxonomy_1:
         p=config["kraken"]["params"],
         virtenv=spec_virtenv("kraken")
     shell:
-        "source activate  {params.virtenv}"
+        "set +u; source activate  {params.virtenv}; set -u;"
         "&& kraken {params.p} --output {output} --fasta_input {input}"
         "&& source deactivate"
 
@@ -228,7 +228,7 @@ rule taxonomy_3:
     params:
         virtenv=spec_virtenv("krona")
     shell:
-        "source activate  {params.virtenv}"
+        "set +u; source activate  {params.virtenv}; set -u;"
         "&& ktImportTaxonomy {input} -o {output}"
         "&& source deactivate"
 
@@ -242,7 +242,7 @@ rule mlst:
         config["mlst"]["params"],
         virtenv=spec_virtenv("mlst")
     shell:
-        "source activate  {params.virtenv}"
+        "set +u; source activate  {params.virtenv}; set -u;"
         "&& mlst {params} {input} >> {output}"
         "&& source deactivate"
 
@@ -257,7 +257,7 @@ rule quast:
         p = config["QUAST"]["params"],
         virtenv=spec_virtenv("quast")
     shell:
-        "source activate  {params.virtenv}"
+        "set +u; source activate  {params.virtenv}; set -u;"
         "&& quast {params.p} -o {params.outfolder} {input}"
         "&& mv stats/quasttemp/report.html {output.html}"
         "&& mv stats/quasttemp/report.tsv {output.tsv}"
@@ -272,7 +272,7 @@ rule resfinder:
     params:
         virtenv = spec_virtenv("abricate")
     shell:
-        "source activate  {params.virtenv}"
+        "set +u; source activate  {params.virtenv}; set -u;"
         "&& abricate {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
         "&& source deactivate"
@@ -287,6 +287,6 @@ rule checkm:
         config["checkm"]["params"],
         virtenv = spec_virtenv("checkm")        
     shell:
-        "source activate  {params.virtenv}"
+        "set +u; source activate  {params.virtenv}; set -u;"
         "&& checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file}"
         "&& source deactivate"
