@@ -110,9 +110,9 @@ rule fastqc_before:
     params:
         virtenv=spec_virtenv("seqtk")
     shell:
-        "set +u; source activate {params.virtenv}; set -u;"
+        "set +u; source activate {params.virtenv}; set -u"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
 
 rule trim:
      input:
@@ -123,9 +123,9 @@ rule trim:
         p = config["seqtk"]["params"],
         virtenv=spec_virtenv("seqtk")
      shell: 
-        "set +u; source activate {params.virtenv}; set -u;"
+        "set +u; source activate {params.virtenv}; set -u"
         "&& seqtk trimfq {params.p} {input} > {output} "
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
 
 rule fastqc_after:
     input:
@@ -135,9 +135,9 @@ rule fastqc_after:
     params:
         virtenv=spec_virtenv("seqtk")
     shell:
-        "set +u; source activate {params.virtenv}; set -u;"
+        "set +u; source activate {params.virtenv}; set -u"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
-        "&& set +u; source deactivate; set -u;"       
+        "&& set +u; source deactivate; set -u"       
 
 rule trimstat:
     input:
@@ -165,9 +165,9 @@ rule spades:
         outfolder = "assembly/{sample}",
         virtenv=spec_virtenv("spades")
     shell:
-        "set +u; source activate {params.virtenv}; set -u;"
+        "set +u; source activate {params.virtenv}; set -u"
         "&& spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
 
 rule rename:
     input:
@@ -179,9 +179,9 @@ rule rename:
         versiontag = "{sample}_"+versiontag,
         virtenv=spec_virtenv("seqtk")
     shell:
-        "set +u; source activate {params.virtenv}; set -u;"
+        "set +u; source activate {params.virtenv}; set -u"
         "&& seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
       
 rule annotation:
     input:
@@ -194,9 +194,9 @@ rule annotation:
         prefix = "{sample}",
         virtenv=spec_virtenv("prokka")
     shell:
-        "set +u; source activate {params.virtenv}; set -u;"
+        "set +u; source activate {params.virtenv}; set -u"
         "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
         
 rule taxonomy_1:
     input:
@@ -207,9 +207,9 @@ rule taxonomy_1:
         p=config["kraken"]["params"],
         virtenv=spec_virtenv("kraken")
     shell:
-        "set +u; source activate  {params.virtenv}; set -u;"
+        "set +u; source activate  {params.virtenv}; set -u"
         "&& kraken {params.p} --output {output} --fasta_input {input}"
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
 
 rule taxonomy_2:
     input:
@@ -228,9 +228,9 @@ rule taxonomy_3:
     params:
         virtenv=spec_virtenv("krona")
     shell:
-        "set +u; source activate  {params.virtenv}; set -u;"
+        "set +u; source activate  {params.virtenv}; set -u"
         "&& ktImportTaxonomy {input} -o {output}"
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
 
 
 rule mlst:
@@ -242,9 +242,9 @@ rule mlst:
         config["mlst"]["params"],
         virtenv=spec_virtenv("mlst")
     shell:
-        "set +u; source activate  {params.virtenv}; set -u;"
+        "set +u; source activate  {params.virtenv}; set -u"
         "&& mlst {params} {input} >> {output}"
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
 
 rule quast:
     input:
@@ -257,12 +257,12 @@ rule quast:
         p = config["QUAST"]["params"],
         virtenv=spec_virtenv("quast")
     shell:
-        "set +u; source activate  {params.virtenv}; set -u;"
+        "set +u; source activate  {params.virtenv}; set -u"
         "&& quast {params.p} -o {params.outfolder} {input}"
         "&& mv stats/quasttemp/report.html {output.html}"
         "&& mv stats/quasttemp/report.tsv {output.tsv}"
         "&& rm -r stats/quasttemp"
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
 
 rule resfinder:
     input:
@@ -272,10 +272,10 @@ rule resfinder:
     params:
         virtenv = spec_virtenv("abricate")
     shell:
-        "set +u; source activate  {params.virtenv}; set -u;"
+        "set +u; source activate  {params.virtenv}; set -u"
         "&& abricate {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
 
 rule checkm:
     input:
@@ -287,6 +287,6 @@ rule checkm:
         config["checkm"]["params"],
         virtenv = spec_virtenv("checkm")        
     shell:
-        "set +u; source activate  {params.virtenv}; set -u;"
+        "set +u; source activate  {params.virtenv}; set -u"
         "&& checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file}"
-        "&& set +u; source deactivate; set -u;"
+        "&& set +u; source deactivate; set -u"
