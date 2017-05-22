@@ -10,10 +10,14 @@ min_version("3.9")
 configfile: "config.yaml"
 
 ##to build a virt env
+
 seqtkversion = config["seqtk"]["version"] 
 spadesversion = config["SPAdes"]["version"]
 versiontag = "V022017SPAdes"+spadesversion
 
+# Standard
+
+standardpipeline = config["standardpipeline"]["version"]
 
 # Prokka
 prokkaversion = config["prokka"]["version"]
@@ -42,9 +46,12 @@ def kmer_determination():
     return kmer
 
 # virtual environments
-virtenvs = "checkm-genome={} quast={} seqtk={} spades={} prokka={} mlst={} kraken={} krona={} abricate={}".format ( checkmversion, quastversion, seqtkversion, spadesversion, prokkaversion, mlstversion, krakenversion, kronaversion, abricateversion).split()
+if (standardpipeline):
+    virtenvs = 
+else:
+    virtenvs = "checkm-genome={} quast={} seqtk={} spades={} prokka={} mlst={} kraken={} krona={} abricate={}".format ( checkmversion, quastversion, seqtkversion, spadesversion, prokkaversion, mlstversion, krakenversion, kronaversion, abricateversion).split()
 
-os.makedirs ("virtenvs", exist_ok=True )
+    os.makedirs ("virtenvs", exist_ok=True )
 
 def spec_virtenv(program):
     """ Create conda enviroment for every job. """
@@ -66,7 +73,6 @@ def spec_virtenv(program):
         print ('Virtual environment already present')
 
     return "virtenvs/{}".format(program)
-
 
 
 

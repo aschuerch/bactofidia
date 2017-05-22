@@ -1,15 +1,22 @@
+###########################
+##General parameters#######
+###########################
 
-##General parameters
-#####################
 # minimum length of resulting contigs
 minlen: 500
 
 # minimum average coverage of contigs (to filter out low frequency contamination)
 mincov: 10
 
+# version of standard pipeline used for diagnostic
+standardpipeline:
+  version: 0.9
 
-##Package-specific parameters
-#############################
+
+###################################################################################
+##Package-specific parameters, only change if standard - version above is empty. Otherwise,
+##pre-defined standard parameters will be taken
+####################################################################################
 # Please consult bioconda package manager for possible package versions
 
 seqtk:
