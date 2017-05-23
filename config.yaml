@@ -8,6 +8,9 @@ minlen: 500
 # minimum average coverage of contigs (to filter out low frequency contamination)
 mincov: 10
 
+virtual_environment:
+  name: bactofidia_standard201706
+
 ###################################################################################
 ##Package-specific parameters, only change if standard - version above is empty. Otherwise,
 ##pre-defined standard parameters will be taken

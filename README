@@ -37,3 +37,11 @@ For debugging or testing purposes, the pipeline itself can be dry-run with
 
 ##need to adjust config.yaml and env.yaml
 
+##env.yaml bactofidia but run checkm first time with checkm data setRoot etc (interactive prompt)....
+
+
+conda env create -f env.yaml -n bactofidia_custom
+
+make sure to 
+checkm data setRoot
+checkm data update
