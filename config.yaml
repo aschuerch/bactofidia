@@ -8,11 +8,6 @@ minlen: 500
 # minimum average coverage of contigs (to filter out low frequency contamination)
 mincov: 10
 
-# version of standard pipeline used for diagnostic
-standardpipeline:
-  version: 0.9
-
-
 ###################################################################################
 ##Package-specific parameters, only change if standard - version above is empty. Otherwise,
 ##pre-defined standard parameters will be taken
@@ -20,20 +15,16 @@ standardpipeline:
 # Please consult bioconda package manager for possible package versions
 
 seqtk:
-  version: 1.2
   params: -q 0.01
 
 SPAdes:
   params: --only-assembler --careful --threads 8
-  version: 3.6.2
   krange: 57,97,127 #adjust if you would like to select a different kmer range for spades assembly
 
 QUAST:
-  version: 4.1
   params: --min-contig 500
 
 mlst:
-  version: 2.6
   params: --reduced_tree
 
 prokka:
@@ -41,7 +32,6 @@ prokka:
   version: 1.11
 
 kraken:
-  version: 0.10.5beta
   params: --quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/
 
 krona:
@@ -49,7 +39,6 @@ krona:
 
 checkm: 
   params: --reduced_tree
-  version: 1.0.5
 
 abricate:
   version: 0.3

@@ -3,40 +3,15 @@ import sys
 import glob
 import subprocess
 import shutil
+from random import randint
+
 
 from snakemake.utils import min_version
 
 min_version("3.9")
 configfile: "config.yaml"
 
-##to build a virt env
-
-seqtkversion = config["seqtk"]["version"] 
-spadesversion = config["SPAdes"]["version"]
-versiontag = "V022017SPAdes"+spadesversion
-
-# Standard
-
-standardpipeline = config["standardpipeline"]["version"]
-
-# Prokka
-prokkaversion = config["prokka"]["version"]
-# mlst
-mlstversion = config["mlst"]["version"]
-
-# QUAST  
-quastversion = config["QUAST"]["version"]
-
-# Kraken
-krakenversion = config["kraken"]["version"] 
-
-# Krona
-kronaversion = config["krona"]["version"]
-# Checkm
-checkmversion = config["checkm"]["version"]
-
-# abricate
-abricateversion = config["abricate"]["version"]
+tag = str(randint(1000,9999)
 
 def kmer_determination():
     if (config.get("krange")):
@@ -45,35 +20,19 @@ def kmer_determination():
         kmer = config["SPAdes"] ["krange"]
     return kmer
 
-# virtual environments
-if (standardpipeline):
-    virtenvs = 
-else:
-    virtenvs = "checkm-genome={} quast={} seqtk={} spades={} prokka={} mlst={} kraken={} krona={} abricate={}".format ( checkmversion, quastversion, seqtkversion, spadesversion, prokkaversion, mlstversion, krakenversion, kronaversion, abricateversion).split()
 
-    os.makedirs ("virtenvs", exist_ok=True )
-
-def spec_virtenv(program):
-    """ Create conda enviroment for every job. """
+def virtenv():
+    """ Create conda enviroment """
     if shutil.which("conda") is None:
         raise CreateCondaEnvironmentException("The 'conda' command is not available in $PATH.")
-
-    i = (list( filter(lambda x: program in x, virtenvs))[0])         
-   # stdout = open("virtenvs/{}.txt".format(program),"wb")
-
-    print (program, "version", i)
     try: 
-  #      x = subprocess.check_output(["conda", "env", "export", "--prefix", "virtenvs/"+program]) 
-   #     stdout.write(x)
-   # except: 
-        subprocess.check_output([ "conda", "create","-y", "--prefix", "virtenvs/"+program, i, "--copy"]  , stderr=subprocess.STDOUT)
-    #    x = subprocess.check_output(["conda", "env", "export", "--prefix", "virtenvs/"+program]) 
-     #   stdout.write(x)
+        x = subprocess.check_output([ "conda", "create","-y", "--prefix", "virtenvs/bactofidia"+tag, "--copy"]  , stderr=subprocess.STDOUT)
+        stdout.write(x)
     except: 
         print ('Virtual environment already present')
 
-    return "virtenvs/{}".format(program)
-
+virtenv()
+versiontag = "V2017R"+tag
 
 
 # Collect samples
@@ -104,7 +63,7 @@ rule all:
        "stats/ResFinder.tsv",
        "stats/SpeciesDetermination.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
-       expand ("annotation/{sample}.gff", sample=SAMPLES),
+       expand ("annotation/{sample}.gff", sample=SAMPLES)
 #       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES)
 
 
@@ -113,10 +72,8 @@ rule fastqc_before:
         "data/{sample}_{r}.fastq.gz"
     output:
         temp("stats/{sample}_{r}_Trimmingstats_before_trimming")
-    params:
-        virtenv=spec_virtenv("seqtk")
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
         "&& set +u; source deactivate; set -u"
 
@@ -126,10 +83,9 @@ rule trim:
      output:
         temp("trimmed/{sample}_{r}.fastq")
      params:
-        p = config["seqtk"]["params"],
-        virtenv=spec_virtenv("seqtk")
+        p = config["seqtk"]["params"]
      shell: 
-        "set +u; source activate {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& seqtk trimfq {params.p} {input} > {output} "
         "&& set +u; source deactivate; set -u"
 
@@ -138,10 +94,8 @@ rule fastqc_after:
         "trimmed/{sample}_{r}.fastq"
     output:
          temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
-    params:
-        virtenv=spec_virtenv("seqtk")
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
         "&& set +u; source deactivate; set -u"       
 
@@ -168,10 +122,9 @@ rule spades:
         spadesparams = config["SPAdes"]["params"],
         kmer = kmer_determination(),
         cov = config["mincov"],
-        outfolder = "assembly/{sample}",
-        virtenv=spec_virtenv("spades")
+        outfolder = "assembly/{sample}"
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
         "&& set +u; source deactivate; set -u"
 
@@ -183,9 +136,8 @@ rule rename:
     params:
         minlen = config["minlen"],
         versiontag = "{sample}_"+versiontag,
-        virtenv=spec_virtenv("seqtk")
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
         "&& set +u; source deactivate; set -u"
       
@@ -197,10 +149,9 @@ rule annotation:
     params:
         dir = "annotation",
         params = config["prokka"]["params"],
-        prefix = "{sample}",
-        virtenv=spec_virtenv("prokka")
+        prefix = "{sample}"
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
         "&& set +u; source deactivate; set -u"
         
@@ -210,10 +161,9 @@ rule taxonomy_1:
     output:
         temp("taxonomy/{sample}.krakenout")
     params:
-        p=config["kraken"]["params"],
-        virtenv=spec_virtenv("kraken")
+        p=config["kraken"]["params"]
     shell:
-        "set +u; source activate  {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& kraken {params.p} --output {output} --fasta_input {input}"
         "&& set +u; source deactivate; set -u"
 
@@ -225,19 +175,16 @@ rule taxonomy_2:
     shell:
         "cut -f2,3 {input} > {output}"
 
-
 rule taxonomy_3:
     input:
         "taxonomy/{sample}.kronain"
     output:
         "stats/Taxonomy_{sample}.html"
-    params:
-        virtenv=spec_virtenv("krona")
+
     shell:
-        "set +u; source activate  {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& ktImportTaxonomy {input} -o {output}"
         "&& set +u; source deactivate; set -u"
-
 
 rule mlst:
     input:
@@ -245,10 +192,9 @@ rule mlst:
     output:
         "stats/MLST.tsv"
     params:
-        config["mlst"]["params"],
-        virtenv=spec_virtenv("mlst")
+        config["mlst"]["params"]
     shell:
-        "set +u; source activate  {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& mlst {params} {input} >> {output}"
         "&& set +u; source deactivate; set -u"
 
@@ -260,10 +206,9 @@ rule quast:
         tsv = "stats/AssemblyQC.tsv"
     params:
         outfolder = "stats/quasttemp",
-        p = config["QUAST"]["params"],
-        virtenv=spec_virtenv("quast")
+        p = config["QUAST"]["params"]
     shell:
-        "set +u; source activate  {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& quast {params.p} -o {params.outfolder} {input}"
         "&& mv stats/quasttemp/report.html {output.html}"
         "&& mv stats/quasttemp/report.tsv {output.tsv}"
@@ -275,10 +220,8 @@ rule resfinder:
         expand("scaffolds/{sample}.fna", sample=SAMPLES) 
     output:
         "stats/ResFinder.tsv"
-    params:
-        virtenv = spec_virtenv("abricate")
     shell:
-        "set +u; source activate  {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& abricate {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
         "&& set +u; source deactivate; set -u"
@@ -290,9 +233,8 @@ rule checkm:
         file = "stats/SpeciesDetermination.tsv",
         folder = temp("checkm")
     params:
-        config["checkm"]["params"],
-        virtenv = spec_virtenv("checkm")        
+        config["checkm"]["params"]      
     shell:
-        "set +u; source activate  {params.virtenv}; set -u"
+        "set +u; source activate virtenvs/bactofidia; set -u"
         "&& checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file}"
         "&& set +u; source deactivate; set -u"
