@@ -1,1 +1,10 @@
 Snakefile.py
+annotation/
+assembly/
+data/
+log/
+scaffolds/
+stats/
+taxonomy/
+temp/
+trimmed/
