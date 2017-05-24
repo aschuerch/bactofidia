@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+set -x 
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
 
 ##1. Checks
@@ -54,8 +56,7 @@ fi
 
 
 # Check and activate snakemake 
-source activate snakemake || echo "Please create a virtual environment with snakemake and python3" ; exit 0
-
+source activate snakemake || echo "Please create a virtual environment with snakemake and python3" 
 
 log=$(pwd)/log/call_assembly.txt
 mkdir -p log
