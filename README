@@ -1,13 +1,54 @@
-### bactofidia: Basic microbial WGS analysis pipeline    
+### bactofidia: Basic microbial WGS analysis pipeline
 
-**bactofidia** is a bacterial assembly pipeline using Snakemake and bioconda.
-It is flexible and easily transferable
+**bactofidia** is a bacterial assembly and basic analysis pipeline using Snakemake and bioconda.
 
-How to use:
 
-Run the whole pipeline with:
+* Installation
+
+A bioconda installation is required, see below if it is not installed on your system yet.
+See the example script below for Linux 64-bit, for other options, see the [bioconda page](https://bioconda.github.io)
+
+```bash
+ wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+ chmod +x Miniconda2-latest-Linux-x86_64.sh
+ mkdir -p ~/tmp
+ ./Miniconda2-latest-Linux-x86_64.sh -b -p ~/tmp/Miniconda2
+ rm Miniconda2-latest-Linux-x86_64.sh
+ export PATH=~/tmp/Miniconda2/bin:$PATH 
+ export PYTHONPATH=~/tmp/Miniconda2/pkgs/
+ conda config --add channels conda-forge
+ conda config --add channels defaults
+ conda config --add channels r
+ conda config --add channels bioconda
+ conda create -y -n snakemake python=3.5 snakemake
+```
+
+Consider to add the miniconda directory to your PATH environment variable by editing your ~/.bash_profile
+
+* Usage
+
+The first time the pipeline will be run, the virtual environment needs to be created. The env.yaml file can be adjusted for desired version of software. See bioconda.github.io for available packages.
+
+Then, create the environment with 
+
+```bash
+conda env create -f env.yaml -n [bactofidia_custom]
+```
+where [bactiofidia_custom] matches the name of the environment given in the config.yaml
+
+The config.yaml file can be adjusted for parameters of the different tools
+
+For debugging or testing purposes, the pipeline itself can be dry-run with 
+
+```
+snakemake -np
+```
+
+Test the whole pipeline with:
 
 `bactofidia.sh Test`
+
+This will run the included Test fastq files
 
 Running only 
 
@@ -17,31 +58,22 @@ will give an explanation of the (limited) options.
 
 Currently it runs:
  -quality check before and after trimming using seqtk
- -trimming with seqtk
- -assembly with spades
- -annotation with prokka
- -taxonomy determination with kraken, vizualization with krona
- -mlst with mlst
- -quality assessment of assembly with quast
- -resistance gene finding with abricate
- -assessing completeness and contamination of genome with checkm
+ -trimming with [seqtk](http://bioconda.github.io/recipes/seqtk/README.html)
+ -assembly with [spades](http://bioconda.github.io/recipes/spades/README.html)
+ -annotation with [prokka](http://bioconda.github.io/recipes/prokka/README.html)
+ -taxonomy determination with [kraken](http://bioconda.github.io/recipes/kraken/README.html), vizualization with [krona](http://bioconda.github.io/recipes/krona/README.html) 
+ -mlst with [mlst](http://bioconda.github.io/recipes/mlst/README.html)
+ -quality assessment of assembly with [quast](http://bioconda.github.io/recipes/quast/README.html)
+ -resistance gene finding with [abricate](http://bioconda.github.io/recipes/abricate/README.html)
 
-When running the script it installs the bioconda package manager if necessary and creates a virtual environment with snakemake
 
-The config.yml file of the pipeline can be adjusted for desired version of software. See bioconda.github.io for available packages.
 
 For debugging or testing purposes, the pipeline itself can be dry-run with 
 
- `snakemake -np`
+```bash
+snakemake -np
+```
+
+For further customizing purposes, see [snakemake documentation](https://snakemake.readthedocs.io/en/stable/) and [bioconda] (http://bioconda.github.io/)
 
 
-##need to adjust config.yaml and env.yaml
-
-##env.yaml bactofidia but run checkm first time with checkm data setRoot etc (interactive prompt)....
-
-
-conda env create -f env.yaml -n bactofidia_custom
-
-make sure to 
-checkm data setRoot
-checkm data update
