@@ -27,12 +27,12 @@ Consider to add the miniconda directory to your PATH environment variable by edi
 
 * Usage
 
-The first time the pipeline will be run, the virtual environment needs to be created. The env.yaml file can be adjusted for desired version of software. See bioconda.github.io for available packages.
+The first time the pipeline will be run, the virtual environment needs to be created. The package-list.txt file can be adjusted for desired version of software. See bioconda.github.io for available packages.
 
 Then, create the environment with 
 
 ```bash
-conda env create -f env.yaml -n [bactofidia_custom]
+conda create --file package-list.txt -n [bactofidia_custom]
 ```
 where [bactiofidia_custom] matches the name of the environment given in the config.yaml
 
