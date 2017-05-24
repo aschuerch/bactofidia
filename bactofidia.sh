@@ -29,7 +29,7 @@ if [ $# -eq 0 ]; then
 fi
 
 
-##Check for *fastq.gz
+## Check for *fastq.gz
 for i in "$@"
  do
   ls -1 "$i"_*R1*fastq.gz > /dev/null 2>&1
@@ -44,30 +44,17 @@ Exiting."
   fi
  done
 
-#if needed download miniconda installation
+# check if conda is installed
 if command -v conda > /dev/null; then
  echo  2>&1| tee -a $log
-
 else
-
- wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
- chmod +x Miniconda2-latest-Linux-x86_64.sh
- mkdir -p ~/tmp
- ./Miniconda2-latest-Linux-x86_64.sh -b -p ~/tmp/Miniconda2
- rm Miniconda2-latest-Linux-x86_64.sh
- export PATH=~/tmp/Miniconda2/bin:$PATH 
- export PYTHONPATH=~/tmp/Miniconda2/pkgs/
- conda config --add channels conda-forge
- conda config --add channels defaults
- conda config --add channels r
- conda config --add channels bioconda
- conda create -y -n snakemake python=3.5 snakemake
-
+ echo "Miniconda missing" 
+ exit 0
 fi
 
 
-#activate snakemake env
-source activate snakemake
+# Check and activate snakemake 
+source activate snakemake || echo "Please create a virtual environment with snakemake and python3" ; exit 0
 
 
 log=$(pwd)/log/call_assembly.txt

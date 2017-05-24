@@ -20,10 +20,15 @@ See the example script below for Linux 64-bit, for other options, see the [bioco
  conda config --add channels defaults
  conda config --add channels r
  conda config --add channels bioconda
+```
+Consider to add the miniconda directory to your PATH environment variable by editing your ~/.bash_profile
+
+Create a virtual environment for snakemake using python3:
+
+```bash
  conda create -y -n snakemake python=3.5 snakemake
 ```
 
-Consider to add the miniconda directory to your PATH environment variable by editing your ~/.bash_profile
 
 * Usage
 
@@ -57,15 +62,14 @@ Running only
 will give an explanation of the (limited) options.
 
 Currently it runs:
- -quality check before and after trimming using seqtk
- -trimming with [seqtk](http://bioconda.github.io/recipes/seqtk/README.html)
- -assembly with [spades](http://bioconda.github.io/recipes/spades/README.html)
- -annotation with [prokka](http://bioconda.github.io/recipes/prokka/README.html)
- -taxonomy determination with [kraken](http://bioconda.github.io/recipes/kraken/README.html), vizualization with [krona](http://bioconda.github.io/recipes/krona/README.html) 
- -mlst with [mlst](http://bioconda.github.io/recipes/mlst/README.html)
- -quality assessment of assembly with [quast](http://bioconda.github.io/recipes/quast/README.html)
- -resistance gene finding with [abricate](http://bioconda.github.io/recipes/abricate/README.html)
-
+ - quality check before and after trimming using seqtk
+ - trimming with [seqtk](http://bioconda.github.io/recipes/seqtk/README.html)
+ - assembly with [spades](http://bioconda.github.io/recipes/spades/README.html)
+ - annotation with [prokka](http://bioconda.github.io/recipes/prokka/README.html)
+ - taxonomy determination with [kraken](http://bioconda.github.io/recipes/kraken/README.html), vizualization with [krona](http://bioconda.github.io/recipes/krona/README.html) 
+ - mlst with [mlst](http://bioconda.github.io/recipes/mlst/README.html)
+ - quality assessment of assembly with [quast](http://bioconda.github.io/recipes/quast/README.html)
+ - resistance gene finding with [abricate](http://bioconda.github.io/recipes/abricate/README.html)
 
 
 For debugging or testing purposes, the pipeline itself can be dry-run with 
