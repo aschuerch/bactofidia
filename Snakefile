@@ -49,7 +49,7 @@ rule all:
        "stats/AssemblyQC.html",
        "stats/AssemblyQC.tsv",
        "stats/ResFinder.tsv",
-       "stats/SpeciesDetermination.tsv",
+       "stats/MLST.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
        expand ("annotation/{sample}.gff", sample=SAMPLES)
 #       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES)
@@ -84,7 +84,7 @@ rule fastqc_after:
     input:
         "trimmed/{sample}_{r}.fastq"
     output:
-         temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
+        temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:
@@ -133,7 +133,7 @@ rule rename:
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
-        "&& seqtk seq -L {params.minlen} {inp8432ut} | sed  s/NODE/{params.versiontag}/g > {output}"
+        "&& seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
         "&& set +u; source deactivate; set -u"
       
 rule annotation:
@@ -190,11 +190,11 @@ rule mlst:
     output:
         "stats/MLST.tsv"
     params:
-        config["mlst"]["params"],
+        mlst = config["mlst"]["params"],
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
-        "&& mlst {params} {input} >> {output}"
+        "&& mlst {params.mlst} {input} >> {output}"
         "&& set +u; source deactivate; set -u"
 
 rule quast:
@@ -226,18 +226,4 @@ rule resfinder:
         "set +u; source activate {params.virtenv}; set -u"
         "&& abricate {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
-        "&& set +u; source deactivate; set -u"
-
-rule checkm:
-    input:
-        expand("scaffolds/{sample}.fna", sample=SAMPLES)
-    output:
-        file = "stats/SpeciesDetermination.tsv",
-        folder = temp("checkm")
-    params:
-        config["checkm"]["params"],
-        virtenv = config["virtual_environment"]["name"]
-    shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& checkm lineage_wf scaffolds {output.folder} {params} --tab_table -x fna > {output.file}"
         "&& set +u; source deactivate; set -u"
