@@ -82,7 +82,7 @@ rule trim:
 
 rule fastqc_after:
     input:
-        "trimmed/{sample}_{r}.fastq"
+        temp("tmp/{sample}_{r}.fastq")
     output:
         temp("tmp/{sample}_{r}_Trimmingstats_after_trimming")
     params:
@@ -199,7 +199,9 @@ rule mlst:
 
 rule quast:
     input:
-        expand("scaffolds/{sample}.fna", sample=SAMPLES)
+        in=expand("scaffolds/{sample}.fna", sample=SAMPLES),
+        R1=temp("tmp/{sample}_R1.fastq"),
+        R2=temp("tmp/{sample}_R2.fastq")
     output:
         html = "stats/AssemblyQC.html",
         tsv = "stats/AssemblyQC.tsv"
@@ -209,7 +211,7 @@ rule quast:
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
-        "&& quast {params.p} -o {params.outfolder} {input}"
+        "&& quast {params.p} -1 {input.R1} -2 {input.R2} -o {params.outfolder} {input.in}"
         "&& mv stats/quasttemp/report.html {output.html}"
         "&& mv stats/quasttemp/report.tsv {output.tsv}"
         "&& rm -r stats/quasttemp"

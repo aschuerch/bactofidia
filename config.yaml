@@ -25,7 +25,7 @@ SPAdes: # assembly
   krange: 57,97,127 #adjust if you would like to select a different kmer range for spades assembly
 
 QUAST: # assembly quality check
-  params: --min-contig 500
+  params: --min-contig 500 
 
 mlst:  # multi-locus sequence typing on WGS
   params: --nopath
