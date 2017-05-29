@@ -64,7 +64,7 @@ rule fastqc_before:
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
-        "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
+        "&& echo -ne {input}'\t'| sed -n '2~4p' {input} | wc -m >> {output}"
         "&& set +u; source deactivate; set -u"
 
 rule trim:
@@ -89,7 +89,7 @@ rule fastqc_after:
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
-        "&& seqtk fqchk {input} | grep ALL | sed 's/ALL//g' >> {output}"
+        "&& echo -ne {input}'\t'| sed -n '2~4p' {input} | wc -m >> {output}"
         "&& set +u; source deactivate; set -u"       
 
 rule trimstat:
@@ -199,9 +199,8 @@ rule mlst:
 
 rule quast:
     input:
-        in=expand("scaffolds/{sample}.fna", sample=SAMPLES),
-        R1=temp("tmp/{sample}_R1.fastq"),
-        R2=temp("tmp/{sample}_R2.fastq")
+        expand("scaffolds/{sample}.fna", sample=SAMPLES),
+        
     output:
         html = "stats/AssemblyQC.html",
         tsv = "stats/AssemblyQC.tsv"
@@ -211,7 +210,7 @@ rule quast:
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
-        "&& quast {params.p} -1 {input.R1} -2 {input.R2} -o {params.outfolder} {input.in}"
+        "&& quast {params.p} -o {params.outfolder} {input}"
         "&& mv stats/quasttemp/report.html {output.html}"
         "&& mv stats/quasttemp/report.tsv {output.tsv}"
         "&& rm -r stats/quasttemp"
