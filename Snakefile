@@ -51,7 +51,7 @@ rule all:
        "stats/ResFinder.tsv",
        "stats/MLST.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
-       expand ("annotation/{sample}.gff", sample=SAMPLES)
+       expand ("annotation/{sample}.gff", sample=SAMPLES),
        expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES)
 
 
