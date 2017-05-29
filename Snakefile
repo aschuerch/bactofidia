@@ -52,14 +52,14 @@ rule all:
        "stats/MLST.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
        expand ("annotation/{sample}.gff", sample=SAMPLES),
-       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES)
+       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES),
 
 
 rule fastqc_before:
     input:
         "data/{sample}_{r}.fastq.gz"
     output:
-        temp("stats/{sample}_{r}_Trimmingstats_before_trimming")
+        temp("tmp/{sample}_{r}_Trimmingstats_before_trimming")
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:
@@ -71,7 +71,7 @@ rule trim:
      input:
         "data/{sample}_{r}.fastq.gz"
      output:
-        temp("trimmed/{sample}_{r}.fastq")
+        temp("tmp/{sample}_{r}.fastq")
      params:
         p = config["seqtk"]["params"],
         virtenv = config["virtual_environment"]["name"]
@@ -84,7 +84,7 @@ rule fastqc_after:
     input:
         "trimmed/{sample}_{r}.fastq"
     output:
-        temp("stats/{sample}_{r}_Trimmingstats_after_trimming")
+        temp("tmp/{sample}_{r}_Trimmingstats_after_trimming")
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:
@@ -94,8 +94,8 @@ rule fastqc_after:
 
 rule trimstat:
     input:
-        after=expand("stats/{sample}_{r}_Trimmingstats_after_trimming", sample=SAMPLES, r=R),
-        before=expand("stats/{sample}_{r}_Trimmingstats_before_trimming", sample=SAMPLES, r=R)
+        after=expand("tmp/{sample}_{r}_Trimmingstats_after_trimming", sample=SAMPLES, r=R),
+        before=expand("tmp/{sample}_{r}_Trimmingstats_before_trimming", sample=SAMPLES, r=R)
     output:
         "stats/Trimming.tsv"
     shell:
@@ -107,10 +107,10 @@ rule trimstat:
        
 rule spades:
     input: 
-        R1="trimmed/{sample}_R1.fastq",
-        R2="trimmed/{sample}_R2.fastq"
+        R1=temp("tmp/{sample}_R1.fastq"),
+        R2=temp("tmp/{sample}_R2.fastq")
     output:
-        "assembly/{sample}/scaffolds.fasta"
+        temp("tmp/assembly/{sample}/scaffolds.fasta")
     params:
         spadesparams = config["SPAdes"]["params"],
         kmer = kmer_determination(),
@@ -124,7 +124,7 @@ rule spades:
 
 rule rename:
     input:
-        "assembly/{sample}/scaffolds.fasta"
+        temp("tmp/assembly/{sample}/scaffolds.fasta")
     output:
         "scaffolds/{sample}.fna",
     params:
@@ -155,7 +155,7 @@ rule taxonomy_1:
     input:
         "scaffolds/{sample}.fna"
     output:
-        temp("taxonomy/{sample}.krakenout")
+        temp("tmp/{sample}.krakenout")
     params:
         p=config["kraken"]["params"],
         virtenv = config["virtual_environment"]["name"]
@@ -166,15 +166,15 @@ rule taxonomy_1:
 
 rule taxonomy_2:
     input:
-        "taxonomy/{sample}.krakenout"
+        "tmp/{sample}.krakenout"
     output:
-        temp("taxonomy/{sample}.kronain")
+        temp("tmp/{sample}.kronain")
     shell:
         "cut -f2,3 {input} > {output}"
 
 rule taxonomy_3:
     input:
-        "taxonomy/{sample}.kronain"
+        temp("tmp/{sample}.kronain")
     output:
         "stats/Taxonomy_{sample}.html"
     params:
@@ -228,3 +228,4 @@ rule resfinder:
         "&& abricate {params.p} {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
         "&& set +u; source deactivate; set -u"
+
