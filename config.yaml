@@ -28,7 +28,7 @@ QUAST:
   params: --min-contig 500
 
 mlst:
-  params: --reduced_tree
+  params: --nopath
 
 prokka:
   params: --centre U --locustag C --compliant
@@ -40,8 +40,6 @@ kraken:
 krona:
   version: 2.6
 
-checkm: 
-  params: --reduced_tree
-
 abricate:
+  params: --nopath --minid=90
   version: 0.3
