@@ -44,7 +44,7 @@ onerror:
 
 rule all:
     input:
-       "stats/Trimmingstats.tsv",
+       "stats/Trimming.tsv",
        "stats/MLST.tsv",
        "stats/AssemblyQC.html",
        "stats/AssemblyQC.tsv",
@@ -52,7 +52,7 @@ rule all:
        "stats/MLST.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
        expand ("annotation/{sample}.gff", sample=SAMPLES)
-#       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES)
+       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES)
 
 
 rule fastqc_before:
@@ -97,7 +97,7 @@ rule trimstat:
         after=expand("stats/{sample}_{r}_Trimmingstats_after_trimming", sample=SAMPLES, r=R),
         before=expand("stats/{sample}_{r}_Trimmingstats_before_trimming", sample=SAMPLES, r=R)
     output:
-        "stats/Trimmingstats.tsv"
+        "stats/Trimming.tsv"
     shell:
         "echo -e 'Reads\t#bases\t%A\t%C\t%G\t%T\t%N\tavgQ\terrQ\t%low\t%high' > {output} "
         "&& echo -en {input.before}  >> {output} "
@@ -194,7 +194,7 @@ rule mlst:
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
-        "&& mlst {params.mlst} {input} >> {output}"
+        "&& mlst {params.mlst} {input} > {output}"
         "&& set +u; source deactivate; set -u"
 
 rule quast:
@@ -221,9 +221,10 @@ rule resfinder:
     output:
         "stats/ResFinder.tsv"
     params:
+        p = config["abricate"]["params"],
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
-        "&& abricate {input} > {output}" 
+        "&& abricate {params.p} {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
         "&& set +u; source deactivate; set -u"
