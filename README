@@ -32,7 +32,7 @@ Create a virtual environment for snakemake using python3:
 
 * Usage
 
-The first time the pipeline will be run, the virtual environment needs to be created. The package-list.txt file can be adjusted for desired version of software. See bioconda.github.io for available packages.
+Before running the pipeline for the first time, a virtual environment needs to be created. Packages and versions are specified in 'package-list.txt'. Adjust this file to your needs. See bioconda.github.io for available packages.
 
 Then, create the environment with 
 
@@ -41,7 +41,7 @@ conda create --file package-list.txt -n [bactofidia_custom]
 ```
 where [bactiofidia_custom] matches the name of the environment given in the config.yaml
 
-The config.yaml file can be adjusted for parameters of the different tools
+The config.yaml file can be adjusted for parameters of the different tools.
 
 For debugging or testing purposes, the pipeline itself can be dry-run with 
 
@@ -49,17 +49,15 @@ For debugging or testing purposes, the pipeline itself can be dry-run with
 snakemake -np
 ```
 
+The pipeline takes compressed sequencing files (.fastq.gz) which must be present in the same folder from where the script is called.
+Use only the sample name to call the script.
+
 Test the whole pipeline with:
 
 `bactofidia.sh Test`
 
-This will run the included Test fastq files
+This will run the pipeline on the included Test.fastq.gz files.
 
-Running only 
-
-`bactofidia.sh`
-
-will give an explanation of the (limited) options.
 
 Currently it runs:
  - quality check before and after trimming using seqtk
@@ -71,13 +69,11 @@ Currently it runs:
  - quality assessment of assembly with [quast](http://bioconda.github.io/recipes/quast/README.html)
  - resistance gene finding with [abricate](http://bioconda.github.io/recipes/abricate/README.html)
 
+Running only 
 
-For debugging or testing purposes, the pipeline itself can be dry-run with 
+`bactofidia.sh`
 
-```bash
-snakemake -np
-```
-
-For further customizing purposes, see [snakemake documentation](https://snakemake.readthedocs.io/en/stable/) and [bioconda] (http://bioconda.github.io/)
+will give an explanation of the (limited) options.
+For further customizing, see [snakemake documentation](https://snakemake.readthedocs.io/en/stable/) and [bioconda] (http://bioconda.github.io/)
 
 

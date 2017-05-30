@@ -1,8 +1,9 @@
 #!/bin/bash
 
 set -e
-set -x 
+
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
+##aschuerch 052017
 
 ##1. Checks
 ##Check for command line arguments
@@ -21,16 +22,29 @@ if [ $# -eq 0 ]; then
 ## bactofidia.sh  ECO-RES-PR1-00001 ECO-RES-PR1-00002                    ##
 ##                                                                       ##
 ##                                                                       ##
-## If parameters different from the standard parameters will be used,    ##
-## you can adjust config.yaml to your needs before running this script   ##
+## Before running the pipeline for the first time, a virtual             ##
+## environment needs to be created. Packages and versions are specified  ##
+## in package-list.txt. Adjust this file to your needs. See              ##
+## bioconda.github.io for available packages.                            ##
 ##                                                                       ##
- #                                                                       ##
-## Anita Schurch Feb 2017                                                ##
+## Create the environment with                                           ##
+##                                                                       ##
+## conda create --file package-list.txt -n [bactofidia_custom]           ##
+##                                                                       ##
+## where [bactiofidia_custom] matches the name of the environment        ##
+## given in the config.yaml. The config.yaml file can be adjusted for    ##
+## parameters of the different tools.If parameters different from the    ##
+## standard parameters will be used,                                     ##
+## you can adjust package-list.txt config.yaml                           ##
+## to your needs before running this script                              ##
+##                                                                       ##
+##                                                                       ##
+## Anita Schurch May 2017                                                ##
 ###########################################################################"
     exit
 fi
 
-
+Use only the sample name to call the script
 ## Check for *fastq.gz
 for i in "$@"
  do
