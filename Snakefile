@@ -44,12 +44,9 @@ onerror:
 
 rule all:
     input:
-       "stats/Trimming.tsv",
-       "stats/MLST.tsv",
+       "stats/Summary.tsv",
        "stats/AssemblyQC.html",
-       "stats/AssemblyQC.tsv",
        "stats/ResFinder.tsv",
-       "stats/MLST.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
        expand ("annotation/{sample}.gff", sample=SAMPLES),
        expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES),
@@ -91,19 +88,6 @@ rule fastqc_after:
         "set +u; source activate {params.virtenv}; set -u"
         "&& echo -ne {input}'\t'| sed -n '2~4p' {input} | wc -m >> {output}"
         "&& set +u; source deactivate; set -u"       
-
-rule trimstat:
-    input:
-        after=expand("tmp/{sample}_{r}_Trimmingstats_after_trimming", sample=SAMPLES, r=R),
-        before=expand("tmp/{sample}_{r}_Trimmingstats_before_trimming", sample=SAMPLES, r=R)
-    output:
-        "stats/Trimming.tsv"
-    shell:
-        "echo -e 'Reads\t#bases\t%A\t%C\t%G\t%T\t%N\tavgQ\terrQ\t%low\t%high' > {output} "
-        "&& echo -en {input.before}  >> {output} "
-        "&& cat {input.before} >> {output} "
-        "&& echo -en {input.after} >> {output} "
-        "&& cat {input.after} >> {output} "
        
 rule spades:
     input: 
@@ -188,7 +172,7 @@ rule mlst:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES)
     output:
-        "stats/MLST.tsv"
+        temp("tmp/MLST.tsv")
     params:
         mlst = config["mlst"]["params"],
         virtenv = config["virtual_environment"]["name"]
@@ -199,11 +183,10 @@ rule mlst:
 
 rule quast:
     input:
-        expand("scaffolds/{sample}.fna", sample=SAMPLES),
-        
+        expand("scaffolds/{sample}.fna", sample=SAMPLES),        
     output:
         html = "stats/AssemblyQC.html",
-        tsv = "stats/AssemblyQC.tsv"
+        tsv = temp("tmp/AssemblyQC.tsv")
     params:
         outfolder = "stats/quasttemp",
         p = config["QUAST"]["params"],
@@ -212,7 +195,7 @@ rule quast:
         "set +u; source activate {params.virtenv}; set -u"
         "&& quast {params.p} -o {params.outfolder} {input}"
         "&& mv stats/quasttemp/report.html {output.html}"
-        "&& mv stats/quasttemp/report.tsv {output.tsv}"
+        "&& mv stats/quasttemp/transposed_report.txt {output.txt}"
         "&& rm -r stats/quasttemp"
         "&& set +u; source deactivate; set -u"
 
@@ -230,3 +213,28 @@ rule resfinder:
         "&& sed -i 's/scaffolds\///g' {output}"
         "&& set +u; source deactivate; set -u"
 
+
+rule sumstat:
+    input:
+        R1.before = "tmp/{sample}_R1_Trimmingstats_before_trimming",
+        R1.after = "tmp/{sample}_R1_Trimmingstats_after_trimming", 
+        R2.before = "tmp/{sample}_R2_Trimmingstats_before_trimming",
+        R2.after = "tmp/{sample}_R2_Trimmingstats_after_trimming", 
+        assem = "tmp/AssemblyQC.tsv",
+        mlst = "tmp/MLST.tsv"
+    output:
+        "stats/Summary.tsv"
+    params:
+        sample = "{sample}",
+    shell:
+        "echo -e 'Reads\t#R1-Bases before trimming \t#R1-Bases after trimming\t#R2-Bases before trimming \t#R2-Bases after trimming\t#Bases Total\tEst. Genome size\tAv. coverage\t%GC\tN50\tspecies (MLST)\tMLST' > {output} "
+        "&& R1.before=$(cat {input.R1.before}); R1.after=$(cat {input.R1.after})"
+        "&& R2.before=$(cat {input.R2.before}); R2.after=$(cat {input.R2.after})"
+        "&& Total=$(awk "BEGIN {print ($R1.after+$R2.after)})"
+        "&& assemstats=$(grep {params.sample} {input.assem}"
+        "&& EstGenomeSize=$(cut -f 16,16 $assemstats)"
+        "&& AvCoverage=$(awk "BEGIN {print ($Total/$EstGenomeSize)})"
+        "&& GC=$(cut -f 17,17 $assemstats);N50=$(cut -f 18,18 $assemstats)"
+        "&& MLST=$(grep {params.sample} {input.mlst}| cut -f 1,1 --complement)"
+        "for i in $R1.before $R1.after $R2.before $R2.after $Total $EstGenomeSize $AvCoverage $GC $N50 $MLST; do echo -en $i '\t'>> {output}; done"
+        "echo "" >> {output}"
