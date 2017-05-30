@@ -44,12 +44,13 @@ onerror:
 
 rule all:
     input:
-       "stats/Summary.tsv",
        "stats/AssemblyQC.html",
        "stats/ResFinder.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
        expand ("annotation/{sample}.gff", sample=SAMPLES),
        expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES),
+       expand ("stats/Summary_{sample}.tsv", sample=SAMPLES),
+       "stats/Summary.tsv"
 
 
 rule fastqc_before:
@@ -186,7 +187,7 @@ rule quast:
         expand("scaffolds/{sample}.fna", sample=SAMPLES),        
     output:
         html = "stats/AssemblyQC.html",
-        tsv = temp("tmp/AssemblyQC.tsv")
+        txt = temp("tmp/AssemblyQC.txt")
     params:
         outfolder = "stats/quasttemp",
         p = config["QUAST"]["params"],
@@ -213,28 +214,35 @@ rule resfinder:
         "&& sed -i 's/scaffolds\///g' {output}"
         "&& set +u; source deactivate; set -u"
 
-
-rule sumstat:
+rule stat:
     input:
-        R1.before = "tmp/{sample}_R1_Trimmingstats_before_trimming",
-        R1.after = "tmp/{sample}_R1_Trimmingstats_after_trimming", 
-        R2.before = "tmp/{sample}_R2_Trimmingstats_before_trimming",
-        R2.after = "tmp/{sample}_R2_Trimmingstats_after_trimming", 
-        assem = "tmp/AssemblyQC.tsv",
+        R1before = "tmp/{sample}_R1_Trimmingstats_before_trimming",
+        R1after = "tmp/{sample}_R1_Trimmingstats_after_trimming", 
+        R2before = "tmp/{sample}_R2_Trimmingstats_before_trimming",
+        R2after = "tmp/{sample}_R2_Trimmingstats_after_trimming", 
+        assem = "tmp/AssemblyQC.txt",
         mlst = "tmp/MLST.tsv"
     output:
-        "stats/Summary.tsv"
+        "stats/Summary_{sample}.tsv"
     params:
-        sample = "{sample}",
+        sample = "{sample}"
     shell:
-        "echo -e 'Reads\t#R1-Bases before trimming \t#R1-Bases after trimming\t#R2-Bases before trimming \t#R2-Bases after trimming\t#Bases Total\tEst. Genome size\tAv. coverage\t%GC\tN50\tspecies (MLST)\tMLST' > {output} "
-        "&& R1.before=$(cat {input.R1.before}); R1.after=$(cat {input.R1.after})"
-        "&& R2.before=$(cat {input.R2.before}); R2.after=$(cat {input.R2.after})"
-        "&& Total=$(awk "BEGIN {print ($R1.after+$R2.after)})"
+        "R1.before=$(cat {input.R1before}); R1.after=$(cat {input.R1after})"
+        "&& R2.before=$(cat {input.R2before}); R2.after=$(cat {input.R2after})"
+        "&& Total=$((R1.after+R2.after))"
         "&& assemstats=$(grep {params.sample} {input.assem}"
         "&& EstGenomeSize=$(cut -f 16,16 $assemstats)"
-        "&& AvCoverage=$(awk "BEGIN {print ($Total/$EstGenomeSize)})"
+        "&& AvCoverage=$(($Total/$EstGenomeSize))"
         "&& GC=$(cut -f 17,17 $assemstats);N50=$(cut -f 18,18 $assemstats)"
         "&& MLST=$(grep {params.sample} {input.mlst}| cut -f 1,1 --complement)"
         "for i in $R1.before $R1.after $R2.before $R2.after $Total $EstGenomeSize $AvCoverage $GC $N50 $MLST; do echo -en $i '\t'>> {output}; done"
-        "echo "" >> {output}"
+        "echo  >> {output}"
+
+rule sumstat:
+     input:
+        expand("stats/Summary_{sample}.tsv", sample=SAMPLES)
+     output:
+        "stats/Summary.tsv"
+     shell:
+        "echo -e 'Reads\t#R1-Bases before trimming \t#R1-Bases after trimming\t#R2-Bases before trimming \t#R2-Bases after trimming\t#Bases Total\tEst. Genome size\tAv. coverage\t%GC\tN50\tspecies (MLST)\tMLST' > {output} "
+        "&& cat {input} >> {output} "
