@@ -42,6 +42,7 @@ minced=0.2.0=0
 mkl=2017.0.1=0
 mlst=2.9=pl5.22.0_0
 numpy=1.12.1=py27_0
+openjdk=8.0.121=1
 openssl=1.0.2k=2
 parallel=20170422=pl5.22.0_0
 pcre=8.39=1
@@ -96,7 +97,7 @@ python=2.7.13=0
 python-dateutil=2.6.0=py27_0
 pytz=2017.2=py27_0
 qt=5.6.2=4
-quast=4.4=boost1.61_1
+quast=4.5=boost1.61_1
 readline=6.2=2
 samtools=1.4.1=0
 scipy=0.19.0=np112py27_0
@@ -106,7 +107,7 @@ setuptools=27.2.0=py27_0
 simplejson=3.8.1=py27_0
 sip=4.18=py27_0
 six=1.10.0=py27_0
-spades=3.6.2=0
+spades=3.10.1=py27_0
 sqlite=3.13.0=0
 subprocess32=3.2.7=py27_0
 tbl2asn=25.3=0

@@ -44,7 +44,7 @@ if [ $# -eq 0 ]; then
     exit
 fi
 
-Use only the sample name to call the script
+
 ## Check for *fastq.gz
 for i in "$@"
  do
