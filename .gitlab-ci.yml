@@ -1,3 +1,3 @@
-test:
+job:
   script:
     - ./bactofidia.sh Test
