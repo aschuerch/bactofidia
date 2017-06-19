@@ -126,32 +126,32 @@ if command -v qstat > /dev/null; then
  --config krange="33,55,71" \
  --verbose \
  --forceall \
- --cluster \
  --keepgoing \
  --restart_times 5\
+ --cluster \
  'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 "
 
  else #miseq
 
  echo "snakemake \
- --latency_wait 60 \
+ --latency-wait 60 \
  --config krange="57,97,127" \
  --verbose \
- --keepgoing \
- --restart_times 5\
- --cluster \
+ --keep-going \
+ --restart-times 5\
  --forceall \
+ --cluster \
  'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 " 
 
  snakemake \
- --latency_wait 60 \
+ --latency-wait 60 \
  --config krange="57,97,127" \
  --verbose \
  --forceall \
- --keepgoing \
- --restart_times 5\
+ --keep-going \
+ --restart-times 5\
  --cluster \
  'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
  --jobs 100
