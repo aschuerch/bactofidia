@@ -130,6 +130,7 @@ if command -v qstat > /dev/null; then
  --latency-wait 60 \
  --config krange="33,55,71" \
  --verbose \
+ --forceall \
  --cluster \
  'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 "
@@ -142,6 +143,7 @@ if command -v qstat > /dev/null; then
  --verbose \
  --keep-going \
  --cluster \
+ --forceall \
  'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 " 
 
@@ -150,6 +152,7 @@ if command -v qstat > /dev/null; then
  --config krange="57,97,127" \
  --verbose \
  --keep-going \
+ --forceall \
  --cluster \
  'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
  --jobs 100
@@ -157,7 +160,7 @@ if command -v qstat > /dev/null; then
  fi
 else
 
-snakemake --keep-going 
+snakemake --keep-going --forceall
 
 fi
 
