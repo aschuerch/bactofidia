@@ -48,21 +48,27 @@ fi
 ## Check for *fastq.gz
 for i in "$@"
  do
-  ls -1 "$i"_*R1*fastq.gz > /dev/null 2>&1
-  if [[ "$?" = "0" ]]; then
-   echo "Found file(s) for "$i
+  if (ls -1 "$i"_*R1*fastq.gz > /dev/null 2>&1)
+   then
+   echo 'Found file(s) for ' "$i"
   else
-   echo "Sequence file(s) as    $i*fastq.gz          is/are missing in this folder.
+   echo 'Sequence file(s) as '"$i"'*fastq.gz          is/are missing in this folder.
 Please execute this script from the location of the sequencing files or exclude 
 the sample.
-Exiting."
+Exiting.'
    exit 0
   fi
  done
 
+mkdir -p $(pwd)/log
+log=$(pwd)/log/call_assembly.txt
+touch "$log"
+sleep 1
+
+
 # check if conda is installed
 if command -v conda > /dev/null; then
- echo  2>&1| tee -a $log
+ echo  2>&1| tee -a "$log"
 else
  echo "Miniconda missing" 
  exit 0
@@ -72,44 +78,33 @@ fi
 # Check and activate snakemake 
 source activate snakemake || echo "Please create a virtual environment with snakemake and python3" 
 
-log=$(pwd)/log/call_assembly.txt
-mkdir -p log
-touch $log
+
+echo |  2>&1 tee -a "$log"
+echo "The results will be generated in this location: " 2>&1| tee -a "$log"
+pwd 2>&1| tee -a "$log"
+echo |  2>&1 tee -a "$log"
 sleep 1
 
-echo |  2>&1 tee -a $log
-echo "The results will be generated in this location: " 2>&1| tee -a $log
-echo $(pwd)  2>&1| tee -a $log
-echo |  2>&1 tee -a $log
+echo "The logfiles will be generated here: " 2>&1 | tee -a "$log"
+echo "$(pwd)"/log  2>&1| tee -a "$log"
+echo 2>&1 |tee -a "$log"
 sleep 1
-
-echo "The logfiles will be generated here: " 2>&1 | tee -a $log
-echo $(pwd)/log  2>&1| tee -a $log
-echo 2>&1 |tee -a $log
-sleep 1
-
-#if [[ -z $email ]];then
-#echo  2>&1| tee -a $log
-#echo "User not found. Please enter the e-mail address to which the confirmation of completion needs to be send
-#"
-#read email
-#fi
 
 
 # determine if miseq or hiseq
-seq='miseq'
-if [[ 2*$# > $(ls -1 *fastq.gz) ]];then
-  echo  2>&1| tee -a $log
-  echo "Sequencing type is NextSeq"  2>&1| tee -a $log
-
+for i in "$@"
+ do
+ num=$(find . -maxdepth 1 -name "$i" | wc -l)
+ if [[ $((num/2)) -gt 1 ]];then
+  echo  2>&1| tee -a "$log"
+  echo "Sequencing type is NextSeq"  2>&1| tee -a "$log"
   seq='nextseq'
 else
-  echo  2>&1| tee -a $log
-  echo "Sequencing type is MiSeq"  2>&1| tee -a $log
-
+  echo  2>&1| tee -a "$log"
+  echo "Sequencing type is MiSeq"  2>&1| tee -a "$log"
   seq='miseq'
 fi
-
+done
 
 
 # concatenate for rev and put into data/ folder:
@@ -124,35 +119,39 @@ done
 #check if it is on hpc
 if command -v qstat > /dev/null; then
 
- if [[ seq == 'nextseq' ]]; then
+ if [[ $seq == 'nextseq' ]]; then
 
  echo "snakemake \
- --latency-wait 60 \
+ --latency_wait 60 \
  --config krange="33,55,71" \
  --verbose \
  --forceall \
  --cluster \
+ --keepgoing \
+ --restart_times 5\
  'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 "
 
  else #miseq
 
  echo "snakemake \
- --latency-wait 60 \
+ --latency_wait 60 \
  --config krange="57,97,127" \
  --verbose \
- --keep-going \
+ --keepgoing \
+ --restart_times 5\
  --cluster \
  --forceall \
  'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 " 
 
  snakemake \
- --latency-wait 60 \
+ --latency_wait 60 \
  --config krange="57,97,127" \
  --verbose \
- --keep-going \
  --forceall \
+ --keepgoing \
+ --restart_times 5\
  --cluster \
  'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
  --jobs 100
@@ -161,6 +160,7 @@ if command -v qstat > /dev/null; then
 else
 
 snakemake --keep-going --forceall
+
 
 fi
 
