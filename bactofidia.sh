@@ -89,24 +89,7 @@ echo "$(pwd)"/log  2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
 sleep 1
 
-
-# determine if miseq or hiseq
-#for i in "$@"
-# do
-# num=$(find . -maxdepth 1 -name "$i" | wc -l)
- #if [[ $((num/2)) -gt 1 ]];then
-  #echo  2>&1| tee -a "$log"
-  #echo "Sequencing type is NextSeq"  2>&1| tee -a "$log"
-  #seq='nextseq'
-#else
-#  echo  2>&1| tee -a "$log"
- # echo "Sequencing type is MiSeq"  2>&1| tee -a "$log"
- # seq='miseq'
-#f#i
-#done
-
 # determine kmer length
-
 for i in "$@"
  do
  length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " ")
@@ -119,21 +102,13 @@ for i in "$@"
 
 kmer2=$((kmer/3*2+1))
 
-#for k in kmer kmer2
-#do
-#rem=$(( "$k" % 2 ))
- #if [ "$rem" -eq 0 ]; then
- 
-
-
 krange="$kmer2","$kmer"
+echo 2>&1 |tee -a "$log"
+echo "Kmer range for spades was determined as " "$krange"   2>&1| tee -a "$log"
+echo 2>&1 |tee -a "$log"
 
-echo "$krange"
-
-
-
-exit 0
-
+sleep 1
+ 
 # concatenate for rev and put into data/ folder:
 mkdir -p data
 for i in "$@"
@@ -146,47 +121,22 @@ done
 #check if it is on hpc
 if command -v qstat > /dev/null; then
 
- if [[ $seq == 'nextseq' ]]; then
-
- echo "snakemake \
- --latency_wait 60 \
- --config krange="33,55,71" \
- --verbose \
- --forceall \
- --keepgoing \
- --restart_times 5\
- --cluster \
- 'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
- --jobs 100 "
-
- else #miseq
-
- echo "snakemake \
- --latency-wait 60 \
- --config krange="57,97,127" \
- --verbose \
- --keep-going \
- --restart-times 5\
- --forceall \
- --cluster \
- 'qsub -cwd -l h_vmem=48G -l h_rt=04:00:00 -e log/ -o log/ ' \
- --jobs 100 " 
-
  snakemake \
  --latency-wait 60 \
- --config krange="57,97,127" \
+ --config krange=$krange \
  --verbose \
  --forceall \
  --keep-going \
  --restart-times 5\
  --cluster \
  'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
- --jobs 100
+ --jobs 100 | tee -a "$log"
 
  fi
+
 else
 
-snakemake --keep-going --forceall
+snakemake --keep-going --config krange=$krange
 
 
 fi
