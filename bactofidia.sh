@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
@@ -92,20 +91,48 @@ sleep 1
 
 
 # determine if miseq or hiseq
+#for i in "$@"
+# do
+# num=$(find . -maxdepth 1 -name "$i" | wc -l)
+ #if [[ $((num/2)) -gt 1 ]];then
+  #echo  2>&1| tee -a "$log"
+  #echo "Sequencing type is NextSeq"  2>&1| tee -a "$log"
+  #seq='nextseq'
+#else
+#  echo  2>&1| tee -a "$log"
+ # echo "Sequencing type is MiSeq"  2>&1| tee -a "$log"
+ # seq='miseq'
+#f#i
+#done
+
+# determine kmer length
+
 for i in "$@"
  do
- num=$(find . -maxdepth 1 -name "$i" | wc -l)
- if [[ $((num/2)) -gt 1 ]];then
-  echo  2>&1| tee -a "$log"
-  echo "Sequencing type is NextSeq"  2>&1| tee -a "$log"
-  seq='nextseq'
-else
-  echo  2>&1| tee -a "$log"
-  echo "Sequencing type is MiSeq"  2>&1| tee -a "$log"
-  seq='miseq'
-fi
-done
+ length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " ")
+ kmer=$((length/2+1))
+ kmereven=$((kmer % 2))
+ if [[ "$kmereven" -eq 0 ]];then
+  kmer=$((kmer+1))
+ fi
+ done
 
+kmer2=$((kmer/3*2+1))
+
+#for k in kmer kmer2
+#do
+#rem=$(( "$k" % 2 ))
+ #if [ "$rem" -eq 0 ]; then
+ 
+
+
+krange="$kmer2","$kmer"
+
+echo "$krange"
+
+
+
+exit 0
 
 # concatenate for rev and put into data/ folder:
 mkdir -p data
