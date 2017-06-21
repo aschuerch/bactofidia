@@ -92,7 +92,7 @@ sleep 1
 # determine kmer length
 for i in "$@"
  do
- length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " ")
+ length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
  kmer=$((length/2+1))
  kmereven=$((kmer % 2))
  if [[ "$kmereven" -eq 0 ]];then
@@ -131,8 +131,6 @@ if command -v qstat > /dev/null; then
  --cluster \
  'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
  --jobs 100 | tee -a "$log"
-
- fi
 
 else
 
