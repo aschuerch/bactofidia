@@ -93,7 +93,7 @@ rule spades:
         spadesparams = config["SPAdes"]["params"],
         kmer = kmer_determination(),
         cov = config["mincov"],
-        outfolder = "assembly/{sample}",
+        outfolder = "tmp/assembly/{sample}",
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"

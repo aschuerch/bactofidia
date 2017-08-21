@@ -1,6 +1,3 @@
-[submodule "test/libs/bats"]
-	path = test/libs/bats
-	url = https://github.com/sstephenson/bats
 [submodule "TEST/libs/bats"]
 	path = TEST/libs/bats
 	url = https://github.com/sstephenson/bats
