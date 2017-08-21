@@ -11,34 +11,29 @@ if [ $# -eq 0 ]; then
     echo "
 ###########################################################################
 ############      Basic microbial WGS analysis pipeline    ################
-## for all available samples in this folder.                             ##
-## Compressed sequencing files (.gz)                                     ##
-## must be present in the same folder from where the script is called.   ##
-## Use only the sample name to call the script                           ##
 ##                                                                       ##
-## Example                                                               ##
+## for all samples in this folder.                                       ##
+##                                                                       ##
+## Compressed sequencing files (fastq.gz)                                ##
+## must be present in the same folder from where the script is called.   ##
+##                                                                       ##
+## Use only the sample names to call the script                          ##
+##                                                                       ##
+## Example:                                                              ##
 ##                                                                       ##
 ## bactofidia.sh  ECO-RES-PR1-00001 ECO-RES-PR1-00002                    ##
 ##                                                                       ##
 ##                                                                       ##
 ## Before running the pipeline for the first time, a virtual             ##
 ## environment needs to be created. Packages and versions are specified  ##
-## in package-list.txt. Adjust this file to your needs. See              ##
-## bioconda.github.io for available packages.                            ##
+## in package-list.txt. See bioconda.github.io for available packages.   ##
 ##                                                                       ##
 ## Create the environment with                                           ##
 ##                                                                       ##
-## conda create --file package-list.txt -n [bactofidia_custom]           ##
-##                                                                       ##
-## where [bactiofidia_custom] matches the name of the environment        ##
-## given in the config.yaml. The config.yaml file can be adjusted for    ##
-## parameters of the different tools.If parameters different from the    ##
-## standard parameters will be used,                                     ##
-## you can adjust package-list.txt config.yaml                           ##
-## to your needs before running this script                              ##
+## conda create --file package-list.txt -n bactofidia_standard201706     ##
 ##                                                                       ##
 ##                                                                       ##
-## Anita Schurch May 2017                                                ##
+## Anita Schurch Aug 2017                                                ##
 ###########################################################################"
     exit
 fi
