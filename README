@@ -58,7 +58,6 @@ Test the whole pipeline with:
 
 This will run the pipeline on the included Test.fastq.gz files.
 
-
 Currently it runs:
  - quality check before and after trimming using seqtk
  - trimming with [seqtk](http://bioconda.github.io/recipes/seqtk/README.html)
@@ -74,6 +73,20 @@ Running only
 `bactofidia.sh`
 
 will give an explanation of the (limited) options.
-For further customizing, see [snakemake documentation](https://snakemake.readthedocs.io/en/stable/) and [bioconda] (http://bioconda.github.io/)
+
+
+* Adjusting command line parameters
+
+Command line parameters for the different tools can be adjusted in the config.yaml file or in Snakefile directly. For many cases, the default parameters should be sufficient
+
+
+* Using different package versions
+
+Package versions can be adjusted in package-list.txt. Please visit [bioconda](http://bioconda.github.io/) for available packages
+
+
+* Adding other tools
+
+For further customizing, see [snakemake documentation](https://snakemake.readthedocs.io/en/stable/)
 
 
