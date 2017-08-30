@@ -209,10 +209,10 @@ rule resfinder:
 
 rule stat:
     input:
-        R1before = "tmp/{sample}_R1_Trimmingstats_before_trimming",
-        R1after = "tmp/{sample}_R1_Trimmingstats_after_trimming", 
-        R2before = "tmp/{sample}_R2_Trimmingstats_before_trimming",
-        R2after = "tmp/{sample}_R2_Trimmingstats_after_trimming", 
+        R1before = "data/{sample}_R1.fastq.gz",
+        R1after = "data/{sample}_R1.fastq", 
+        R2before = "tmp/{sample}_R2.fastq.gz",
+        R2after = "tmp/{sample}_R2.fastq", 
         assem = "tmp/AssemblyQC.txt",
         mlst = "tmp/MLST.tsv"
     output:
@@ -221,12 +221,10 @@ rule stat:
         sample = "{sample}"
     shell:
         "for x in {input.R1before} {input.R1after} {input.R2before} {input.R2after}; do" 
-        "echo -ne $x'\t'| sed -n '2~4p' $x | wc -m >> {output}"
+        "sed -n '2~4p' $x | wc -m >> {output}"
+        "echo -n '\t' >> {output} "
         "done"
-
-#R1.before=$(cat {input.R1before}); R1.after=$(cat {input.R1after})"
- #       "&& R2.before=$(cat {input.R2before}); R2.after=$(cat {input.R2after})"
-  #      "&& Total=$((R1.after+R2.after))"
+        "echo -ne   #      "&& Total=$((R1.after+R2.after))"
    #     "&& assemstats=$(grep {params.sample} {input.assem})"
     #    "&& EstGenomeSize=$(cut -f 16,16 $assemstats)"
      #   "&& AvCoverage=$(($Total/$EstGenomeSize))"
