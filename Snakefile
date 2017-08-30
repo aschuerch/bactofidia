@@ -40,23 +40,11 @@ rule all:
        "stats/AssemblyQC.html",
        "stats/ResFinder.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
-       expand ("annotation/{sample}.gff", sample=SAMPLES),
-       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES),
+#       expand ("annotation/{sample}.gff", sample=SAMPLES),
+#       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES),
        expand ("stats/Summary_{sample}.tsv", sample=SAMPLES),
        "stats/Summary.tsv"
 
-
-rule fastqc_before:
-    input:
-        "data/{sample}_{r}.fastq.gz"
-    output:
-        temp("tmp/{sample}_{r}_Trimmingstats_before_trimming")
-    params:
-        virtenv = config["virtual_environment"]["name"]
-    shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& echo -ne {input}'\t'| sed -n '2~4p' {input} | wc -m >> {output}"
-        "&& set +u; source deactivate; set -u"
 
 rule trim:
      input:
@@ -70,18 +58,7 @@ rule trim:
         "set +u; source activate {params.virtenv}; set -u"
         "&& seqtk trimfq {params.p} {input} > {output} "
         "&& set +u; source deactivate; set -u"
-
-rule fastqc_after:
-    input:
-        temp("tmp/{sample}_{r}.fastq")
-    output:
-        temp("tmp/{sample}_{r}_Trimmingstats_after_trimming")
-    params:
-        virtenv = config["virtual_environment"]["name"]
-    shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& echo -ne {input}'\t'| sed -n '2~4p' {input} | wc -m >> {output}"
-        "&& set +u; source deactivate; set -u"       
+     
        
 rule spades:
     input: 
@@ -180,7 +157,7 @@ rule quast:
         expand("scaffolds/{sample}.fna", sample=SAMPLES),        
     output:
         html = "stats/AssemblyQC.html",
-        txt = temp("tmp/AssemblyQC.txt")
+        txt = "tmp/AssemblyQC.txt"
     params:
         outfolder = "stats/quasttemp",
         p = config["QUAST"]["params"],
@@ -210,8 +187,8 @@ rule resfinder:
 rule stat:
     input:
         R1before = "data/{sample}_R1.fastq.gz",
-        R1after = "data/{sample}_R1.fastq", 
-        R2before = "tmp/{sample}_R2.fastq.gz",
+        R1after = "tmp/{sample}_R1.fastq", 
+        R2before = "data/{sample}_R2.fastq.gz",
         R2after = "tmp/{sample}_R2.fastq", 
         assem = "tmp/AssemblyQC.txt",
         mlst = "tmp/MLST.tsv"
@@ -220,18 +197,18 @@ rule stat:
     params:
         sample = "{sample}"
     shell:
-        "for x in {input.R1before} {input.R1after} {input.R2before} {input.R2after}; do" 
-        "sed -n '2~4p' $x | wc -m >> {output}"
-        "echo -n '\t' >> {output} "
-        "done"
-        "echo -ne   #      "&& Total=$((R1.after+R2.after))"
-   #     "&& assemstats=$(grep {params.sample} {input.assem})"
-    #    "&& EstGenomeSize=$(cut -f 16,16 $assemstats)"
-     #   "&& AvCoverage=$(($Total/$EstGenomeSize))"
-      #  "&& GC=$(cut -f 17,17 $assemstats);N50=$(cut -f 18,18 $assemstats)"
-       # "&& MLST=$(grep {params.sample} {input.mlst}| cut -f 1,1 --complement)"
-       # "for i in $R1.before $R1.after $R2.before $R2.after $Total $EstGenomeSize $AvCoverage $GC $N50 $MLST; do echo -en $i '\t'>> {output}; done"
-       # "echo  >> {output}"
+        "zcat {input.R1before} | sed -n '2~4p' | wc -m >> {output}"
+        "&&sed -n '2~4p' {input.R1after} | wc -m >> {output}"
+        "&&zcat {input.R2before} | sed -n '2~4p' | wc -m >> {output}"
+        "&&sed -n '2~4p' {input.R2after} | wc -m >> {output}"
+        "&&sed -n '2~4p' {input.R1after} {input.R2after} | wc -m >> {output}"
+        "&&grep {params.sample} {input.assem} | cut -f 16,16 >> {output}"
+     #  "&& AvCoverage=$(($Total/$EstGenomeSize))"
+#        "echo averagecoverage >> {output} "
+        "&&grep {params.sample} {input.assem} | cut -f 17,17 >> {output}"
+        "&&grep {params.sample} {input.assem} | cut -f 18,18 >> {output}"
+        "&&grep {params.sample} {input.mlst}| cut -f 1,1 --complement >> {output}"
+
 
 rule sumstat:
      input:
@@ -239,5 +216,5 @@ rule sumstat:
      output:
         "stats/Summary.tsv"
      shell:
-        "echo -e 'Reads\t#R1-Bases before trimming \t#R1-Bases after trimming\t#R2-Bases before trimming \t#R2-Bases after trimming\t#Bases Total\tEst. Genome size\tAv. coverage\t%GC\tN50\tspecies (MLST)\tMLST' > {output} "
-        "&& cat {input} >> {output} "
+        "printf 'Reads\t#R1-Bases before trimming \t#R1-Bases after trimming\t#R2-Bases before trimming \t#R2-Bases after trimming\t#Bases Total\tEst. Genome size\tAv. coverage\t%GC\tN50\tspecies (MLST)\tMLST' > {output} "
+        "&&cat {input} | tr -d '\n' |while read line ; do echo -ne $line >> {output} ; echo '\t' >> {output} ; done "
