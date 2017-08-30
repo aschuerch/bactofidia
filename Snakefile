@@ -32,7 +32,7 @@ onerror:
  #   # delete virtual environment
   #  for i in virtenvs:
    #     os.system ( "conda-env remove -y -n {}".format(i)) 
-    print("Workflow finished")
+    print("Workflow finished with errors")
 
 
 rule all:
@@ -220,16 +220,20 @@ rule stat:
     params:
         sample = "{sample}"
     shell:
-        "R1.before=$(cat {input.R1before}); R1.after=$(cat {input.R1after})"
-        "&& R2.before=$(cat {input.R2before}); R2.after=$(cat {input.R2after})"
-        "&& Total=$((R1.after+R2.after))"
-        "&& assemstats=$(grep {params.sample} {input.assem}"
-        "&& EstGenomeSize=$(cut -f 16,16 $assemstats)"
-        "&& AvCoverage=$(($Total/$EstGenomeSize))"
-        "&& GC=$(cut -f 17,17 $assemstats);N50=$(cut -f 18,18 $assemstats)"
-        "&& MLST=$(grep {params.sample} {input.mlst}| cut -f 1,1 --complement)"
-        "for i in $R1.before $R1.after $R2.before $R2.after $Total $EstGenomeSize $AvCoverage $GC $N50 $MLST; do echo -en $i '\t'>> {output}; done"
-        "echo  >> {output}"
+        "for x in {input.R1before} {input.R1after} {input.R2before} {input.R2after}; do" 
+        "echo -ne $x'\t'| sed -n '2~4p' $x | wc -m >> {output}"
+        "done"
+
+#R1.before=$(cat {input.R1before}); R1.after=$(cat {input.R1after})"
+ #       "&& R2.before=$(cat {input.R2before}); R2.after=$(cat {input.R2after})"
+  #      "&& Total=$((R1.after+R2.after))"
+   #     "&& assemstats=$(grep {params.sample} {input.assem})"
+    #    "&& EstGenomeSize=$(cut -f 16,16 $assemstats)"
+     #   "&& AvCoverage=$(($Total/$EstGenomeSize))"
+      #  "&& GC=$(cut -f 17,17 $assemstats);N50=$(cut -f 18,18 $assemstats)"
+       # "&& MLST=$(grep {params.sample} {input.mlst}| cut -f 1,1 --complement)"
+       # "for i in $R1.before $R1.after $R2.before $R2.after $Total $EstGenomeSize $AvCoverage $GC $N50 $MLST; do echo -en $i '\t'>> {output}; done"
+       # "echo  >> {output}"
 
 rule sumstat:
      input:
