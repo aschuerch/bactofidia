@@ -40,10 +40,13 @@ rule all:
        "stats/AssemblyQC.html",
        "stats/ResFinder.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
+       expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
+       expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES),
+
 #       expand ("annotation/{sample}.gff", sample=SAMPLES),
 #       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES),
-       expand ("stats/Summary_{sample}.tsv", sample=SAMPLES),
-       "stats/Summary.tsv"
+       expand ("stats/Trimmingstats_{sample}.tsv", sample=SAMPLES),
+       "stats/Trimmingstats.tsv"
 
 
 rule trim:
@@ -143,7 +146,7 @@ rule mlst:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES)
     output:
-        temp("tmp/MLST.tsv")
+        temp("stats/MLST.tsv")
     params:
         mlst = config["mlst"]["params"],
         virtenv = config["virtual_environment"]["name"]
@@ -184,6 +187,24 @@ rule resfinder:
         "&& sed -i 's/scaffolds\///g' {output}"
         "&& set +u; source deactivate; set -u"
 
+rule map:
+    input:
+        ref = expand("scaffolds/{sample}.fna", sample=SAMPLES),
+        in_R1 = expand("tmp/{sample}_R1.fastq", sample=SAMPLES, r=R),
+        in_R2 = expand("tmp/{sample}_R2.fastq", sample=SAMPLES, r=R)
+    output:
+        concat = temp("tmp/{sample}.fastq"),
+        covstats_detail = "stats/CoverageStatistics_{sample}_scaffolds.txt",
+        covstats = "stats/CoverageStatistics_{sample}.txt"
+    params:
+        virtenv = config["virtual_environment"]["name"]
+    shell:
+        "set +u; source activate {params.virtenv}; set -u"
+        "&& cat {input.in_R1} {input.in_R2} > {output.concat}"
+        "&& bbmap.sh in={output.concat} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
+        "&& set +u; source deactivate; set -u"
+
+
 rule stat:
     input:
         R1before = "data/{sample}_R1.fastq.gz",
@@ -193,7 +214,7 @@ rule stat:
         assem = "tmp/AssemblyQC.txt",
         mlst = "tmp/MLST.tsv"
     output:
-        "stats/Summary_{sample}.tsv"
+        "stats/Trimmingstats_{sample}.tsv"
     params:
         sample = "{sample}"
     shell:
@@ -202,19 +223,19 @@ rule stat:
         "&&zcat {input.R2before} | sed -n '2~4p' | wc -m >> {output}"
         "&&sed -n '2~4p' {input.R2after} | wc -m >> {output}"
         "&&sed -n '2~4p' {input.R1after} {input.R2after} | wc -m >> {output}"
-        "&&grep {params.sample} {input.assem} | cut -f 16,16 >> {output}"
+        "&&grep ^{params.sample} {input.assem} | cut -f 16,16 >> {output}"
      #  "&& AvCoverage=$(($Total/$EstGenomeSize))"
 #        "echo averagecoverage >> {output} "
-        "&&grep {params.sample} {input.assem} | cut -f 17,17 >> {output}"
-        "&&grep {params.sample} {input.assem} | cut -f 18,18 >> {output}"
-        "&&grep {params.sample} {input.mlst}| cut -f 1,1 --complement >> {output}"
+#        "&&grep ^{params.sample} {input.assem} | cut -f 17,17 >> {output}"
+#        "&&grep ^{params.sample} {input.assem} | cut -f 18,18 >> {output}"
+#        "&&grep ^{params.sample} {input.mlst}| cut -f 1,1 --complement >> {output}"
 
 
 rule sumstat:
      input:
-        expand("stats/Summary_{sample}.tsv", sample=SAMPLES)
+        expand("stats/Trimmingstats_{sample}.tsv", sample=SAMPLES)
      output:
-        "stats/Summary.tsv"
+        "stats/Trimmingstats.tsv"
      shell:
-        "printf 'Reads\t#R1-Bases before trimming \t#R1-Bases after trimming\t#R2-Bases before trimming \t#R2-Bases after trimming\t#Bases Total\tEst. Genome size\tAv. coverage\t%GC\tN50\tspecies (MLST)\tMLST' > {output} "
-        "&&cat {input} | tr -d '\n' |while read line ; do echo -ne $line >> {output} ; echo '\t' >> {output} ; done "
+        "printf '#R1-before trimming \t#R1-after trimming\t#R2-before trimming \t#R2-after trimming\n' >> {output} "
+        "&&tr '\n' '\t' < {input}  >> {output} "
