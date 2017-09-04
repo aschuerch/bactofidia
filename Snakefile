@@ -37,16 +37,33 @@ onerror:
 
 rule all:
     input:
+       expand("data/{sample}_R1_fastqc.zip", sample=SAMPLES),
        "stats/AssemblyQC.html",
        "stats/ResFinder.tsv",
+       "stats/MLST.tsv",
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
-       expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
-       expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES),
-
-#       expand ("annotation/{sample}.gff", sample=SAMPLES),
+#       expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
+#       expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES),
+       expand ("annotation/{sample}.gff", sample=SAMPLES),
 #       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES),
        expand ("stats/Trimmingstats_{sample}.tsv", sample=SAMPLES),
-       "stats/Trimmingstats.tsv"
+#       "stats/Trimmingstats.tsv"
+
+
+rule fastqc:
+    input:
+        "data/{sample}_R1.fastq.gz"
+    output:
+        "data/{sample}_R1_fastqc.zip",
+        "data/{sample}_R1_fastqc.html",
+        temp = temp("data/{sample}_R1.fastq")
+    params:
+        virtenv = config["virtual_environment"]["name"]
+    shell:
+        "set +u; source activate {params.virtenv}; set -u "
+        "&& zcat {input} >> {output.temp} "
+        "&& fastqc {output.temp}"
+        "&& set +u; source deactivate; set -u"
 
 
 rule trim:
@@ -211,8 +228,6 @@ rule stat:
         R1after = "tmp/{sample}_R1.fastq", 
         R2before = "data/{sample}_R2.fastq.gz",
         R2after = "tmp/{sample}_R2.fastq", 
-        assem = "tmp/AssemblyQC.txt",
-        mlst = "tmp/MLST.tsv"
     output:
         "stats/Trimmingstats_{sample}.tsv"
     params:
@@ -223,13 +238,6 @@ rule stat:
         "&&zcat {input.R2before} | sed -n '2~4p' | wc -m >> {output}"
         "&&sed -n '2~4p' {input.R2after} | wc -m >> {output}"
         "&&sed -n '2~4p' {input.R1after} {input.R2after} | wc -m >> {output}"
-        "&&grep ^{params.sample} {input.assem} | cut -f 16,16 >> {output}"
-     #  "&& AvCoverage=$(($Total/$EstGenomeSize))"
-#        "echo averagecoverage >> {output} "
-#        "&&grep ^{params.sample} {input.assem} | cut -f 17,17 >> {output}"
-#        "&&grep ^{params.sample} {input.assem} | cut -f 18,18 >> {output}"
-#        "&&grep ^{params.sample} {input.mlst}| cut -f 1,1 --complement >> {output}"
-
 
 rule sumstat:
      input:
