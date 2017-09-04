@@ -41,6 +41,8 @@ rule all:
        "stats/AssemblyQC.html",
        "stats/ResFinder.tsv",
        "stats/MLST.tsv",
+       expand ("data/{sample}_R1.fastq.gz.msh", sample=SAMPLES),
+
        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
 #       expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
 #       expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES),
@@ -67,19 +69,32 @@ rule fastqc:
 
 
 rule trim:
-     input:
+    input:
         "data/{sample}_{r}.fastq.gz"
-     output:
+    output:
         temp("tmp/{sample}_{r}.fastq")
-     params:
+    params:
         p = config["seqtk"]["params"],
         virtenv = config["virtual_environment"]["name"]
-     shell: 
+    shell: 
         "set +u; source activate {params.virtenv}; set -u"
         "&& seqtk trimfq {params.p} {input} > {output} "
         "&& set +u; source deactivate; set -u"
-     
-       
+
+rule sketch:
+    input:
+        "data/{sample}_R1.fastq.gz"
+    output:
+        "data/{sample}_R1.fastq.gz.msh" 
+    params:
+        p = config["mash"]["params"],
+        virtenv = config["virtual_environment"]["name"]
+    shell:
+        "set +u; source activate {params.virtenv}; set -u"
+        "&& mash sketch {params.p} {input}"
+        "&& set +u; source deactivate; set -u"
+   
+
 rule spades:
     input: 
         R1=temp("tmp/{sample}_R1.fastq"),
@@ -176,18 +191,15 @@ rule quast:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES),        
     output:
-        html = "stats/AssemblyQC.html",
-        txt = "tmp/AssemblyQC.txt"
+        html = "stats/AssemblyQC.html"
     params:
-        outfolder = "stats/quasttemp",
+        outfolder = "stats/quast",
         p = config["QUAST"]["params"],
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
         "&& quast {params.p} -o {params.outfolder} {input}"
-        "&& mv stats/quasttemp/report.html {output.html}"
-        "&& mv stats/quasttemp/transposed_report.txt {output.txt}"
-        "&& rm -r stats/quasttemp"
+        "&& cp stats/quast/report.html {output.html}"
         "&& set +u; source deactivate; set -u"
 
 rule resfinder:
