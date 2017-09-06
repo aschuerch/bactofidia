@@ -33,7 +33,6 @@ onerror:
 rule all:
     input:
         "stats/multiqc_report.html",
-        "stats/AssemblyQC.html",
         "stats/ResFinder.tsv",
         "stats/MLST.tsv",
 #        expand ("data/{sample}_R1.fastq.gz.msh", sample=SAMPLES),
@@ -62,7 +61,8 @@ rule fastqc:
 
 rule multiqc:
     input:
-        expand("tmp/{sample}_R1_fastqc.html", sample=SAMPLES)
+        expand("tmp/{sample}_R1_fastqc.html", sample=SAMPLES),
+        expand("tmp/AssemblyQC_{sample}/report.html", sample=SAMPLES)
     output:
         "stats/multiqc_report.html"
     params:
@@ -202,15 +202,15 @@ rule quast:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES),        
     output:
-        html = "stats/AssemblyQC_{sample}.html"
+        html = "tmp/AssemblyQC_{sample}/report.html"
     params:
-        outfolder = "stats/quast",
+        outfolder = "tmp/AssemblyQC_{sample}",
         p = config["QUAST"]["params"],
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
         "&& quast {params.p} -o {params.outfolder} {input}"
-        "&& cp stats/quast/report.html {output.html}"
+#        "&& cp tmp/quast/report.html {output.html}"
         "&& set +u; source deactivate; set -u"
 
 rule resfinder:
