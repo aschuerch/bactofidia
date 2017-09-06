@@ -22,33 +22,27 @@ SAMPLES = set(SAMPLES)
 R = set(R)
 
 onsuccess:
-    # delete virtual environment
-#    for i in virtenvs:
- #       os.system ( "conda-env remove -y -n {}".format (i)) 
+    # delete files 
     print("Workflow finished!")
 
 
 onerror:
- #   # delete virtual environment
-  #  for i in virtenvs:
-   #     os.system ( "conda-env remove -y -n {}".format(i)) 
     print("Workflow finished with errors")
 
 
 rule all:
     input:
-       expand("data/{sample}_R1_fastqc.zip", sample=SAMPLES),
-       "stats/AssemblyQC.html",
-       "stats/ResFinder.tsv",
-       "stats/MLST.tsv",
-       expand ("data/{sample}_R1.fastq.gz.msh", sample=SAMPLES),
-
-       expand ("scaffolds/{sample}.fna", sample=SAMPLES),
-#       expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
-#       expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES),
-       expand ("annotation/{sample}.gff", sample=SAMPLES),
-#       expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES),
-       expand ("stats/Trimmingstats_{sample}.tsv", sample=SAMPLES),
+        "stats/multiqc_report.html",
+        "stats/AssemblyQC.html",
+        "stats/ResFinder.tsv",
+        "stats/MLST.tsv",
+#        expand ("data/{sample}_R1.fastq.gz.msh", sample=SAMPLES),
+         expand ("scaffolds/{sample}.fna", sample=SAMPLES),
+        expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
+        expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES),
+#        expand ("annotation/{sample}.gff", sample=SAMPLES),
+#        expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES),
+#        expand ("stats/Trimmingstats_{sample}.tsv", sample=SAMPLES),
 #       "stats/Trimmingstats.tsv"
 
 
@@ -56,17 +50,27 @@ rule fastqc:
     input:
         "data/{sample}_R1.fastq.gz"
     output:
-        "data/{sample}_R1_fastqc.zip",
-        "data/{sample}_R1_fastqc.html",
+        temp("tmp/{sample}_R1_fastqc.html"),
         temp = temp("data/{sample}_R1.fastq")
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u "
         "&& zcat {input} >> {output.temp} "
-        "&& fastqc {output.temp}"
+        "&& fastqc {output.temp} -o tmp"
         "&& set +u; source deactivate; set -u"
 
+rule multiqc:
+    input:
+        expand("tmp/{sample}_R1_fastqc.html", sample=SAMPLES)
+    output:
+        "stats/multiqc_report.html"
+    params:
+        virtenv = config["virtual_environment"]["name"]
+    shell:
+        "set +u; source activate {params.virtenv}; set -u "
+        "&& multiqc tmp/ -n {output}"
+        "&& set +u; source deactivate; set -u"
 
 rule trim:
     input:
@@ -81,18 +85,18 @@ rule trim:
         "&& seqtk trimfq {params.p} {input} > {output} "
         "&& set +u; source deactivate; set -u"
 
-rule sketch:
-    input:
-        "data/{sample}_R1.fastq.gz"
-    output:
-        "data/{sample}_R1.fastq.gz.msh" 
-    params:
-        p = config["mash"]["params"],
-        virtenv = config["virtual_environment"]["name"]
-    shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& mash sketch {params.p} {input}"
-        "&& set +u; source deactivate; set -u"
+#rule sketch:
+ #   input:
+  #      "data/{sample}_R1.fastq.gz"
+   # output:
+    #    "data/{sample}_R1.fastq.gz.msh" 
+   ## params:
+     #   p = config["mash"]["params"],
+      #  virtenv = config["virtual_environment"]["name"]
+   # shell:
+    ##    "set +u; source activate {params.virtenv}; set -u"
+      #  "&& mash sketch {params.p} {input}"
+       # "&& set +u; source deactivate; set -u"
    
 
 rule spades:
@@ -141,44 +145,51 @@ rule annotation:
         "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
         "&& set +u; source deactivate; set -u"
         
-rule taxonomy_1:
-    input:
-        "scaffolds/{sample}.fna"
-    output:
-        temp("tmp/{sample}.krakenout")
-    params:
-        p=config["kraken"]["params"],
-        virtenv = config["virtual_environment"]["name"]
-    shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& kraken {params.p} --output {output} --fasta_input {input}"
-        "&& set +u; source deactivate; set -u"
+#rule mash_dist:
+ #   input:
+  #      query = "data/{sample}_R1.fastq.gz,
+   #     ref = "data/ref.msh"
+   # output:
+    #    "ref/name_{sample}.txt"
+   # params:
+    ##    p = config["mash"]["params"],
+      #  virtenv = config["virtual_environment"]["name"]
+   # shell:
+    #    "set +u; source activate {params.virtenv}; set -u"
+     #   "&& mash dist -t {params.p} {input.query} {input.ref} | sort -k2 | head -n 1 | cut -f 1,1 | cut -f 1,1 -d / >> {output} "
 
-rule taxonomy_2:
-    input:
-        "tmp/{sample}.krakenout"
-    output:
-        temp("tmp/{sample}.kronain")
-    shell:
-        "cut -f2,3 {input} > {output}"
+#rule get_ref:
+ #   input:
+  #      "ref/name_{sample}.txt"
+   # output:
+    #    url = "ref/url_{sample}.txt",
+     #  seq = "ref/refseq_{sample}.txt",
+      #  dest = "ref/{sample}
+    #shell:
+     #   "echo -n 'wget -P {output.dest}' >> {output.url}"
+      #  "&&grep  -f {input} ftpdirpaths | tr -d '\n' >> {output.url}"
+       # "&&echo '/_genomic.fna.gz' >> {output.url}"
+        #"&& bash {output.url}"
 
-rule taxonomy_3:
-    input:
-        temp("tmp/{sample}.kronain")
-    output:
-        "stats/Taxonomy_{sample}.html"
-    params:
-        virtenv = config["virtual_environment"]["name"]
-    shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& ktImportTaxonomy {input} -o {output}"
-        "&& set +u; source deactivate; set -u"
+
+#rule taxonomy_1:
+ #   input:
+  #      "scaffolds/{sample}.fna"
+   # output:
+    #    temp("tmp/{sample}.krakenout")
+    #params:
+     #   p=config["kraken"]["params"],
+      #  virtenv = config["virtual_environment"]["name"]
+   # shell:
+    #    "set +u; source activate {params.virtenv}; set -u"
+     #   "&& kraken {params.p} --output {output} --fasta_input {input}"
+      #  "&& set +u; source deactivate; set -u"
 
 rule mlst:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES)
     output:
-        temp("stats/MLST.tsv")
+        "stats/MLST.tsv"
     params:
         mlst = config["mlst"]["params"],
         virtenv = config["virtual_environment"]["name"]
@@ -191,7 +202,7 @@ rule quast:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES),        
     output:
-        html = "stats/AssemblyQC.html"
+        html = "stats/AssemblyQC_{sample}.html"
     params:
         outfolder = "stats/quast",
         p = config["QUAST"]["params"],
@@ -234,28 +245,12 @@ rule map:
         "&& set +u; source deactivate; set -u"
 
 
-rule stat:
-    input:
-        R1before = "data/{sample}_R1.fastq.gz",
-        R1after = "tmp/{sample}_R1.fastq", 
-        R2before = "data/{sample}_R2.fastq.gz",
-        R2after = "tmp/{sample}_R2.fastq", 
-    output:
-        "stats/Trimmingstats_{sample}.tsv"
-    params:
-        sample = "{sample}"
-    shell:
-        "zcat {input.R1before} | sed -n '2~4p' | wc -m >> {output}"
-        "&&sed -n '2~4p' {input.R1after} | wc -m >> {output}"
-        "&&zcat {input.R2before} | sed -n '2~4p' | wc -m >> {output}"
-        "&&sed -n '2~4p' {input.R2after} | wc -m >> {output}"
-        "&&sed -n '2~4p' {input.R1after} {input.R2after} | wc -m >> {output}"
-
-rule sumstat:
-     input:
-        expand("stats/Trimmingstats_{sample}.tsv", sample=SAMPLES)
-     output:
-        "stats/Trimmingstats.tsv"
-     shell:
-        "printf '#R1-before trimming \t#R1-after trimming\t#R2-before trimming \t#R2-after trimming\n' >> {output} "
-        "&&tr '\n' '\t' < {input}  >> {output} "
+#rule stat:
+ #   input:
+  #      R1before = "data/{sample}_R1.fastq.gz",
+   #     R1after = "tmp/{sample}_R1.fastq", 
+    #    R2before = "data/{sample}_R2.fastq.gz",
+     #   R2after = "tmp/{sample}_R2.fastq", 
+#    output:
+ #       "stats/Trimmingstats_{sample}.tsv"
+ 
