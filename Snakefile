@@ -1,4 +1,5 @@
 import os
+import sys
 from snakemake.utils import min_version
 
 #min_version("3.9")
@@ -7,10 +8,11 @@ configfile: "config.yaml"
 
 def kmer_determination():
     if (config.get("krange")):
-        kmer = config.get("krange")
+        kmer = str(config.get("krange")).replace(" ", "")
     else:
-        kmer = config["SPAdes"] ["krange"]
+        kmer = str(config["SPAdes"] ["krange"]).replace(" ", "")
     return kmer
+
 
 versiontag = config["virtual_environment"]["name"]
 
