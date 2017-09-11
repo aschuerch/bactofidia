@@ -1,7 +1,7 @@
 import os
 from snakemake.utils import min_version
 
-min_version("3.9")
+#min_version("3.9")
 configfile: "config.yaml"
 
 
