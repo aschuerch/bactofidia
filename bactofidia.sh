@@ -84,23 +84,44 @@ echo "$(pwd)"/log  2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
 sleep 1
 
-# determine kmer length
+## determine kmer length
+#for i in "$@"
+# do
+# length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
+# kmer=$((length/2+1))
+# kmereven=$((kmer % 2))
+# if [[ "$kmereven" -eq 0 ]];then
+#  kmer=$((kmer+1))
+# fi
+# done
+
+#kmer2=$((kmer/3*2+1))
+
+#krange="$kmer2","$kmer"
+#echo 2>&1 |tee -a "$log"
+#echo "Kmer range for spades was determined as " "$krange"   2>&1| tee -a "$log"
+#echo 2>&1 |tee -a "$log"
+
+# determine read length and config file
+
 for i in "$@"
  do
  length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
- kmer=$((length/2+1))
- kmereven=$((kmer % 2))
- if [[ "$kmereven" -eq 0 ]];then
-  kmer=$((kmer+1))
- fi
  done
 
-kmer2=$((kmer/3*2+1))
+if [[ "$length"==151 ]];then
+  configfile=config.yaml
+elif [[ "$length"==251 ]]; then
+  configfile=config_miseq.yaml
+else
+  echo 'please provide a custom config file (e.g. config_custom.yaml) '
+  read configfile
+fi
 
-krange="$kmer2","$kmer"
 echo 2>&1 |tee -a "$log"
-echo "Kmer range for spades was determined as " "$krange"   2>&1| tee -a "$log"
+echo "Read length was determined as: " "$length" " , " "$configfile" " will be used as configfile"   2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
+
 
 sleep 1
  
@@ -118,7 +139,7 @@ if command -v qstat > /dev/null; then
 
  snakemake \
  --latency-wait 60 \
- --config krange=$krange \
+ --config configfile="$configfile" \
  --verbose \
  --forceall \
  --keep-going \
@@ -129,7 +150,7 @@ if command -v qstat > /dev/null; then
 
 else
 
-snakemake --keep-going --config krange=$krange
+snakemake --keep-going --config configfile="$configfile"
 
 
 fi
