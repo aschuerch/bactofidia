@@ -1,18 +1,16 @@
 import os
-import sys
 from snakemake.utils import min_version
 
 #min_version("3.9")
-configfile: "config.yaml"
+configfile : config.get("configfile") 
 
 
 def kmer_determination():
     if (config.get("krange")):
-        kmer = str(config.get("krange")).replace(" ", "")
+        kmer = config.get("krange")
     else:
-        kmer = str(config["SPAdes"] ["krange"]).replace(" ", "")
+        kmer = config["SPAdes"]["krange"]
     return kmer
-
 
 versiontag = config["virtual_environment"]["name"]
 
@@ -37,14 +35,9 @@ rule all:
         "stats/multiqc_report.html",
         "stats/ResFinder.tsv",
         "stats/MLST.tsv",
-#        expand ("data/{sample}_R1.fastq.gz.msh", sample=SAMPLES),
          expand ("scaffolds/{sample}.fna", sample=SAMPLES),
         expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
-        expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES),
-#        expand ("annotation/{sample}.gff", sample=SAMPLES),
-#        expand ("stats/Taxonomy_{sample}.html", sample=SAMPLES),
-#        expand ("stats/Trimmingstats_{sample}.tsv", sample=SAMPLES),
-#       "stats/Trimmingstats.tsv"
+        expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES)
 
 
 rule fastqc:
@@ -85,21 +78,7 @@ rule trim:
     shell: 
         "set +u; source activate {params.virtenv}; set -u"
         "&& seqtk trimfq {params.p} {input} > {output} "
-        "&& set +u; source deactivate; set -u"
-
-#rule sketch:
- #   input:
-  #      "data/{sample}_R1.fastq.gz"
-   # output:
-    #    "data/{sample}_R1.fastq.gz.msh" 
-   ## params:
-     #   p = config["mash"]["params"],
-      #  virtenv = config["virtual_environment"]["name"]
-   # shell:
-    ##    "set +u; source activate {params.virtenv}; set -u"
-      #  "&& mash sketch {params.p} {input}"
-       # "&& set +u; source deactivate; set -u"
-   
+        "&& set +u; source deactivate; set -u"   
 
 rule spades:
     input: 
@@ -146,46 +125,6 @@ rule annotation:
         "set +u; source activate {params.virtenv}; set -u"
         "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
         "&& set +u; source deactivate; set -u"
-        
-#rule mash_dist:
- #   input:
-  #      query = "data/{sample}_R1.fastq.gz,
-   #     ref = "data/ref.msh"
-   # output:
-    #    "ref/name_{sample}.txt"
-   # params:
-    ##    p = config["mash"]["params"],
-      #  virtenv = config["virtual_environment"]["name"]
-   # shell:
-    #    "set +u; source activate {params.virtenv}; set -u"
-     #   "&& mash dist -t {params.p} {input.query} {input.ref} | sort -k2 | head -n 1 | cut -f 1,1 | cut -f 1,1 -d / >> {output} "
-
-#rule get_ref:
- #   input:
-  #      "ref/name_{sample}.txt"
-   # output:
-    #    url = "ref/url_{sample}.txt",
-     #  seq = "ref/refseq_{sample}.txt",
-      #  dest = "ref/{sample}
-    #shell:
-     #   "echo -n 'wget -P {output.dest}' >> {output.url}"
-      #  "&&grep  -f {input} ftpdirpaths | tr -d '\n' >> {output.url}"
-       # "&&echo '/_genomic.fna.gz' >> {output.url}"
-        #"&& bash {output.url}"
-
-
-#rule taxonomy_1:
- #   input:
-  #      "scaffolds/{sample}.fna"
-   # output:
-    #    temp("tmp/{sample}.krakenout")
-    #params:
-     #   p=config["kraken"]["params"],
-      #  virtenv = config["virtual_environment"]["name"]
-   # shell:
-    #    "set +u; source activate {params.virtenv}; set -u"
-     #   "&& kraken {params.p} --output {output} --fasta_input {input}"
-      #  "&& set +u; source deactivate; set -u"
 
 rule mlst:
     input:
@@ -245,14 +184,3 @@ rule map:
         "&& cat {input.in_R1} {input.in_R2} > {output.concat}"
         "&& bbmap.sh in={output.concat} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
         "&& set +u; source deactivate; set -u"
-
-
-#rule stat:
- #   input:
-  #      R1before = "data/{sample}_R1.fastq.gz",
-   #     R1after = "tmp/{sample}_R1.fastq", 
-    #    R2before = "data/{sample}_R2.fastq.gz",
-     #   R2after = "tmp/{sample}_R2.fastq", 
-#    output:
- #       "stats/Trimmingstats_{sample}.tsv"
- 
