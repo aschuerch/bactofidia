@@ -16,23 +16,13 @@ seqtk: # trimming
 
 SPAdes: # assembly
   params: --only-assembler --careful --threads 8
-  krange: 57,97,127 #adjust if you would like to select a different kmer range for spades assembly
+  krange: 37,57,77 #adjust if you would like to select a different kmer range for spades assembly
 
 QUAST: # assembly quality check
   params: --min-contig 500 
 
 mlst:  # multi-locus sequence typing on WGS
   params: --nopath
-
-prokka: # annotation
-  params: --centre U --locustag C --compliant
-  version: 1.11
-
-kraken: # species determination
-  params: --quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/
-
-krona: # visualization of species determination
-  version: 2.6
 
 abricate: # resistance gene detection
   params: --nopath --minid=90
