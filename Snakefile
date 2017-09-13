@@ -22,6 +22,7 @@ R = set(R)
 
 onsuccess:
     # delete files 
+    # os.remove (tmp)
     print("Workflow finished!")
 
 
@@ -32,12 +33,12 @@ onerror:
 rule all:
     input:
         "stats/multiqc_report.html",
-        "stats/ResFinder.tsv",
-        "stats/MLST.tsv",
-        "stats/CoverageStatistics_summary.tsv",
-        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
-        expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
-        expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES)
+#        "stats/ResFinder.tsv",
+#        "stats/MLST.tsv",
+#        "stats/CoverageStatistics_summary.tsv",
+        expand ("scaffolds/{sample}.fna", sample=SAMPLES)
+#        expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
+#        expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES)
 
 
 rule fastqc:
@@ -52,19 +53,6 @@ rule fastqc:
         "set +u; source activate {params.virtenv}; set -u "
         "&& zcat {input} >> {output.temp} "
         "&& fastqc {output.temp} -o tmp"
-        "&& set +u; source deactivate; set -u"
-
-rule multiqc:
-    input:
-        expand("tmp/{sample}_R1_fastqc.html", sample=SAMPLES),
-        expand("tmp/AssemblyQC_{sample}/report.html", sample=SAMPLES)
-    output:
-        "stats/multiqc_report.html"
-    params:
-        virtenv = config["virtual_environment"]["name"]
-    shell:
-        "set +u; source activate {params.virtenv}; set -u "
-        "&& multiqc tmp/ -n {output}"
         "&& set +u; source deactivate; set -u"
 
 rule trim:
@@ -111,21 +99,6 @@ rule rename:
         "&& seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
         "&& set +u; source deactivate; set -u"
       
-#rule annotation:
- #   input:
-  #      "scaffolds/{sample}.fna"
-   # output:
-    #    "annotation/{sample}.gff",
-   # params:
-    #    dir = "annotation",
-     #   params = config["prokka"]["params"],
-      #  prefix = "{sample}",
-       # virtenv = config["virtual_environment"]["name"]
-#    shell:
- #       "set +u; source activate {params.virtenv}; set -u"
-  #      "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
-   #     "&& set +u; source deactivate; set -u"
-
 rule mlst:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES)
@@ -141,17 +114,16 @@ rule mlst:
 
 rule quast:
     input:
-        expand("scaffolds/{sample}.fna", sample=SAMPLES),        
+        expand("scaffolds/{sample}.fna", sample=SAMPLES)      
     output:
-        html = "tmp/AssemblyQC_{sample}/report.html"
+        html = temp("tmp/report.html")
     params:
-        outfolder = "tmp/AssemblyQC_{sample}",
+        outfolder = "tmp",
         p = config["QUAST"]["params"],
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
         "&& quast {params.p} -o {params.outfolder} {input}"
-#        "&& cp tmp/quast/report.html {output.html}"
         "&& set +u; source deactivate; set -u"
 
 rule resfinder:
@@ -170,11 +142,11 @@ rule resfinder:
 
 rule map:
     input:
-        ref = expand("scaffolds/{sample}.fna", sample=SAMPLES),
-        in_R1 = expand("tmp/{sample}_R1.fastq", sample=SAMPLES, r=R),
-        in_R2 = expand("tmp/{sample}_R2.fastq", sample=SAMPLES, r=R)
+        ref = "scaffolds/{sample}.fna",
+        in_R1 = "tmp/{sample}_R1.fastq",
+        in_R2 = "tmp/{sample}_R2.fastq"
     output:
-        concat = temp("tmp/{sample}.fastq"),
+        concat = temp("tmp/{sample}_concatenated.fastq"),
         covstats_detail = "stats/CoverageStatistics_{sample}_scaffolds.txt",
         covstats = "stats/CoverageStatistics_{sample}.txt"
     params:
@@ -192,3 +164,18 @@ rule sum:
         "stats/CoverageStatistics_summary.tsv"
     shell:
         "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' >> {output}"
+
+
+rule multiqc:
+    input:
+        expand("tmp/{sample}_R1_fastqc.html", sample=SAMPLES),
+        "tmp/report.html"
+    output:
+        "stats/multiqc_report.html"
+    params:
+        virtenv = config["virtual_environment"]["name"]
+    shell:
+        "set +u; source activate {params.virtenv}; set -u "
+        "&& multiqc tmp/ -n {output}"
+        "&& set +u; source deactivate; set -u"
+
