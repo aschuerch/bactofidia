@@ -4,7 +4,6 @@ from snakemake.utils import min_version
 #min_version("3.9")
 configfile : config.get("configfile") 
 
-
 def kmer_determination():
     if (config.get("krange")):
         kmer = config.get("krange")
@@ -35,7 +34,8 @@ rule all:
         "stats/multiqc_report.html",
         "stats/ResFinder.tsv",
         "stats/MLST.tsv",
-         expand ("scaffolds/{sample}.fna", sample=SAMPLES),
+        "stats/CoverageStatistics_summary.tsv",
+        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
         expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
         expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES)
 
@@ -111,20 +111,20 @@ rule rename:
         "&& seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
         "&& set +u; source deactivate; set -u"
       
-rule annotation:
-    input:
-        "scaffolds/{sample}.fna"
-    output:
-        "annotation/{sample}.gff",
-    params:
-        dir = "annotation",
-        params = config["prokka"]["params"],
-        prefix = "{sample}",
-        virtenv = config["virtual_environment"]["name"]
-    shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
-        "&& set +u; source deactivate; set -u"
+#rule annotation:
+ #   input:
+  #      "scaffolds/{sample}.fna"
+   # output:
+    #    "annotation/{sample}.gff",
+   # params:
+    #    dir = "annotation",
+     #   params = config["prokka"]["params"],
+      #  prefix = "{sample}",
+       # virtenv = config["virtual_environment"]["name"]
+#    shell:
+ #       "set +u; source activate {params.virtenv}; set -u"
+  #      "&& prokka --force --prefix {params.prefix} --outdir {params.dir} {params.params} {input} "
+   #     "&& set +u; source deactivate; set -u"
 
 rule mlst:
     input:
@@ -184,3 +184,11 @@ rule map:
         "&& cat {input.in_R1} {input.in_R2} > {output.concat}"
         "&& bbmap.sh in={output.concat} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
         "&& set +u; source deactivate; set -u"
+
+rule sum:
+    input:
+        expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES)
+    output:
+        "stats/CoverageStatistics_summary.tsv"
+    shell:
+        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' >> {output}"
