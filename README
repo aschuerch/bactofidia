@@ -59,14 +59,13 @@ Test the whole pipeline with:
 This will run the pipeline on the included Test.fastq.gz files.
 
 Currently it runs:
- - quality check before and after trimming using seqtk
+ - quality check before trimming using fastqc
  - trimming with [seqtk](http://bioconda.github.io/recipes/seqtk/README.html)
  - assembly with [spades](http://bioconda.github.io/recipes/spades/README.html)
- - annotation with [prokka](http://bioconda.github.io/recipes/prokka/README.html)
- - taxonomy determination with [kraken](http://bioconda.github.io/recipes/kraken/README.html), vizualization with [krona](http://bioconda.github.io/recipes/krona/README.html) 
  - mlst with [mlst](http://bioconda.github.io/recipes/mlst/README.html)
+ - resistance gene determination with [abricate](http://bioconda.github.io/recipes/abricate/README.html)  using the [resfinder database](https://cge.cbs.dtu.dk/services/ResFinder/)
  - quality assessment of assembly with [quast](http://bioconda.github.io/recipes/quast/README.html)
- - resistance gene finding with [abricate](http://bioconda.github.io/recipes/abricate/README.html)
+ - coverage estimation with [bbmap2](http://bioconda.github.io/recipes/bbmap/README.html) 
 
 Running only 
 
@@ -77,7 +76,7 @@ will give an explanation of the (limited) options.
 
 * Adjusting command line parameters
 
-Command line parameters for the different tools can be adjusted in the config.yaml file or in Snakefile directly. For many cases, the default parameters should be sufficient
+Command line parameters for the different tools can be adjusted in the config.yaml or config_miseq.yaml file or in Snakefile directly. For many cases, the default parameters should be sufficient
 
 
 * Using different package versions
