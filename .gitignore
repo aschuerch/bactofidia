@@ -8,3 +8,9 @@ stats/
 taxonomy/
 temp/
 trimmed/
+.snakemake
+Test_R1.fastq.gz
+Test_R2.fastq.gz
+ref/
+tmp/
+

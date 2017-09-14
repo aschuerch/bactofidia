@@ -2,7 +2,7 @@
 set -e
 
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
-##aschuerch 052017
+##aschuerch 092017
 
 ##1. Checks
 ##Check for command line arguments
@@ -30,7 +30,7 @@ if [ $# -eq 0 ]; then
 ##                                                                       ##
 ## Create the environment with                                           ##
 ##                                                                       ##
-## conda create --file package-list.txt -n bactofidia_standard201706     ##
+## conda create --file package-list.txt -n bactofidia_standard201709     ##
 ##                                                                       ##
 ##                                                                       ##
 ## Anita Schurch Aug 2017                                                ##
@@ -54,7 +54,7 @@ Exiting.'
   fi
  done
 
-mkdir -p $(pwd)/log
+mkdir -p "$(pwd)"/log
 log=$(pwd)/log/call_assembly.txt
 touch "$log"
 sleep 1
@@ -84,24 +84,6 @@ echo "$(pwd)"/log  2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
 sleep 1
 
-## determine kmer length
-#for i in "$@"
-# do
-# length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
-# kmer=$((length/2+1))
-# kmereven=$((kmer % 2))
-# if [[ "$kmereven" -eq 0 ]];then
-#  kmer=$((kmer+1))
-# fi
-# done
-
-#kmer2=$((kmer/3*2+1))
-
-#krange="$kmer2","$kmer"
-#echo 2>&1 |tee -a "$log"
-#echo "Kmer range for spades was determined as " "$krange"   2>&1| tee -a "$log"
-#echo 2>&1 |tee -a "$log"
-
 # determine read length and config file
 
 for i in "$@"
@@ -109,17 +91,19 @@ for i in "$@"
  length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
  done
 
-if [[ "$length"==151 ]];then
+if [[ "$length" == 151 ]];then
   configfile=config.yaml
-elif [[ "$length"==251 ]]; then
+elif [[ "$length" == 251 ]]; then
   configfile=config_miseq.yaml
 else
   echo 'please provide a custom config file (e.g. config_custom.yaml) '
-  read configfile
+  read -r configfile
 fi
 
 echo 2>&1 |tee -a "$log"
-echo "Read length was determined as: " "$length" " , " "$configfile" " will be used as configfile"   2>&1| tee -a "$log"
+echo "Read length was determined as: " 2>&1| tee -a "$log"
+echo "$length" 2>&1| tee -a "$log"
+echo "$configfile" "will be used as configfile"   2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
 
 

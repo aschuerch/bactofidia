@@ -12,8 +12,9 @@ SAMPLES = set(SAMPLES)
 R = set(R)
 
 onsuccess:
-    # delete files 
-    shutil.rmtree (tmp)
+    # delete files
+    if  (config["remove_temp"] == "yes"):
+        shutil.rmtree ("tmp")
     print("Workflow finished!")
 
 
@@ -32,10 +33,10 @@ rule all:
 
 rule fastqc:
     input:
-        "data/{sample}_R1.fastq.gz"
+        expand("data/{sample}_R1.fastq.gz", r=R)
     output:
-        temp("tmp/{sample}_R1_fastqc.html"),
-        temp = temp("data/{sample}_R1.fastq")
+        "tmp/{sample}_R1_fastqc.html",
+        temp = "data/{sample}_R1.fastq"
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:
@@ -48,7 +49,7 @@ rule trim:
     input:
         "data/{sample}_{r}.fastq.gz"
     output:
-        temp("tmp/{sample}_{r}.fastq")
+        "tmp/{sample}_{r}.fastq"
     params:
         p = config["seqtk"]["params"],
         virtenv = config["virtual_environment"]["name"]
@@ -59,10 +60,10 @@ rule trim:
 
 rule spades:
     input: 
-        R1=temp("tmp/{sample}_R1.fastq"),
-        R2=temp("tmp/{sample}_R2.fastq")
+        R1="tmp/{sample}_R1.fastq",
+        R2="tmp/{sample}_R2.fastq"
     output:
-        temp("tmp/assembly/{sample}/scaffolds.fasta")
+        "tmp/assembly/{sample}/scaffolds.fasta"
     params:
         spadesparams = config["SPAdes"]["params"],
         kmer = config["SPAdes"]["krange"],
@@ -76,7 +77,7 @@ rule spades:
 
 rule rename:
     input:
-        temp("tmp/assembly/{sample}/scaffolds.fasta")
+        "tmp/assembly/{sample}/scaffolds.fasta"
     output:
         "scaffolds/{sample}.fna",
     params:
@@ -105,14 +106,16 @@ rule quast:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES)      
     output:
-        html = temp("tmp/report.html")
+        html = "tmp/report.html",
+        html2 = "stats/Assembly_report.html"
     params:
-        outfolder = "tmp",
+        outfolder = "tmp/",
         p = config["QUAST"]["params"],
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
         "&& quast {params.p} -o {params.outfolder} {input}"
+        "&& cp {output.html} {output.html2} " 
         "&& set +u; source deactivate; set -u"
 
 rule resfinder:
@@ -135,15 +138,13 @@ rule map:
         in_R1 = "tmp/{sample}_R1.fastq",
         in_R2 = "tmp/{sample}_R2.fastq"
     output:
-        concat = temp("tmp/{sample}_concatenated.fastq"),
-        covstats_detail = temp("tmp/CoverageStatistics_{sample}_scaffolds.txt"),
+        covstats_detail = "tmp/CoverageStatistics_{sample}_scaffolds.txt",
         covstats = "stats/CoverageStatistics_{sample}.txt"
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
-        "&& cat {input.in_R1} {input.in_R2} > {output.concat}"
-        "&& bbmap.sh in={output.concat} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
+        "&& bbmap.sh in={input.in_R1} in2={input.in_R2} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
         "&& set +u; source deactivate; set -u"
 
 rule sum:
@@ -152,16 +153,17 @@ rule sum:
     output:
         "stats/CoverageStatistics_summary.tsv"
     shell:
-        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' >> {output}"
+        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\\@@g'| sed 's@\.txt@@g' >> {output}"
 
 
 rule multiqc:
     input:
         expand("tmp/{sample}_R1_fastqc.html", sample=SAMPLES),
         "tmp/report.html",
-        "output.covstats"
+        expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES)
     output:
-        "stats/multiqc_report.html"
+        "stats/multiqc_report.html",
+        temp
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:

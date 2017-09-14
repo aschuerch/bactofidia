@@ -8,8 +8,11 @@ minlen: 500
 # minimum average coverage of contigs (to filter out low frequency contamination)
 mincov: 10
 
+# remove temporary files after successful analysis. yes/no
+remove_temp: yes
+
 virtual_environment: # arbitrary name for virtual environment based on package-list.txt
-  name: bactofidia_standard201706
+  name: bactofidia_standard201709
 
 seqtk: # trimming 
   params: -q 0.01
@@ -23,16 +26,6 @@ QUAST: # assembly quality check
 
 mlst:  # multi-locus sequence typing on WGS
   params: --nopath
-
-prokka: # annotation
-  params: --centre U --locustag C --compliant
-  version: 1.11
-
-kraken: # species determination
-  params: --quick --db /hpc/local/CentOS7/dla_mm/tools/kraken/db/minikraken_20140330/
-
-krona: # visualization of species determination
-  version: 2.6
 
 abricate: # resistance gene detection
   params: --nopath --minid=90
