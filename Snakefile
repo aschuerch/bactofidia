@@ -1,5 +1,6 @@
 import shutil
-
+import glob
+import os
 from snakemake.utils import min_version
 
 min_version("3.9")
@@ -13,8 +14,42 @@ R = set(R)
 
 onsuccess:
     # delete files
-    if  (config["remove_temp"] == "yes"):
-        shutil.rmtree ("tmp")
+    if  (config["remove_temp"]):
+        print("Removing temporary files")
+        try:
+            shutil.rmtree ("tmp")
+        except:
+            pass
+        try:
+            shutil.rmtree ("data")
+        except:
+            pass
+        try:
+            shutil.rmtree ("log")
+        except:
+            pass
+        try:
+            dirs = glob.glob ("multiqc_report*")
+            for dir in dirs:
+                shutil.rmtree (dir)
+        except:
+            pass
+        try:
+            dirs = glob.glob ("stats/multiqc_report*")
+            for dir in dirs:
+                shutil.rmtree (dir)
+        except:
+            pass
+        try:
+            shutil.rmtree ("ref")
+        except:
+            pass
+    try:
+        os.mkdir("results")
+    except:
+        pass
+    for dir in ["stats", "scaffolds"]:
+        shutil.move(dir, "results/"+dir)
     print("Workflow finished!")
 
 
@@ -33,7 +68,7 @@ rule all:
 
 rule fastqc:
     input:
-        expand("data/{sample}_R1.fastq.gz", r=R)
+        "data/{sample}_R1.fastq.gz"
     output:
         "tmp/{sample}_R1_fastqc.html",
         temp = "data/{sample}_R1.fastq"
@@ -162,8 +197,7 @@ rule multiqc:
         "tmp/report.html",
         expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES)
     output:
-        "stats/multiqc_report.html",
-        temp
+        "stats/multiqc_report.html"
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:

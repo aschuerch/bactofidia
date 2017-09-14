@@ -9,7 +9,7 @@ minlen: 500
 mincov: 10
 
 # remove temporary files after successful analysis. no/yes
-remove_temp: no
+remove_temp: yes
 
 virtual_environment: # arbitrary name for virtual environment based on package-list.txt
   name: bactofidia_standard201709

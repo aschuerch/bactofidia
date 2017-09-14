@@ -130,11 +130,11 @@ if command -v qstat > /dev/null; then
  --restart-times 5\
  --cluster \
  'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
- --jobs 100 | tee -a "$log"
+ --jobs 100 2>&1| tee -a "$log"
 
 else
 
-snakemake --keep-going --config configfile="$configfile"
+snakemake --keep-going --config configfile="$configfile" 2>&1| tee -a "$log"
 
 
 fi
