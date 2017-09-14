@@ -1,16 +1,12 @@
-import os
 import shutil
+
 from snakemake.utils import min_version
 
 min_version("3.9")
 
 configfile : config.get("configfile") 
 
-versiontag = config["virtual_environment"]["name"]
-
-print(versiontag)
-
-# Collect samples
+# Collect samples. They need to be stored in data/
 SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
 SAMPLES = set(SAMPLES)
 R = set(R)
@@ -32,8 +28,6 @@ rule all:
         "stats/MLST.tsv",
         "stats/CoverageStatistics_summary.tsv",
         expand ("scaffolds/{sample}.fna", sample=SAMPLES)
-#        expand ("stats/CoverageStatistics_{sample}_scaffolds.txt",sample=SAMPLES),
-#        expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES)
 
 
 rule fastqc:
@@ -87,7 +81,7 @@ rule rename:
         "scaffolds/{sample}.fna",
     params:
         minlen = config["minlen"],
-        versiontag = "{sample}_"+versiontag,
+        versiontag = "{sample}_"+config["virtual_environment"]["name"],
         virtenv = config["virtual_environment"]["name"]
     shell:
         "set +u; source activate {params.virtenv}; set -u"
@@ -142,8 +136,8 @@ rule map:
         in_R2 = "tmp/{sample}_R2.fastq"
     output:
         concat = temp("tmp/{sample}_concatenated.fastq"),
-        covstats_detail = "stats/CoverageStatistics_{sample}_scaffolds.txt",
-        covstats = temp("stats/CoverageStatistics_{sample}.txt")
+        covstats_detail = temp("tmp/CoverageStatistics_{sample}_scaffolds.txt"),
+        covstats = "stats/CoverageStatistics_{sample}.txt"
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:
