@@ -1,12 +1,13 @@
 ### bactofidia: Basic microbial WGS analysis pipeline
 
-** bactofidia ** is a bacterial assembly and basic analysis pipeline using Snakemake and bioconda.
+*bactofidia* is a bacterial assembly and basic analysis pipeline using Snakemake and bioconda.
 
 
 ## Installation
 
-A bioconda installation is required, see below if it is not installed on your system yet.
-See the example script below for Linux 64-bit, for other options, see the [bioconda page](https://bioconda.github.io)
+A bioconda installation is required.
+
+This is an example script to install biocona on a Linux 64-bit architecture. For other options, see the [bioconda page](https://bioconda.github.io)
 
 ```bash
  wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
@@ -23,7 +24,7 @@ See the example script below for Linux 64-bit, for other options, see the [bioco
 ```
 Consider to add the miniconda directory to your PATH environment variable by editing your ~/.bash_profile
 
-Create a virtual environment for snakemake using python3:
+Next, create a virtual environment for snakemake using python3:
 
 ```bash
  conda create -y -n snakemake python=3.5 snakemake
@@ -32,9 +33,9 @@ Create a virtual environment for snakemake using python3:
 
 ## Usage
 
-Before running the pipeline for the first time, a virtual environment needs to be created. Packages and versions are specified in 'package-list.txt'. Adjust this file to your needs. See bioconda.github.io for available packages.
+Before running the pipeline for the first time, another virtual environment needs to be created. Packages and versions are specified in 'package-list.txt'. Adjust this file to your needs. See bioconda.github.io for available packages.
 
-Then, create the environment with 
+Create the environment with 
 
 ```bash
 conda create --file package-list.txt -n [bactofidia_custom]
@@ -45,16 +46,21 @@ The config.yaml file can be adjusted for parameters of the different tools.
 
 For debugging or testing purposes, the pipeline itself can be dry-run with 
 
-```
-snakemake -np
+```bash
+source activate snakemake
+snakemake -np --config configfile=config.yaml
+source deactivate
 ```
 
 The pipeline takes compressed sequencing files (.fastq.gz) which must be present in the same folder from where the script is called.
-Use only the sample name to call the script.
+Use only the sample name to call the script (not the .fastq.gz ending).
 
 Test the whole pipeline with:
 
-`bactofidia.sh Test`
+```bash
+cp test/Test*gz .
+bactofidia.sh Test
+```
 
 This will run the pipeline on the included Test.fastq.gz files.
 
@@ -63,13 +69,16 @@ Currently it runs:
  - trimming with [seqtk](http://bioconda.github.io/recipes/seqtk/README.html)
  - assembly with [spades](http://bioconda.github.io/recipes/spades/README.html)
  - mlst with [mlst](http://bioconda.github.io/recipes/mlst/README.html)
- - resistance gene determination with [abricate](http://bioconda.github.io/recipes/abricate/README.html)  using the [resfinder database](https://cge.cbs.dtu.dk/services/ResFinder/)
+ - resistance gene determination with [abricate](http://bioconda.github.io/recipes/abricate/README.html) using the [resfinder database](https://cge.cbs.dtu.dk/services/ResFinder/)
  - quality assessment of assembly with [quast](http://bioconda.github.io/recipes/quast/README.html)
- - coverage estimation with [bbmap2](http://bioconda.github.io/recipes/bbmap/README.html) 
+ - coverage estimation with [bbmap2](http://bioconda.github.io/recipes/bbmap/README.html)
+ - summarizing report with [multiqc](http://bioconda.github.io/recipes/multiqc/README.html)
 
 Running only 
 
-`bactofidia.sh`
+```bash
+bactofidia.sh
+```
 
 will give an explanation of the (limited) options.
 
