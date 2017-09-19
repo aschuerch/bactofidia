@@ -59,7 +59,7 @@ Test the whole pipeline with:
 
 ```bash
 cp test/Test*gz .
-bactofidia.sh Test
+./bactofidia.sh Test
 ```
 
 This will run the pipeline on the included Test.fastq.gz files.
@@ -77,7 +77,7 @@ Currently it runs:
 Running only 
 
 ```bash
-bactofidia.sh
+./bactofidia.sh
 ```
 
 will give an explanation of the (limited) options.
