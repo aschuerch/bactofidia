@@ -1,9 +1,6 @@
 import shutil
 import glob
 import os
-from snakemake.utils import min_version
-
-min_version("3.9")
 
 configfile : config.get("configfile") 
 
