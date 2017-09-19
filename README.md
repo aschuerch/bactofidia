@@ -1,9 +1,9 @@
 ### bactofidia: Basic microbial WGS analysis pipeline
 
-**bactofidia** is a bacterial assembly and basic analysis pipeline using Snakemake and bioconda.
+** bactofidia ** is a bacterial assembly and basic analysis pipeline using Snakemake and bioconda.
 
 
-* Installation
+## Installation
 
 A bioconda installation is required, see below if it is not installed on your system yet.
 See the example script below for Linux 64-bit, for other options, see the [bioconda page](https://bioconda.github.io)
@@ -30,7 +30,7 @@ Create a virtual environment for snakemake using python3:
 ```
 
 
-* Usage
+## Usage
 
 Before running the pipeline for the first time, a virtual environment needs to be created. Packages and versions are specified in 'package-list.txt'. Adjust this file to your needs. See bioconda.github.io for available packages.
 
@@ -74,17 +74,17 @@ Running only
 will give an explanation of the (limited) options.
 
 
-* Adjusting command line parameters
+## Adjusting command line parameters
 
 Command line parameters for the different tools can be adjusted in the config.yaml or config_miseq.yaml file or in Snakefile directly. For many cases, the default parameters should be sufficient
 
 
-* Using different package versions
+## Using different package versions
 
 Package versions can be adjusted in package-list.txt. Please visit [bioconda](http://bioconda.github.io/) for available packages
 
 
-* Adding other tools
+## Adding other tools
 
 For further customizing, see [snakemake documentation](https://snakemake.readthedocs.io/en/stable/)
 
