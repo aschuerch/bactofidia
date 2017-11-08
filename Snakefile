@@ -56,7 +56,7 @@ onerror:
 
 rule all:
     input:
-        "stats/multiqc_report.html",
+        "stats/MultiQC_report.html",
         "stats/ResFinder.tsv",
         "stats/MLST.tsv",
         "stats/CoverageStatistics_summary.tsv",
@@ -139,7 +139,7 @@ rule quast:
         expand("scaffolds/{sample}.fna", sample=SAMPLES)      
     output:
         html = "tmp/report.html",
-        html2 = "stats/Assembly_report.html"
+        html2 = "stats/Extra/Assembly_report.html"
     params:
         outfolder = "tmp/",
         p = config["QUAST"]["params"],
@@ -171,7 +171,7 @@ rule map:
         in_R2 = "tmp/{sample}_R2.fastq"
     output:
         covstats_detail = "tmp/CoverageStatistics_{sample}_scaffolds.txt",
-        covstats = "stats/CoverageStatistics_{sample}.txt"
+        covstats = "stats/Extra/CoverageStatistics_{sample}.txt"
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:
@@ -181,7 +181,7 @@ rule map:
 
 rule sum:
     input:
-        expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES)
+        expand("stats/Extra/CoverageStatistics_{sample}.txt", sample=SAMPLES)
     output:
         "stats/CoverageStatistics_summary.tsv"
     shell:
@@ -192,9 +192,9 @@ rule multiqc:
     input:
         expand("tmp/{sample}_R1_fastqc.html", sample=SAMPLES),
         "tmp/report.html",
-        expand("stats/CoverageStatistics_{sample}.txt", sample=SAMPLES)
+        expand("stats/Extra/CoverageStatistics_{sample}.txt", sample=SAMPLES)
     output:
-        "stats/multiqc_report.html"
+        "stats/MultiQC_report.html"
     params:
         virtenv = config["virtual_environment"]["name"]
     shell:
