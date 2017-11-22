@@ -24,4 +24,4 @@ install:
   - source activate snakemake
 
 script:
-  test/test.py
+  python test/test.py
