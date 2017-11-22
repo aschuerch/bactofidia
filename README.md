@@ -7,7 +7,7 @@
 
 A bioconda installation is required.
 
-This is an example script to install biocona on a Linux 64-bit architecture. For other options, see the [bioconda page](https://bioconda.github.io)
+This is an example script to install bioconda on a Linux 64-bit architecture. For other options, see the [bioconda page](https://bioconda.github.io)
 
 ```bash
  wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
