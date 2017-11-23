@@ -21,7 +21,7 @@ install:
   - conda config --add channels r
   - conda config --add channels bioconda
   - conda create -q -n snakemake python=3.5 snakemake
-  - conda create -q --file package-list.txt -n bactofidia__standard201709
+  - conda create -q --file package-list.txt -n bactofidia_standard201709
   - source activate snakemake
 
 script:
