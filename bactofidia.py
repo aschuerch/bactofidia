@@ -61,9 +61,9 @@ parser = argparse.ArgumentParser(description='''################################
 ##                                                                       ##
 ## Anita Schurch Aug 2017                                                ##
 ###########################################################################''')
-parser.add_argument('-path', default = '', help = 'Full path to the folder containing the sequencing files if not in this folder')
-parser.add_argument('-config', default = 'default', help = 'Configuration file in yaml format (e.g. config_custom.yaml). Only necessary if standard config files are not applicable, e.g. read length') 
-parser.add_argument('-email', default = '', help = 'E-mail address to send confirmation e-mail if on HPC' )
+parser.add_argument('--path', default = '', help = 'Full path to the folder containing the sequencing files if not in this folder')
+parser.add_argument('--config', default = 'default', help = 'Configuration file in yaml format (e.g. config_custom.yaml). Only necessary if standard config files are not applicable, e.g. read length') 
+parser.add_argument('--email', default = '', help = 'E-mail address to send confirmation e-mail if on HPC' )
 
 parser.add_argument('file', nargs = '+', help = 'Sample name of the sequencing file (R1 and R2) as fastq.gz files')
 
@@ -74,6 +74,7 @@ if not os.path.exists(path):
 #    sys.exit ('Please provide the full path to the folder containing the sequencing files with -path [/home/user/data/]')
     
 config = argument.config   
+email = argument.email
 seqfiles=[]
 names=[]
 for f in argument.file:
@@ -86,15 +87,20 @@ for f in argument.file:
 if (len(seqfiles) % 2)  != 0:
     sys.exit('Please provide the sample name to an R1 and and R2 sequencing file. ')
 #####################################################################################
-def check_if_on_hpc():    
+def check_email ():
+    logger.debug ('checks e-mail address')    
+    logger.debug ('check e-mail address')
+    if not email:
+        email = input('Which e-mail address should be used to send the job status confirmation?\n \
+        This e-mail address can be provided with the argument --email or enter it now, followed by return\n')         
+    return email
+
+#####################################################################################
+def check_hpc():    
     logger.debug ('check environment')
-    process = subprocess.Popen(["source", "activate", "snakemake"], stdout=subprocess.PIPE)
+    process = subprocess.Popen(["command -v qstat"],shell = True, stdout=subprocess.PIPE)
     stdout = process.communicate()[0]
-    logger.debug(stdout)
-    
-    
-
-
+    return process.returncode
 #####################################################################################
 def mkdir_p(path):
     try:
@@ -184,7 +190,24 @@ def concatenate_files(f, seqfiles):
                 for fn in Rseqfiles:
                     with open(fn, 'rb') as rfp:
                         shutil.copyfileobj(rfp, wfp)
-
+    
+#####################################################################################
+                        
+def runpipe(config):
+    if (check_hpc() > 125):
+        logger.debug('')
+    else:
+        logger.debug ('on hpc, assuming sge')
+        email = check_email()
+        process = subprocess.Popen(['snakemake', \
+        '--latency-wait 60', \
+        '--config configfile='config, \
+        '--verbose', \
+        '--forceall', \
+        '--keep-going', \
+        '--restart-times 5',\
+        '--cluster', \
+        \''qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M ',email \' \ --jobs 100 2>&1| tee -a "$log"
     
 #####################################################################################
 if __name__ == '__main__':
@@ -197,7 +220,7 @@ if __name__ == '__main__':
     if config == 'default':
         config = determine_read_length(seqfiles[0])
     concatenate_files(names, seqfiles)
-    runpipe(config, email)
-    
+    runpipe(config)
+     
     
     
