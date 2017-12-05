@@ -14,6 +14,7 @@ import errno
 import subprocess
 import gzip
 import shutil
+import shlex
 
 
 
@@ -147,9 +148,9 @@ def check_conda():
 ####################################################################################
 def activate_snakemake():
     logger.debug ('activate virtual environment with snakemake')
-    process = subprocess.Popen(["source", "activate", "snakemake"], stdout=subprocess.PIPE)
-    stdout = process.communicate()[0]
-    logger.debug(stdout)
+    process = subprocess.run(["source activate snakemake"], shell = True, stdout=subprocess.PIPE)
+   # stdout = process.communicate()[0]
+    #logger.debug(stdout)
     
     
 ####################################################################################
@@ -195,19 +196,25 @@ def concatenate_files(f, seqfiles):
                         
 def runpipe(config):
     if (check_hpc() > 125):
-        logger.debug('')
+        logger.debug('starting snakemake')
+        commandline = 'snakemake --keep-going --config configfile='+ config
+        args = shlex.split(commandline)
+        print (args)
+        process = subprocess.Popen(args,  stdout=subprocess.PIPE)
+        stdout = process.communicate()[0]
+        logger.debug(stdout)
     else:
-        logger.debug ('on hpc, assuming sge')
-        email = check_email()
-        process = subprocess.Popen(['snakemake', \
-        '--latency-wait 60', \
-        '--config configfile='config, \
-        '--verbose', \
-        '--forceall', \
-        '--keep-going', \
-        '--restart-times 5',\
-        '--cluster', \
-        \''qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M ',email \' \ --jobs 100 2>&1| tee -a "$log"
+        logger.debug ('starting job on hpc, assuming sge')
+#        email = check_email()
+#        process = subprocess.Popen(['snakemake', \
+#        '--latency-wait 60', \
+#        '--config configfile='config, \
+#        '--verbose', \
+#        '--forceall', \
+#        '--keep-going', \
+#        '--restart-times 5',\
+#        '--cluster', \
+#        \''qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M ',email \' \ --jobs 100 2>&1| tee -a "$log"
     
 #####################################################################################
 if __name__ == '__main__':
@@ -216,7 +223,7 @@ if __name__ == '__main__':
     logger.debug('The results will be generated in results/')
     logger.debug('The logfiles will be generated in log/')
     check_conda()
-   # activate_snakemake()
+    activate_snakemake()
     if config == 'default':
         config = determine_read_length(seqfiles[0])
     concatenate_files(names, seqfiles)
