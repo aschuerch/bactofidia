@@ -12,7 +12,7 @@ import sys
 import logging
 import errno
 import subprocess
-import re
+import gzip
 
 
 
@@ -60,13 +60,17 @@ parser = argparse.ArgumentParser(description='''################################
 ##                                                                       ##
 ## Anita Schurch Aug 2017                                                ##
 ###########################################################################''')
-parser.add_argument('-path', default='', help='Full path to the folder containing the sequencing files if not in this folder')
-parser.add_argument('file', nargs='+', help='Sample name of the sequencing file (R1 and R2) as fastq.gz files')
+parser.add_argument('-path', default = '', help = 'Full path to the folder containing the sequencing files if not in this folder')
+parser.add_argument('-config', default = 'default', help = 'Configuration file in yaml format (e.g. config_custom.yaml). Only necessary if standard config files are not applicable, e.g. read length') 
+parser.add_argument('file', nargs = '+', help = 'Sample name of the sequencing file (R1 and R2) as fastq.gz files')
+
 argument = parser.parse_args()
 path = argument.path
 if not os.path.exists(path):
     path = os.getcwd()
 #    sys.exit ('Please provide the full path to the folder containing the sequencing files with -path [/home/user/data/]')
+    
+config = argument.config   
 seqfiles=[]
 names= ''
 for f in argument.file:
@@ -133,24 +137,28 @@ def activate_snakemake():
     
 ####################################################################################
 def determine_read_length(fqfile):
-    print (fqfile)
-    process = subprocess.Popen ( ["zcat",fqfile,"|awk'{{if(NR%4==2) print length($1)}}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev".format()], stdout=subprocess.PIPE)
-    stdout = process.communicate()[0]
-    print(stdout)    
     
-
-  #  F=open(fqfile,'r')
-   # re_seq=re.compile('^@')
-    #numlist=[]
-    #lenlist=[]
-
-#    for occurence in re_seq.finditer(F.read()):
- #       gnom,num,seq=occurence.groups()
-  #      numlist.append(num)
-   #     lenlist.append(len(seq))
-    #    print gnom,num,len(seq)
+    lengths = []
+    configfile = ''
+    if fqfile.endswith ('gz'):    
+        fq = gzip.GzipFile(fqfile, "r")
+    else:
+        fq = open(fqfile, "r")
+    for line in fq:
+        if len(line) > 100:
+            lengths.append(len(line))
+    read_length =  reduce(lambda x, y: x + y, lengths) / len(lengths)
+    logger.debug('Read length is %d', read_length)    
     
-   # maxl=max(lenlist)
+    if (140 < read_length < 160):
+        configfile = 'config.yaml'
+    elif (240 < read_length < 260):
+        configfile = 'config_miseq.yaml'
+    else:
+        logger.debug('Please provide a custom config file with the option -config')
+        sys.exit()
+    logger.debug('Configuration file is %s', configfile)
+    return configfile
 
 #####################################################################################
 if __name__ == '__main__':
@@ -160,4 +168,6 @@ if __name__ == '__main__':
     logger.debug('The logfiles will be generated in log/')
     check_conda()
    # activate_snakemake()
-    determine_read_length(seqfiles[0])
+    if config == 'default':
+        config = determine_read_length(seqfiles[0])
+    
