@@ -52,6 +52,7 @@ onsuccess:
 
 onerror:
     print("Workflow finished with errors")
+    return 13
 
 
 rule all:
