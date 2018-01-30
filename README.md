@@ -2,6 +2,21 @@
 
 *bactofidia* is a bacterial assembly and basic analysis pipeline using Snakemake and bioconda.
 
+## Usage (short version)
+
+Clone this repository with
+
+```bash
+git clone https://github.com/aschuerch/bactofidia.git
+```
+
+Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample1_R1.fastq.gz and Sample1_R2.fastq.gz) to this folder (or symlink them). Run the pipeline with
+
+
+```bash
+./bactofidia.sh Sample1 Sample2
+```
+
 
 ## Installation
 
@@ -31,7 +46,7 @@ Next, create a virtual environment for snakemake using python3:
 ```
 
 
-## Usage
+## Usage (long version)
 
 Before running the pipeline for the first time, another virtual environment needs to be created. Packages and versions are specified in 'package-list.txt'. Adjust this file to your needs. See bioconda.github.io for available packages.
 
@@ -55,6 +70,8 @@ source deactivate
 The pipeline takes compressed sequencing files (.fastq.gz) which must be present in the same folder from where the script is called.
 Use only the sample name to call the script (not the .fastq.gz ending).
 
+## Testing
+
 Test the whole pipeline with:
 
 ```bash
@@ -63,6 +80,8 @@ cp test/Test*gz .
 ```
 
 This will run the pipeline on the included Test.fastq.gz files.
+
+## Components
 
 Currently it runs:
  - quality check before trimming using fastqc
