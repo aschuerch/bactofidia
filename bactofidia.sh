@@ -75,7 +75,7 @@ source activate snakemake || echo "Please create a virtual environment with snak
 
 echo |  2>&1 tee -a "$log"
 echo "The results will be generated in this location: " 2>&1| tee -a "$log"
-pwd 2>&1| tee -a "$log"
+echo "$(pwd)"/results 2>&1| tee -a "$log"
 echo |  2>&1 tee -a "$log"
 sleep 1
 
