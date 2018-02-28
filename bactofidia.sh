@@ -121,6 +121,16 @@ done
 #check if it is on hpc
 if command -v qstat > /dev/null; then
 
+ emaildict=/hpc/dla_mm/data/shared_data/bactofidia_config/email.txt
+ if [[ -e "$emaildict" ]]; then
+   while read name mail
+    do
+      if [[ name == $("$(whoami)"))
+      email="$mail" 
+    done
+    < "$emaildict"
+   
+
  snakemake \
  --latency-wait 60 \
  --config configfile="$configfile" \
@@ -129,7 +139,7 @@ if command -v qstat > /dev/null; then
  --keep-going \
  --restart-times 5\
  --cluster \
- 'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M a.c.schurch@umcutrecht.nl ' \
+ 'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M "$email" ' \
  --jobs 100 2>&1| tee -a "$log"
 
 else
