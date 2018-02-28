@@ -48,13 +48,13 @@ onsuccess:
     for dir in ["stats", "scaffolds"]:
         shutil.move(dir, "results/"+dir)
     print("Workflow finished!")
-#    return
+    return
     #to test CI
-    os._exit(1)
+  #  os._exit(1)
 
 onerror:
     print("Workflow finished with errors")
-    sys.exit(13)
+    os._exit(13)
 
 
 rule all:
