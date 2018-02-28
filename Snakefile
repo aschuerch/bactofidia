@@ -50,7 +50,7 @@ onsuccess:
     print("Workflow finished!")
 #    return
     #to test CI
-    sys.exit(1)    
+    os._exit(1)
 
 onerror:
     print("Workflow finished with errors")

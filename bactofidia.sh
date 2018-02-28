@@ -164,15 +164,15 @@ qsub -m ae -M "$email" "$job"
 else
 
 #if not on a cluster
-snakemake --keep-going --config configfile="$configfile" 2>&1| tee -a "$log"  2> /dev/null
+snakemake --keep-going --config configfile="$configfile"  2> /dev/null
 
 #for the CI
 if [ $? -eq 0 ]
 then
-  echo "Successfully created file"
+  echo "Successfully finished job"
   exit 0
 else
-  echo "Could not create file" >&2
+  echo "Could not finish job" >&2
   exit 1
 fi
 
