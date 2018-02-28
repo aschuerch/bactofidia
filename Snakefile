@@ -48,6 +48,7 @@ onsuccess:
     for dir in ["stats", "scaffolds"]:
         shutil.move(dir, "results/"+dir)
     print("Workflow finished!")
+    return 12
 
 
 onerror:
