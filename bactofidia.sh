@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set -e
 
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
@@ -119,8 +120,10 @@ done
 
 
 #check if it is on hpc
+
 if command -v qstat > /dev/null; then
 
+#get e-mail to send the confirmation to
  emaildict=/hpc/dla_mm/data/shared_data/bactofidia_config/email.txt
  if [[ -e "$emaildict" ]]; then
    echo 'Email file found' 2>&1| tee -a "$log"
@@ -134,9 +137,10 @@ if command -v qstat > /dev/null; then
    echo 'please provide your e-mail '
    read -p email
  fi
+
 echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$log" 
 
-
+#command on cluster (SGE)
  snakemake \
  --latency-wait 60 \
  --config configfile="$configfile" \
@@ -148,6 +152,7 @@ echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$
  'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 2>&1| tee -a "$log"
 
+#job to send an e-mail
 job=log/bactofidia_done.sh
 touch "$job"
 echo "#!/bin/bash" > "$job"
@@ -157,6 +162,20 @@ echo qsub -m ae -M "$email" "$job"
 qsub -m ae -M "$email" "$job"
 
 else
-snakemake --keep-going --config configfile="$configfile" 2>&1| tee -a "$log"
+
+#if not on a cluster
+snakemake --keep-going --config configfile="$configfile" 2>&1| tee -a "$log"  2> /dev/null
+
+#for the CI
+if [ $? -eq 0 ]
+then
+  echo "Successfully created file"
+  exit 0
+else
+  echo "Could not create file" >&2
+  exit 1
+fi
+
+
 fi
 
