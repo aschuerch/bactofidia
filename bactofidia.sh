@@ -137,16 +137,16 @@ if command -v qstat > /dev/null; then
 echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$log" 
 
 
-# snakemake \
-# --latency-wait 60 \
-# --config configfile="$configfile" \
-# --verbose \
-# --forceall \
-# --keep-going \
-# --restart-times 5\
-# --cluster \
-# 'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ ' \
-# --jobs 100 2>&1| tee -a "$log"
+ snakemake \
+ --latency-wait 60 \
+ --config configfile="$configfile" \
+ --verbose \
+ --forceall \
+ --keep-going \
+ --restart-times 5\
+ --cluster \
+ 'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ ' \
+ --jobs 100 2>&1| tee -a "$log"
 
 job=log/bactofidia_done.sh
 touch "$job"
