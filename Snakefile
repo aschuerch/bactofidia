@@ -48,12 +48,12 @@ onsuccess:
     for dir in ["stats", "scaffolds"]:
         shutil.move(dir, "results/"+dir)
     print("Workflow finished!")
-    return 12
+    sys.exit(12)
 
 
 onerror:
     print("Workflow finished with errors")
-    return 13
+    sys.exit(13)
 
 
 rule all:
