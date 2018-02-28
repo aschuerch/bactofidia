@@ -123,13 +123,19 @@ if command -v qstat > /dev/null; then
 
  emaildict=/hpc/dla_mm/data/shared_data/bactofidia_config/email.txt
  if [[ -e "$emaildict" ]]; then
+   echo 'Email file found' 2>&1| tee -a "$log"
    while read name mail
     do
-      if [[ name == $("$(whoami)"))
-      email="$mail" 
-    done
-    < "$emaildict"
-   
+      if [[ "$name" == "$(whoami)" ]]; then
+       email="$mail"
+      fi 
+    done < "$emaildict"
+ else
+   echo 'please provide your e-mail '
+   read -p email
+ fi
+echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$log" 
+
 
  snakemake \
  --latency-wait 60 \
@@ -139,7 +145,7 @@ if command -v qstat > /dev/null; then
  --keep-going \
  --restart-times 5\
  --cluster \
- 'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M "$email" ' \
+ 'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ -M $email ' \
  --jobs 100 2>&1| tee -a "$log"
 
 else
