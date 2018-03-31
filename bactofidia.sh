@@ -87,19 +87,21 @@ sleep 1
 
 # determine read length and config file
 
-for i in "$@"
- do
- length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
- done
+#for i in "$@"
+ #do
+ #length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
+ #done
 
-if [[ "$length" == 151 ]];then
-  configfile=config.yaml
-elif [[ "$length" == 251 ]]; then
-  configfile=config_miseq.yaml
-else
-  echo 'please provide a custom config file (e.g. config_custom.yaml) '
-  read -r configfile
-fi
+#if [[ "$length" == 151 ]];then
+#  configfile=config.yaml
+#elif [[ "$length" == 251 ]]; then
+#  configfile=config_miseq.yaml
+#else
+#  echo 'please provide a custom config file (e.g. config_custom.yaml) '
+#  read -r configfile
+#fi
+
+configfile=configEco.yaml
 
 echo 2>&1 |tee -a "$log"
 echo "Read length was determined as: " 2>&1| tee -a "$log"
