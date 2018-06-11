@@ -2,12 +2,14 @@
 set -e
 
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
+##Optimized for use on a HPC with SGE scheduler
 ##aschuerch 092017
 
 ##1. Checks
 ##Check for command line arguments
 
-if [ $# -eq 0 ]; then
+
+if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
     echo "
 ###########################################################################
 ############      Basic microbial WGS analysis pipeline    ################
