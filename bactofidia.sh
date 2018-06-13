@@ -3,11 +3,10 @@ set -e
 
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
 ##Optimized for use on a HPC with SGE scheduler
-##aschuerch 092017
+##aschuerch 062018
 
 ##1. Checks
 ##Check for command line arguments
-
 
 if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
     echo "
@@ -23,8 +22,12 @@ if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
 ##                                                                       ##
 ## Example:                                                              ##
 ##                                                                       ##
-## bactofidia.sh  ECO-RES-PR1-00001 ECO-RES-PR1-00002                    ##
+## ./bactofidia.sh  ECO-RES-PR1-00001 ECO-RES-PR1-00002                  ##
 ##                                                                       ##
+##                                                                       ##
+## or                                                                    ##
+##                                                                       ##
+## ./bactofidia.sh ALL                                                   ##
 ##                                                                       ##
 ## Before running the pipeline for the first time, a virtual             ##
 ## environment needs to be created. Packages and versions are specified  ##
@@ -41,25 +44,35 @@ if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
 fi
 
 
-## Check for *fastq.gz
-for i in "$@"
- do
-  if (ls -1 "$i"_*R1*fastq.gz > /dev/null 2>&1)
-   then
-   echo 'Found file(s) for ' "$i"
-  else
-   echo 'Sequence file(s) as '"$i"'*fastq.gz          is/are missing in this folder.
-Please execute this script from the location of the sequencing files or exclude 
-the sample.
-Exiting.'
-   exit 0
-  fi
- done
-
 mkdir -p "$(pwd)"/log
 log=$(pwd)/log/call_assembly.txt
 touch "$log"
 sleep 1
+
+## Check for *fastq.gz
+
+if [ $1 == "ALL" ];then
+   files=$(ls *gz | cut -f 1,1 -d _ | uniq | sort -n | tr '\n' ' ')
+else
+   files="$@"
+fi
+
+allfiles=(`echo ${files}`)
+echo $allfiles
+
+for i in "$files"
+ do
+ if [ ! ${#files[@]} -eq 0 ]
+   then
+   echo 'Found files for ' "$i"  2>&1 | tee -a "$log"
+  else
+   echo 'Sequence files as '"$i"'*fastq.gz are missing in this folder.
+Please execute this script from the location of the sequencing files or exclude 
+the sample.
+Exiting.' 2>&1 | tee -a "$log"
+   exit 0
+  fi
+ done
 
 
 # check if conda is installed
@@ -86,19 +99,19 @@ echo "$(pwd)"/log  2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
 sleep 1
 
-# determine read length and config file
+# determine read length and config files
 
-for i in "$@"
- do
- length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
- done
+for i in "${files%% *}"
+  do
+    length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
+  done
 
 if [[ "$length" == 151 ]];then
   configfile=config.yaml
 elif [[ "$length" == 251 ]]; then
   configfile=config_miseq.yaml
 else
-  echo 'please provide a custom config file (e.g. config_custom.yaml) '
+  echo 'please provide a custom config file (e.g. config_custom.yaml): '
   read -r configfile
 fi
 
@@ -113,11 +126,16 @@ sleep 1
  
 # concatenate for rev and put into data/ folder:
 mkdir -p data
-for i in "$@"
+
+while IFS=' ' read -ra samples
  do
-   cat "$i"*R1*.fastq.gz > data/"$i"_R1.fastq.gz
-   cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz
-done
+   for i in "${samples[@]}";
+    do
+     echo "$i"
+     cat "$i"*R1*.fastq.gz > data/"$i"_R1.fastq.gz
+     cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz
+   done
+ done <<< "$files"
 
 
 #check if it is on hpc
@@ -137,7 +155,6 @@ if command -v qstat > /dev/null; then
 else
 
 snakemake --keep-going --config configfile="$configfile" 2>&1| tee -a "$log"
-
 
 fi
 
