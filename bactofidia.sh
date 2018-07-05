@@ -1,6 +1,8 @@
 #!/bin/bash
 
 set -e
+set -v 
+set -x
 
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
 ##Optimized for use on a HPC with SGE scheduler
@@ -63,11 +65,11 @@ echo $allfiles
 
 for i in "$files"
  do
- if [ ! ${#files[@]} -eq 0 ]
+ if [ -f "$i"_*R1*fastq.gz ]
    then
-   echo 'Found files for ' "$i"  2>&1 | tee -a "$log"
+   echo 'Found files for ' "$i" '_*R1*fastq.gz'  2>&1 | tee -a "$log"
   else
-   echo 'Sequence files as '"$i"'*fastq.gz are missing in this folder.
+   echo 'Sequence files as '"$i"'_*R1*fastq.gz are missing in this folder.
 Please execute this script from the location of the sequencing files or exclude 
 the sample.
 Exiting.' 2>&1 | tee -a "$log"
