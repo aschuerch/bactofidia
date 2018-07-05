@@ -82,14 +82,23 @@ Exiting.' 2>&1 | tee -a "$log"
 if command -v conda > /dev/null; then
  echo  2>&1| tee -a "$log"
 else
- echo "Miniconda missing" 
- exit 0
+ echo "Miniconda missing. Installing...." 
+ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+ chmod +x Miniconda3-latest-Linux-x86_64.sh
+ mkdir -p ~/tmp
+ ./Miniconda3-latest-Linux-x86_64.sh -b -p ~/tmp/Miniconda3
+ rm Miniconda3-latest-Linux-x86_64.sh
+ export PATH=~/tmp/Miniconda3/bin:$PATH 
+ export PYTHONPATH=~/tmp/Miniconda3/pkgs/
+ conda config --add channels conda-forge
+ conda config --add channels defaults
+ conda config --add channels r
+ conda config --add channels bioconda
+ export PERL5LIB="~/tmp/Miniconda3/lib/perl5/site_perl/5.22.0"
 fi
 
-
 # Check and activate snakemake 
-source activate snakemake || echo "Please create a virtual environment with snakemake and python3 with 'conda create -n snakemake snakemake python=3.5"
-
+# source activate snakemake || echo "Please create a virtual environment with snakemake and python3 with 'conda create -n snakemake snakemake python=3.5"
 
 echo |  2>&1 tee -a "$log"
 echo "The results will be generated in this location: " 2>&1| tee -a "$log"
@@ -117,6 +126,17 @@ else
   echo 'please provide a custom config file (e.g. config_custom.yaml): '
   read -r configfile
 fi
+
+
+# Check virtual environment or create
+virtenv=$(grep -A 1 virtual_environment config.yaml | grep -v "#" | cut -f 2,2 -d ":" | sed -e 's/^[[:space:]]*//')
+echo "$virtenv"
+conda env list | grep "$virtenv" || conda create -y -n "$virtenv" --file package-list.txt
+
+
+# Check and activate snakemake or create
+source activate snakemake || conda create -y -n snakemake snakemake
+
 
 echo 2>&1 |tee -a "$log"
 echo "Read length was determined as: " 2>&1| tee -a "$log"
