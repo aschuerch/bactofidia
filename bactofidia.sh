@@ -162,6 +162,7 @@ echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$
 
 #command on cluster (SGE)
  snakemake \
+ --snakefile Snakefile.assembly \
  --latency-wait 60 \
  --config configfile="$configfile" \
  --verbose \
@@ -184,7 +185,7 @@ qsub -m ae -M "$email" "$job"
 else
 
 #if not on a cluster
-snakemake --keep-going --config configfile="$configfile"  2> /dev/null
+snakemake --snakefile Snakefile.assembly --keep-going --config configfile="$configfile"  2> /dev/null
 
 #for the CI
 if [ $? -eq 0 ]
