@@ -2,7 +2,7 @@ import shutil
 import glob
 import os
 
-configfile : config.get("configfile") 
+configfile : config.get("configfile")
 
 # Collect samples. They need to be stored in data/
 SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
@@ -49,9 +49,7 @@ onsuccess:
         shutil.move(dir, "results/"+dir)
     print("Workflow finished!")
     return
-    #to test CI
-  #  os._exit(1)
-
+ 
 onerror:
     print("Workflow finished with errors")
     os._exit(13)

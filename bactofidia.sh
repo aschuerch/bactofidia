@@ -18,7 +18,7 @@ if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
 ##                                                                       ##
 ## for all samples in this folder.                                       ##
 ##                                                                       ##
-## Compressed sequencing files (fastq.gz)                                ##
+## Paired end, compressed sequencing files (fastq.gz)                    ##
 ## must be present in the same folder from where the script is called.   ##
 ##                                                                       ##
 ## Use only the sample names to call the script                          ##
