@@ -86,7 +86,7 @@ fi
 
 
 # Check and activate snakemake 
-source activate snakemake || echo "Please create a virtual environment with snakemake and python3" 
+source activate snakemake || echo "Please create a virtual environment with snakemake and python3 with 'conda create -n snakemake snakemake python=3.5"
 
 
 echo |  2>&1 tee -a "$log"
