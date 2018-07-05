@@ -185,7 +185,8 @@ qsub -m ae -M "$email" "$job"
 else
 
 #if not on a cluster
-snakemake --snakefile Snakefile.assembly --keep-going --config configfile="$configfile"  2> /dev/null
+echo "snakemake --snakefile Snakefile.assembly --keep-going --config configfile=""$configfile"
+snakemake --snakefile Snakefile.assembly --keep-going --config configfile="$configfile"
 
 #for the CI
 if [ $? -eq 0 ]
