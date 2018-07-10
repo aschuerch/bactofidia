@@ -60,7 +60,7 @@ else
    files="$@"
 fi
 
-allfiles=(`echo ${files}`)
+allfiles=(`echo ${allfiles}`)
 echo $allfiles
 
 for i in "$files"
