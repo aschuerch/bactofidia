@@ -60,8 +60,9 @@ else
    files="$@"
 fi
 
-allfiles=(`echo ${allfiles}`)
+allfiles=(`echo ${files}`)
 echo $allfiles
+
 
 for i in "$allfiles"
  do
@@ -201,8 +202,8 @@ touch "$job"
 echo "#!/bin/bash" > "$job"
 echo "sleep 1" > "$job"
 
-echo qsub -m ae -M "$email" "$job"
-qsub -m ae -M "$email" "$job"
+echo qsub -e log/ -o log/ -m ae -M "$email" "$job"
+qsub -e log/ -o log/ -m ae -M "$email" "$job"
 
 else
 
