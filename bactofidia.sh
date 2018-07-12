@@ -63,7 +63,7 @@ fi
 allfiles=(`echo ${allfiles}`)
 echo $allfiles
 
-for i in "$files"
+for i in "$allfiles"
  do
  if [ -f "$i"_*R1*fastq.gz ]
    then
