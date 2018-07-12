@@ -158,7 +158,7 @@ while IFS=' ' read -ra samples
      echo "$i"
      cat "$i"*R1*.fastq.gz > data/"$i"_R1.fastq.gz
      cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz
-   done
+  done
  done <<< "$files"
 
 
@@ -202,8 +202,8 @@ touch "$job"
 echo "#!/bin/bash" > "$job"
 echo "sleep 1" > "$job"
 
-echo qsub -e log/ -o log/ -m ae -M "$email" "$job"
-qsub -e log/ -o log/ -m ae -M "$email" "$job"
+echo qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
+qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
 
 else
 
