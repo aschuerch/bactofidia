@@ -1,13 +1,13 @@
 # This file may be used to create an environment using:
-# $ conda create --name bactofidia_201806 --file package-list.txt
+# $ conda create --name bactofidia_standard201709 --file package-list.txt
 # platform: linux-64
-abricate=0.8
-bbmap=38.06
-mlst=2.10
-multiqc=1.6a0
+abricate=0.7
+bbmap=37.62
+mlst=2.9
+multiqc=1.3
 python=2.7.13
-quast=4.6.3
-seqtk=1.3
-spades=3.12.0
-fastqc=0.11.7
+quast=4.5
+seqtk=1.2
+spades=3.6.2
+fastqc=0.11.5
 
