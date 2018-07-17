@@ -1,1 +1,3 @@
-spades=3.12.0
+name: spades=3.12.0
+dependencies:
+  - spades=3.12.0

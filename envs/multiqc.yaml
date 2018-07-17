@@ -1,1 +1,3 @@
-multiqc=1.6a0
+name: multiqc=1.6a0
+dependencies:
+  - multiqc=1.6a0
