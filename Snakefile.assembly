@@ -63,33 +63,29 @@ rule all:
         "stats/CoverageStatistics_summary.tsv",
         expand ("scaffolds/{sample}.fna", sample=SAMPLES)
 
-
 rule fastqc:
     input:
         "data/{sample}_R1.fastq.gz"
     output:
         "tmp/{sample}_R1_fastqc.html",
         temp = "data/{sample}_R1.fastq"
-    params:
-        virtenv = config["virtual_environment"]["name"]
+    conda:
+        "envs/fastqc.yaml"
     shell:
-        "set +u; source activate {params.virtenv}; set -u "
-        "&& zcat {input} >> {output.temp} "
+        "zcat {input} >> {output.temp} "
         "&& fastqc {output.temp} -o tmp"
-        "&& set +u; source deactivate; set -u"
 
 rule trim:
     input:
         "data/{sample}_{r}.fastq.gz"
     output:
         "tmp/{sample}_{r}.fastq"
+    conda:
+        "envs/seqtk.yaml"
     params:
-        p = config["seqtk"]["params"],
         virtenv = config["virtual_environment"]["name"]
     shell: 
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& seqtk trimfq {params.p} {input} > {output} "
-        "&& set +u; source deactivate; set -u"   
+        "seqtk trimfq {params.p} {input} > {output}"  
 
 rule spades:
     input: 
