@@ -1,0 +1,5 @@
+name: perlapps
+dependencies:
+  - abricate=0.8
+  - mlst=2.10
+
