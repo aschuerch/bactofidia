@@ -94,7 +94,7 @@ rule spades:
     output:
         "tmp/assembly/{sample}/scaffolds.fasta"
     conda:
-	"envs/spades.yaml"
+        "envs/spades.yaml"
     params:
         spadesparams = config["SPAdes"]["params"],
         kmer = config["SPAdes"]["krange"],
@@ -110,7 +110,7 @@ rule rename:
     output:
         "scaffolds/{sample}.fna"
     conda:
-	"envs/seqtk.yaml"
+        "envs/seqtk.yaml"
     params:
         minlen = config["minlen"],
         versiontag = "{sample}_"+config["virtual_environment"]["name"]
@@ -124,7 +124,7 @@ rule mlst:
     output:
         "stats/MLST.tsv"
     conda:
-	"envs/mlst.yaml"
+        "envs/mlst.yaml"
     params:
         mlst = config["mlst"]["params"]
     shell:
@@ -137,7 +137,7 @@ rule quast:
         html = "tmp/report.html",
         html2 = "stats/Extra/Assembly_report.html"
     conda:
-	"envs/quast.yaml"
+        "envs/quast.yaml"
     params:
         outfolder = "tmp/",
         p = config["QUAST"]["params"]
@@ -151,7 +151,7 @@ rule resfinder:
     output:
         "stats/ResFinder.tsv"
     conda:
-	"envs/abricate.yaml"
+        "envs/abricate.yaml"
     params:
         p = config["abricate"]["params"]
     shell:
@@ -167,7 +167,7 @@ rule map:
         covstats_detail = "tmp/CoverageStatistics_{sample}_scaffolds.txt",
         covstats = "stats/Extra/CoverageStatistics_{sample}.txt"
     conda:
-	"envs/bbmap.yaml"
+        "envs/bbmap.yaml"
     shell:
         "bbmap.sh in={input.in_R1} in2={input.in_R2} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
 
@@ -188,6 +188,6 @@ rule multiqc:
     output:
         "stats/MultiQC_report.html"
     conda:
-	"envs/multiqc.yaml"
+        "envs/multiqc.yaml"
     shell:
         "multiqc tmp/ -n {output}"
