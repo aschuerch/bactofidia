@@ -138,26 +138,15 @@ sleep 1
 
 mkdir -p data
 
-while IFS=' ' read -ra samples
+for file in "${files[@]}"
  do
-   if [[ "$length" == 151 ]];then 
-   for i in "${name%_*_*_R[12]*}";
+  for i in "${file%%_*}";
     do
      echo "$i"
      cat "$i"*R1*.fastq.gz > data/"$i"_R1.fastq.gz
      cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz
-    done
-   else
-   for i in "${samples[@]}";
-    do
-     echo "$i"
-     cat "$i"*R1*.fastq.gz > data/"$i"_R1.fastq.gz
-     cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz
-    done
-   fi
-   
- done <<< "${files[@]}"
-
+    done 
+ done
 
 #check if it is on hpc
 
