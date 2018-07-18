@@ -22,12 +22,11 @@ if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
 ## Paired end, compressed sequencing files (fastq.gz)                    ##
 ## must be present in the same folder from where the script is called.   ##
 ##                                                                       ##
-## Use only the sample names to call the script                          ##
 ##                                                                       ##
 ## Example:                                                              ##
 ##                                                                       ##
-## ./bactofidia.sh  ECO-RES-PR1-00001 ECO-RES-PR1-00002                  ##
-##                                                                       ##
+## ./bactofidia.sh  ECO-RES-PR1-00001_R1.fastq.gz ECO-RES-PR1-00001_R2.fastq.gz
+##  ECO-RES-PR1-00002_R1.fastq.gz ECO-RES-PR1-00002_R2.fastq.gz          ##
 ##                                                                       ##
 ## or                                                                    ##
 ##                                                                       ##
@@ -49,32 +48,30 @@ log=$(pwd)/log/call_assembly.txt
 touch "$log"
 sleep 1
 
-## Check for *fastq.gz
+## Check for *fastq.gz files
 
-if [ $1 == "ALL" ];then
-   files=$(ls *gz | cut -f 1,1 -d _ | uniq | sort -n | tr '\n' ' ')
+echo $1
+
+if [ $1 == """ALL""" ];then
+   echo all
+   files=(./*fastq.gz)
 else
-   files="$@"
+   echo else
+   files=( "$@" )
 fi
 
-allfiles=(`echo ${files}`)
-echo $allfiles
-
-
-for i in "$allfiles"
- do
- if [ -f "$i"_*R1*fastq.gz ]
-   then
-   echo 'Found files for ' "$i" '_*R1*fastq.gz'  2>&1 | tee -a "$log"
-  else
-   echo 'Sequence files as '"$i"'_*R1*fastq.gz are missing in this folder.
-Please execute this script from the location of the sequencing files or exclude 
-the sample.
-Exiting.' 2>&1 | tee -a "$log"
-   exit 0
-  fi
- done
-
+for file in "${files[@]}"
+do
+  if [ -e "$file" ]
+   then   # Check whether file exists.
+     echo 'Found files for ' "$file"  2>&1 | tee -a "$log"
+   else
+     echo 'Sequence files as '"$file"'_*R1*fastq.gz are missing in this folder.
+  Please execute this script from the location of the sequencing files or exclude the sample.
+ Exiting.' 2>&1 | tee -a "$log"
+ exit 1
+   fi
+done
 
 # check if conda is installed
 if command -v conda > /dev/null; then
@@ -108,17 +105,17 @@ sleep 1
 
 # determine read length and config files
 
-for i in "${files%% *}"
-  do
-    length=$(zcat "$i"_*R1*fastq.gz | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
-  done
+
+length=$(zcat "${files[0]}" | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
+
+
 
 if [[ "$length" == 151 ]];then
   configfile=config.yaml
 elif [[ "$length" == 251 ]]; then
   configfile=config_miseq.yaml
 else
-  echo 'please provide a custom config file (e.g. config_custom.yaml): '
+  echo 'Sequence length is '"$length"', please provide a custom config file (e.g. config_custom.yaml): '
   read -r configfile
 fi
 
@@ -137,18 +134,19 @@ echo 2>&1 |tee -a "$log"
 sleep 1
  
 # concatenate for rev and put into data/ folder:
+##concatenation debugging juli 18 2018 13.22
+
 mkdir -p data
 
-while IFS=' ' read -ra samples
+for file in "${files[@]}"
  do
-   for i in "${samples[@]}";
+  for i in "${file%%_*}";
     do
      echo "$i"
      cat "$i"*R1*.fastq.gz > data/"$i"_R1.fastq.gz
      cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz
-  done
- done <<< "$files"
-
+    done 
+ done
 
 #check if it is on hpc
 
