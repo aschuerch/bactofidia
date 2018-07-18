@@ -1,8 +1,9 @@
 #!/bin/bash
 
+#for debugging
 set -e
-set -v 
-set -x
+#set -v 
+#set -x
 
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
 ##Optimized for use on a HPC with SGE scheduler
