@@ -14,9 +14,9 @@ do
      git clone https://github.com/aschuerch/bactofidia bactofidia_"$version"
   fi
   cd bactofidia_"$version"
-  git checkout -b newestversions remotes/origin/newestversions
+  git checkout -B newestversions remotes/origin/newestversions
 
-  ln -s "$datasets"/*fastq.gz .
+  ln -fs "$datasets"/*fastq.gz .
 
   sed -i s/spades\=3\.12\.0/spades\=$version/g  envs/spades.yaml 
 
