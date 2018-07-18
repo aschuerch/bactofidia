@@ -117,3 +117,7 @@ Package versions can be adjusted in package-list.txt. Please visit [bioconda](ht
 For further customizing, see [snakemake documentation](https://snakemake.readthedocs.io/en/stable/)
 
 
+## Trouble shooting
+
+Unlock the snakemake instance
+snakemake --snakefile Snakefile.assembly --unlock --config configfile=config.yaml

@@ -130,9 +130,9 @@ fi
 
 
 # Check virtual environment or create
-virtenv=$(grep -A 1 virtual_environment config.yaml | grep -v "#" | cut -f 2,2 -d ":" | sed -e 's/^[[:space:]]*//')
-echo "$virtenv"
-conda env list | grep "$virtenv" || conda create -y -n "$virtenv" --file package-list.txt
+#virtenv=$(grep -A 1 virtual_environment config.yaml | grep -v "#" | cut -f 2,2 -d ":" | sed -e 's/^[[:space:]]*//')
+#echo "$virtenv"
+#conda env list | grep "$virtenv" || conda create -y -n "$virtenv" --file package-list.txt
 
 
 # Check and activate snakemake or create
@@ -189,11 +189,13 @@ echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$
  --latency-wait 60 \
  --config configfile="$configfile" \
  --verbose \
+ --printshellcmds \ 
  --forceall \
  --keep-going \
  --restart-times 5\
+ --use-conda \
  --cluster \
- 'qsub -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ ' \
+ 'qsub -V -cwd -l h_vmem=125G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 2>&1| tee -a "$log"
 
 #job to send an e-mail
