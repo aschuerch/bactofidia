@@ -13,7 +13,7 @@ if [ ! -d bactofidia_"$version" ]; then
 git clone https://github.com/aschuerch/bactofidia bactofidia_"$version"
 fi
 cd bactofidia_"$version"
-git checkout newestversions
+git checkout -b newestversions remotes/origin/newestversions
 ln -fs ../*fastq.gz .
 
 sed -i s/spades\=3\.12\.0/spades\=$version/g  envs/spades.yaml 

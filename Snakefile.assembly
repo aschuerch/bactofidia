@@ -1,8 +1,10 @@
 import shutil
 import glob
 import os
+import datetime
 
 configfile : config.get("configfile")
+timestamp = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
 
 # Collect samples. They need to be stored in data/
 SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
@@ -113,7 +115,7 @@ rule rename:
         "envs/bactofidia.yaml"
     params:
         minlen = config["minlen"],
-        versiontag = "{sample}_"+config["virtual_environment"]["name"]
+        versiontag = "{sample}_"+timestamp
     shell:
         "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
 
