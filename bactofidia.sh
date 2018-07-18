@@ -32,16 +32,12 @@ if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
 ##                                                                       ##
 ## ./bactofidia.sh ALL                                                   ##
 ##                                                                       ##
-## Before running the pipeline for the first time, a virtual             ##
-## environment needs to be created. Packages and versions are specified  ##
-## in package-list.txt. See bioconda.github.io for available packages.   ##
-##                                                                       ##
-## Create the environment with                                           ##
-##                                                                       ##
-## conda create --file package-list.txt -n bactofidia_standard201709     ##
+## Packages and versions are specified in envs/packages.yml.             ## 
+## See bioconda.github.io for available packages.                        ##
 ##                                                                       ##
 ##                                                                       ##
-## Anita Schurch Aug 2017                                                ##
+##                                                                       ##
+## Anita Schurch Aug 2018                                                ##
 ###########################################################################"
     exit
 fi
@@ -189,7 +185,6 @@ echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$
  --latency-wait 60 \
  --config configfile="$configfile" \
  --verbose \
- --printshellcmds \ 
  --forceall \
  --keep-going \
  --restart-times 5\
@@ -210,8 +205,8 @@ qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
 else
 
 #if not on a cluster
-echo "snakemake --snakefile Snakefile.assembly --keep-going --config configfile=""$configfile"
-snakemake --snakefile Snakefile.assembly --keep-going --config configfile="$configfile"
+echo "snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds --keep-going --config configfile=""$configfile"
+snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds  --keep-going --config configfile="$configfile"
 
 #for the CI
 if [ $? -eq 0 ]
