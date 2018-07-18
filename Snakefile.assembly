@@ -137,7 +137,7 @@ rule quast:
         html = "tmp/report.html",
         html2 = "stats/Extra/Assembly_report.html"
     conda:
-        "envs/bactofidia.yaml"
+        "envs/quast.yaml"
     params:
         outfolder = "tmp/",
         p = config["QUAST"]["params"]
