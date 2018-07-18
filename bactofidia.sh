@@ -34,8 +34,8 @@ if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
 ##                                                                       ##
 ## Packages and versions are specified in envs/packages.yml.             ## 
 ## See bioconda.github.io for available packages.                        ##
-##                                                                       ##
-##                                                                       ##
+## Command line parameters for individual tools can be adjusted in       ##
+## config.yaml                                                           ##
 ##                                                                       ##
 ## Anita Schurch Aug 2018                                                ##
 ###########################################################################"
@@ -94,9 +94,6 @@ else
  export PERL5LIB="~/tmp/Miniconda3/lib/perl5/site_perl/5.22.0"
 fi
 
-# Check and activate snakemake 
-# source activate snakemake || echo "Please create a virtual environment with snakemake and python3 with 'conda create -n snakemake snakemake python=3.5"
-
 echo |  2>&1 tee -a "$log"
 echo "The results will be generated in this location: " 2>&1| tee -a "$log"
 echo "$(pwd)"/results 2>&1| tee -a "$log"
@@ -125,14 +122,8 @@ else
 fi
 
 
-# Check virtual environment or create
-#virtenv=$(grep -A 1 virtual_environment config.yaml | grep -v "#" | cut -f 2,2 -d ":" | sed -e 's/^[[:space:]]*//')
-#echo "$virtenv"
-#conda env list | grep "$virtenv" || conda create -y -n "$virtenv" --file package-list.txt
-
-
 # Check and activate snakemake or create
-source activate snakemake || conda create -y -n snakemake snakemake
+source activate snakemake || conda create -y -n snakemake snakemake python=3.5
 
 
 echo 2>&1 |tee -a "$log"
@@ -219,4 +210,3 @@ else
 fi
 
 fi
-
