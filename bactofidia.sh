@@ -60,6 +60,7 @@ else
    files=( "$@" )
 fi
 
+
 for file in "${files[@]}"
 do
   if [ -e "$file" ]
@@ -72,6 +73,7 @@ do
  exit 1
    fi
 done
+
 
 # check if conda is installed
 if command -v conda > /dev/null; then
