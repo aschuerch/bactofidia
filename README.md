@@ -2,7 +2,14 @@
 
 *bactofidia* is a bacterial assembly and basic analysis pipeline using Snakemake and bioconda.
 
-## Usage (short version)
+
+## Dependencies
+
+bactofidia runs under bash and relies on a miniconda installation. If miniconda is not present, 
+the script will attempt to install the latest version in a temporary folder.
+However, I would recommend to install and customize miniconda yourself. See the [bioconda page](https://bioconda.github.io)
+
+## Usage 
 
 Clone this repository with
 
@@ -10,8 +17,7 @@ Clone this repository with
 git clone https://github.com/aschuerch/bactofidia.git
 ```
 
-Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) 
-to this folder (or symlink them). Run the pipeline with
+Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) to this folder (or symlink them). Run the pipeline with
 
 
 ```bash
@@ -23,20 +29,10 @@ or
 ./bactofidia.sh ALL
 ```
 
-
-
-## Prerequisites
-
-Bactofidia runs under bash and relies on a miniconda installation. If miniconda is not present, 
-the script will attempt to install the latest version in a temporary folder.
-However, I would recommend to install miniconda. See the [bioconda page](https://bioconda.github.io)
-
-# Usage (long version)
-
 The pipeline takes Illumina paired-end sequencing reads as compressed sequencing files (.fastq.gz) 
 which must be present in the same folder from where the script is run.
 
-The config.yaml file can be adjusted for parameters of the different tools.
+The config.yaml or config_miseq.yaml files can be adjusted for parameters of the different tools.
 
 The different versions of the packages that are run are defined in the envs folder. 
 
@@ -83,7 +79,7 @@ will give an explanation of the (limited) options.
 ## Adjusting command line parameters
 
 Command line parameters for the different tools can be adjusted in the config.yaml or config_miseq.yaml file or 
-in the Snakefile.assembly directly. For many cases, the default parameters should be sufficient
+in the Snakefile.assembly directly. For many cases, the default parameters should be sufficient.
 
 
 ## Using different package versions
@@ -106,5 +102,4 @@ In this case, unlock the snakemake instance with
 ```bash
 ./unlock.sh
 ```
-
 
