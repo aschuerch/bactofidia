@@ -14,8 +14,10 @@ However, I would recommend to install and customize miniconda yourself. See the 
 Clone this repository with
 
 ```bash
-git clone https://github.com/aschuerch/bactofidia.git
+git clone https://github.com/aschuerch/bactofidia.git bactofidia_[myproject]
 ```
+
+where [myproject] is the name of your project.
 
 Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) to this folder (or symlink them). Run the pipeline with
 
