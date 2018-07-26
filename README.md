@@ -10,7 +10,8 @@ Clone this repository with
 git clone https://github.com/aschuerch/bactofidia.git
 ```
 
-Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample1_R1.fastq.gz and Sample1_R2.fastq.gz) to this folder (or symlink them). Run the pipeline with
+Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample1_R1.fastq.gz and Sample1_R2.fastq.gz) 
+to this folder (or symlink them). Run the pipeline with
 
 
 ```bash
@@ -18,52 +19,28 @@ Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fast
 ```
 
 
-## Installation
+## Prerequisites
 
-A bioconda installation is required.
+Bactofidia runs under bash and relies heavily on a miniconda installation is required. If miniconda is not present, 
+the script will attempt to install the latest version in a temporary folder.
+However, I would recommend to install miniconda. See the [bioconda page](https://bioconda.github.io)
 
-This is an example script to install bioconda on a Linux 64-bit architecture. For other options, see the [bioconda page](https://bioconda.github.io)
+# Usage (long version)
 
-```bash
- wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
- chmod +x Miniconda2-latest-Linux-x86_64.sh
- mkdir -p ~/tmp
- ./Miniconda2-latest-Linux-x86_64.sh -b -p ~/tmp/Miniconda2
- rm Miniconda2-latest-Linux-x86_64.sh
- export PATH=~/tmp/Miniconda2/bin:$PATH 
- export PYTHONPATH=~/tmp/Miniconda2/pkgs/
- conda config --add channels conda-forge
- conda config --add channels defaults
- conda config --add channels r
- conda config --add channels bioconda
-```
-Consider to add the miniconda directory to your PATH environment variable by editing your ~/.bash_profile
+The pipeline takes Illumina paired-end sequencing reads as compressed sequencing files (.fastq.gz) 
+which must be present in the same folder from where the script is run.
 
-Next, create a virtual environment for snakemake using python3:
-
-```bash
- conda create -y -n snakemake python=3.5 snakemake
-```
-
-
-## Usage (long version)
-
-Before running the pipeline for the first time, another virtual environment needs to be created. Packages and versions are specified in 'package-list.txt'. Adjust this file to your needs. See bioconda.github.io for available packages.
-
-Create the environment with 
-
-```bash
-conda create --file package-list.txt -n [bactofidia_custom]
-```
-where [bactiofidia_custom] matches the name of the environment given in the config.yaml
+Use only the sample name to call the script (not the .fastq.gz ending)
 
 The config.yaml file can be adjusted for parameters of the different tools.
+
+The different versions of the packages that are run are defined in the envs folder. 
 
 For debugging or testing purposes, the pipeline itself can be dry-run with 
 
 ```bash
 source activate snakemake
-snakemake -np --config configfile=config.yaml
+snakemake -np  --snakefile Snakefile.assembly --config configfile=config.yaml
 source deactivate
 ```
 
@@ -104,16 +81,29 @@ will give an explanation of the (limited) options.
 
 ## Adjusting command line parameters
 
-Command line parameters for the different tools can be adjusted in the config.yaml or config_miseq.yaml file or in Snakefile directly. For many cases, the default parameters should be sufficient
+Command line parameters for the different tools can be adjusted in the config.yaml or config_miseq.yaml file or 
+in the Snakefile.assembly directly. For many cases, the default parameters should be sufficient
 
 
 ## Using different package versions
 
-Package versions can be adjusted in package-list.txt. Please visit [bioconda](http://bioconda.github.io/) for available packages
+Package versions can be adjusted in envs/*yaml. 
+The packages are in different files mainly due to different dependencies.
+Please visit [bioconda](http://bioconda.github.io/) for available packages
 
 
 ## Adding other tools
 
 For further customizing, see [snakemake documentation](https://snakemake.readthedocs.io/en/stable/)
+
+
+## Trouble shooting
+
+Sometimes the snakemake workflow will give you an error due to an already running instance.
+In this case, unlock the snakemake instance with
+
+```bash
+./unlock.sh
+```
 
 

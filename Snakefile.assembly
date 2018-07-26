@@ -1,8 +1,10 @@
 import shutil
 import glob
 import os
+import datetime
 
 configfile : config.get("configfile")
+timestamp = str(datetime.datetime.now().strftime("%Y%m%d%H%M"))
 
 # Collect samples. They need to be stored in data/
 SAMPLES,R, = glob_wildcards("data/{id}_{r}.fastq.gz")
@@ -63,33 +65,29 @@ rule all:
         "stats/CoverageStatistics_summary.tsv",
         expand ("scaffolds/{sample}.fna", sample=SAMPLES)
 
-
 rule fastqc:
     input:
         "data/{sample}_R1.fastq.gz"
     output:
         "tmp/{sample}_R1_fastqc.html",
         temp = "data/{sample}_R1.fastq"
-    params:
-        virtenv = config["virtual_environment"]["name"]
+    conda:
+        "envs/fastqc.yaml"
     shell:
-        "set +u; source activate {params.virtenv}; set -u "
-        "&& zcat {input} >> {output.temp} "
+        "zcat {input} >> {output.temp} "
         "&& fastqc {output.temp} -o tmp"
-        "&& set +u; source deactivate; set -u"
 
 rule trim:
     input:
         "data/{sample}_{r}.fastq.gz"
     output:
         "tmp/{sample}_{r}.fastq"
+    conda:
+        "envs/bactofidia.yaml"
     params:
-        p = config["seqtk"]["params"],
-        virtenv = config["virtual_environment"]["name"]
+       	p = config["seqtk"]["params"]
     shell: 
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& seqtk trimfq {params.p} {input} > {output} "
-        "&& set +u; source deactivate; set -u"   
+       "seqtk trimfq {params.p} {input} > {output}"  
 
 rule spades:
     input: 
@@ -97,43 +95,42 @@ rule spades:
         R2="tmp/{sample}_R2.fastq"
     output:
         "tmp/assembly/{sample}/scaffolds.fasta"
+    conda:
+        "envs/spades.yaml"
     params:
         spadesparams = config["SPAdes"]["params"],
         kmer = config["SPAdes"]["krange"],
         cov = config["mincov"],
-        outfolder = "tmp/assembly/{sample}",
-        virtenv = config["virtual_environment"]["name"]
+        outfolder = "tmp/assembly/{sample}"
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
-        "&& set +u; source deactivate; set -u"
+        "spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
+
 
 rule rename:
     input:
         "tmp/assembly/{sample}/scaffolds.fasta"
     output:
-        "scaffolds/{sample}.fna",
+        "scaffolds/{sample}.fna"
+    conda:
+        "envs/bactofidia.yaml"
     params:
         minlen = config["minlen"],
-        versiontag = "{sample}_"+config["virtual_environment"]["name"],
-        virtenv = config["virtual_environment"]["name"]
+        versiontag = "{sample}_"+timestamp
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
-        "&& set +u; source deactivate; set -u"
+        "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
+
       
 rule mlst:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES)
     output:
         "stats/MLST.tsv"
+    conda:
+        "envs/perl.yaml"
     params:
-        mlst = config["mlst"]["params"],
-        virtenv = config["virtual_environment"]["name"]
+        mlst = config["mlst"]["params"]
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& mlst {params.mlst} {input} > {output}"
-        "&& set +u; source deactivate; set -u"
+        "mlst {params.mlst} {input} > {output}"
 
 rule quast:
     input:
@@ -141,29 +138,27 @@ rule quast:
     output:
         html = "tmp/report.html",
         html2 = "stats/Extra/Assembly_report.html"
+    conda:
+        "envs/quast.yaml"
     params:
         outfolder = "tmp/",
-        p = config["QUAST"]["params"],
-        virtenv = config["virtual_environment"]["name"]
+        p = config["QUAST"]["params"]
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& quast {params.p} -o {params.outfolder} {input}"
+        "quast {params.p} -o {params.outfolder} {input}"
         "&& cp {output.html} {output.html2} " 
-        "&& set +u; source deactivate; set -u"
 
 rule resfinder:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES) 
     output:
         "stats/ResFinder.tsv"
+    conda:
+        "envs/perl.yaml"
     params:
-        p = config["abricate"]["params"],
-        virtenv = config["virtual_environment"]["name"]
+        p = config["abricate"]["params"]
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& abricate {params.p} {input} > {output}" 
+        "abricate {params.p} {input} > {output}" 
         "&& sed -i 's/scaffolds\///g' {output}"
-        "&& set +u; source deactivate; set -u"
 
 rule map:
     input:
@@ -173,12 +168,10 @@ rule map:
     output:
         covstats_detail = "tmp/CoverageStatistics_{sample}_scaffolds.txt",
         covstats = "stats/Extra/CoverageStatistics_{sample}.txt"
-    params:
-        virtenv = config["virtual_environment"]["name"]
+    conda:
+        "envs/bactofidia.yaml"
     shell:
-        "set +u; source activate {params.virtenv}; set -u"
-        "&& bbmap.sh in={input.in_R1} in2={input.in_R2} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
-        "&& set +u; source deactivate; set -u"
+        "bbmap.sh in={input.in_R1} in2={input.in_R2} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
 
 rule sum:
     input:
@@ -196,10 +189,7 @@ rule multiqc:
         expand("stats/Extra/CoverageStatistics_{sample}.txt", sample=SAMPLES)
     output:
         "stats/MultiQC_report.html"
-    params:
-        virtenv = config["virtual_environment"]["name"]
+    conda:
+        "envs/bactofidia.yaml"
     shell:
-        "set +u; source activate {params.virtenv}; set -u "
-        "&& multiqc tmp/ -n {output}"
-        "&& set +u; source deactivate; set -u"
-
+        "multiqc tmp/ -n {output}"

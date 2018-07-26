@@ -1,0 +1,5 @@
+name: bactofidia
+dependencies:
+  - bbmap=37.62
+  - multiqc=1.6a0
+  - seqtk=1.3

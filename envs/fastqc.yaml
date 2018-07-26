@@ -1,0 +1,3 @@
+name: fastqc=0.11.5
+dependencies: 
+  - fastqc=0.11.5
