@@ -7,7 +7,8 @@
 
 bactofidia runs under bash and relies on a miniconda installation. If miniconda is not present, 
 the script will attempt to install the latest version in a temporary folder.
-However, I would recommend to install and customize miniconda yourself. See the [bioconda page](https://bioconda.github.io)
+However, I would recommend to install and customize miniconda yourself. 
+See the [bioconda page](https://bioconda.github.io).
 
 ## Usage 
 
@@ -19,7 +20,8 @@ git clone https://github.com/aschuerch/bactofidia.git bactofidia_[myproject]
 
 where [myproject] is the name of your project.
 
-Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) to this folder (or symlink them). Run the pipeline with
+Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) 
+to this folder, or symlink them. Run the pipeline with
 
 
 ```bash
@@ -36,7 +38,7 @@ which must be present in the same folder from where the script is run.
 
 The config.yaml or config_miseq.yaml files can be adjusted for parameters of the different tools.
 
-The different versions of the packages that are run are defined in the envs folder. 
+The different versions of the packages that are run are defined in the `envs/` folder. 
 
 ## De-bugging and testing
 
@@ -46,18 +48,19 @@ For debugging or testing purposes, the pipeline itself can be dry-run with
 ./dryrun.sh
 ```
 
-The pipeline takes compressed sequencing files (.fastq.gz) which must be present in the same folder from where the script is called.
+The pipeline takes compressed sequencing files (.fastq.gz) which must be 
+present in the same folder from where the script is called.
 
 Test the whole pipeline with:
 
 ```bash
-cp test/Test*gz .
+ln -s  test/Test*gz .
 ./bactofidia.sh Test_R1.fastq.gz Test_R2.fastq.gz
 ```
 
 This will run the pipeline on the included test files.
 
-## Components
+## Analysis steps
 
 Currently it runs:
  - quality check before trimming using fastqc
@@ -87,7 +90,7 @@ in the Snakefile.assembly directly. For many cases, the default parameters shoul
 ## Using different package versions
 
 Package versions can be adjusted in envs/*yaml. 
-The packages are in different files mainly due to different dependencies such as python 2 / python 3.
+The packages are in different files, mainly due to different dependencies such as python 2 / python 3.
 Please visit [bioconda](http://bioconda.github.io/) for available packages.
 
 
