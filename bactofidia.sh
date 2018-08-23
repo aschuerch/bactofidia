@@ -142,7 +142,7 @@ mkdir -p data
 
 for file in "${files[@]}"
  do
-  for i in "${file%%_*}";
+  for i in "${file%%_R*}";
     do
      echo "$i"
      cat "$i"*R1*.fastq.gz > data/"$i"_R1.fastq.gz
