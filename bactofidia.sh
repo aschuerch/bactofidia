@@ -1,13 +1,16 @@
 #!/bin/bash
 
-#for debugging
-set -e
+##to debug
+#set -e
 #set -v 
 #set -x
 
+########################################
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
 ##Optimized for use on a HPC with SGE scheduler
-##aschuerch 062018
+##aschuerch 082018
+########################################
+
 
 ##1. Checks
 ##Check for command line arguments
@@ -37,7 +40,7 @@ if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
 ## Command line parameters for individual tools can be adjusted in       ##
 ## config.yaml                                                           ##
 ##                                                                       ##
-## Anita Schurch Aug 2018                                                ##
+## Version Aug2018                                                       ##
 ###########################################################################"
     exit
 fi
