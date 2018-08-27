@@ -45,6 +45,7 @@ if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
     exit
 fi
 
+## create logs
 
 mkdir -p "$(pwd)"/log
 log=$(pwd)/log/call_assembly.txt
@@ -78,7 +79,8 @@ do
 done
 
 
-# check if conda is installed
+# check if conda is installed, if not found attempt to install in a temporary folder
+
 if command -v conda > /dev/null; then
  echo  2>&1| tee -a "$log"
 else
@@ -108,12 +110,11 @@ echo "$(pwd)"/log  2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
 sleep 1
 
-# determine read length and config files
-
+# determine read length
 
 length=$(zcat "${files[0]}" | awk '{if(NR%4==2) print length($1)}' | sort | uniq -c | sort -rn | head -n 1 | rev | cut -f 1,1 -d " "| rev)
 
-
+# determine which config file according to read length (only 251 and 151 implemented a the moment)
 
 if [[ "$length" == 151 ]];then
   configfile=config.yaml
@@ -125,9 +126,10 @@ else
 fi
 
 
-# Check and activate snakemake or create
-source activate snakemake || conda create -y -n snakemake snakemake python=3.5
+# Check and activate snakemake or create new environment
+source activate snakemake || conda create -y -n snakemake snakemake python=3.5 && source activate snakemake
 
+# Write to log
 
 echo 2>&1 |tee -a "$log"
 echo "Read length was determined as: " 2>&1| tee -a "$log"
@@ -138,8 +140,7 @@ echo 2>&1 |tee -a "$log"
 
 sleep 1
  
-# concatenate for rev and put into data/ folder:
-##concatenation debugging juli 18 2018 13.22
+# concatenate forward and reverse and put into data/ folder:
 
 mkdir -p data
 
@@ -153,7 +154,7 @@ for file in "${files[@]}"
     done 
  done
 
-#check if it is on hpc
+#check if it is on hpc (with sge scheduler)
 
 if command -v qstat > /dev/null; then
 
