@@ -4,7 +4,7 @@
 ### Basic microbial WGS analysis pipeline
 
 *bactofidia* is a bacterial assembly and basic analysis pipeline using Snakemake and bioconda.
-
+It is currently written for paired-end Illumina data with length 250 or 150. The pipeline is written to ensure reproducibility, and creates virtual software environments with the software versions that are used for analysis.
 
 ## Dependencies
 
@@ -22,8 +22,7 @@ git clone https://github.com/aschuerch/bactofidia.git bactofidia_[myproject]
 
 where [myproject] is the name of your project.
 
-Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) 
-to this folder, or symlink them. Run the pipeline with
+Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) to this folder, or symlink them. Run the pipeline with
 
 
 ```bash
@@ -65,7 +64,7 @@ This will run the pipeline on the included test files.
 ## Analysis steps
 
 Currently it runs:
- - quality check before trimming using fastqc
+ - quality check before trimming using [fastqc](http://bioconda.github.io/recipes/fastqc/README.html)
  - trimming with [seqtk](http://bioconda.github.io/recipes/seqtk/README.html)
  - assembly with [spades](http://bioconda.github.io/recipes/spades/README.html)
  - mlst with [mlst](http://bioconda.github.io/recipes/mlst/README.html)
