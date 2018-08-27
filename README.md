@@ -5,10 +5,9 @@
 
 ## Dependencies
 
-bactofidia runs under bash and relies on a miniconda installation. If miniconda is not present, 
+bactofidia runs under bash and relies on [bioconda](https://bioconda.github.io) and a miniconda installation. 
+If miniconda is not present, 
 the script will attempt to install the latest version in a temporary folder.
-However, I would recommend to install and customize miniconda yourself. 
-See the [bioconda page](https://bioconda.github.io).
 
 ## Usage 
 
@@ -79,6 +78,33 @@ Running only
 ```
 
 will give an explanation of the (limited) options.
+
+
+## Output
+
+The output can be found in the 'results' folder which contains the following files representing the output of the different tools
+
+```
+.
+├── scaffolds
+│   └── Test.fna
+└── stats
+    ├── CoverageStatistics_summary.tsv
+    ├── Extra
+    │   ├── Assembly_report.html
+    │   └── CoverageStatistics_Test.txt
+    ├── MLST.tsv
+    ├── MultiQC_report_data
+    │   ├── multiqc_data.json
+    │   ├── multiqc_fastqc.txt
+    │   ├── multiqc_general_stats.txt
+    │   ├── multiqc.log
+    │   ├── multiqc_quast.txt
+    │   └── multiqc_sources.txt
+    ├── MultiQC_report.html
+    └── ResFinder.tsv
+```
+
 
 
 ## Adjusting command line parameters
