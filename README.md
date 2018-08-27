@@ -1,6 +1,9 @@
 # bactofidia
                                                                                                                                                                              
 
+<img src="noun_Snake_1753915_B30083.png" width="500px" style="display: block; margin: auto;" />
+
+
 ### Basic microbial WGS analysis pipeline
 
 *bactofidia* is a bacterial assembly and basic analysis pipeline using Snakemake and bioconda.
