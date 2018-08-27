@@ -1,7 +1,7 @@
 # bactofidia
                                                                                                                                                                              
 
-<img src="noun_Snake_1753915_B30083.png" width="500px" style="display: block; margin: auto;" />
+<img src="noun_Snake_1753915_B30083.png" width="300px" style="display: block; margin: auto;" />
 
 
 ### Basic microbial WGS analysis pipeline
