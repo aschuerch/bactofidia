@@ -44,6 +44,9 @@ The config.yaml or config_miseq.yaml files can be adjusted for parameters of the
 
 The different versions of the packages that are run are defined in the `envs/` folder. 
 
+The first time bactofidia is run it generates all virtual environments which can take a considerable time. Do not interrupt this process! 
+The ne
+
 ## De-bugging and testing
 
 For debugging or testing purposes, the pipeline itself can be dry-run with 
