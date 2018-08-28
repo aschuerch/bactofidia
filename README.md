@@ -20,7 +20,7 @@ the script will attempt to install the latest version in a temporary folder.
 Clone this repository with
 
 ```bash
-git clone https://github.com/aschuerch/bactofidia.git bactofidia_[myproject]
+git clone git@gitlab.com:aschuerch/bactofidia.git bactofidia_[myproject]
 ```
 
 where [myproject] is the name of your project.
