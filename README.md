@@ -7,7 +7,8 @@
 ### Basic microbial WGS analysis pipeline
 
 *bactofidia* is a bacterial assembly and basic analysis pipeline using Snakemake and bioconda.
-It is currently written for paired-end Illumina data with length 250 or 150. The pipeline is written to ensure reproducibility, and creates virtual software environments with the software versions that are used for analysis.
+It is currently written for paired-end Illumina data with length 250 or 150. The pipeline is written to ensure reproducibility, 
+and creates virtual software environments with the software versions that are used for analysis.
 
 ## Dependencies
 
@@ -44,8 +45,9 @@ The config.yaml or config_miseq.yaml files can be adjusted for parameters of the
 
 The different versions of the packages that are run are defined in the `envs/` folder. 
 
-The first time bactofidia is run it generates all virtual environments which can take a considerable time. Do not interrupt this process! 
-The ne
+The first time bactofidia is run it generates all virtual environments which can take a considerable time depending on the speed of your internet connection.
+Do not interrupt this process!
+
 
 ## De-bugging and testing
 
