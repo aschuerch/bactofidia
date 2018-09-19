@@ -1,3 +1,4 @@
 name: spades=3.11.1
 dependencies:
   - spades=3.11.1
+  - python=3.5
