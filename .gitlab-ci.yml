@@ -10,9 +10,9 @@ before_script:
   # Useful for debugging any issues with conda
   - conda info -a
   - conda config --add channels conda-forge
+  - conda config --add channels bioconda
   - conda config --add channels defaults
   - conda config --add channels r
-  - conda config --add channels bioconda
 
 job1:
   script: "python test/test.py"
