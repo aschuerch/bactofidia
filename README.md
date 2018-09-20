@@ -12,9 +12,9 @@ and creates virtual software environments with the software versions that are us
 
 ## Dependencies
 
-bactofidia runs under bash and relies on [bioconda](https://bioconda.github.io) and a miniconda installation. 
-If miniconda is not present, 
-the script will attempt to install the latest version in a temporary folder.
+bactofidia runs under bash and relies on software available from [bioconda](https://bioconda.github.io) and a conda installation. 
+If conda is not present, 
+the script will attempt to install the latest miniconda version in a temporary folder.
 
 ## Usage 
 
@@ -27,7 +27,7 @@ git clone git@gitlab.com:aschuerch/bactofidia.git bactofidia_[myproject]
 where [myproject] is the name of your project.
 
 Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) to this folder, or symlink them. 
-The first underscore is regarded as the delimiter of the sample name.
+The first underscore is regarded as the delimiter of the sample name. It's advisable to rename samples with underscores in their samplenames.
 Run the pipeline with
 
 
