@@ -93,9 +93,8 @@ else
  export PATH=~/tmp/Miniconda3/bin:$PATH 
  export PYTHONPATH=~/tmp/Miniconda3/pkgs/
  conda config --add channels conda-forge
- conda config --add channels defaults
- conda config --add channels r
  conda config --add channels bioconda
+ conda config --add channels defaults
  export PERL5LIB="~/tmp/Miniconda3/lib/perl5/site_perl/5.22.0"
 fi
 
