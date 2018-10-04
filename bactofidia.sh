@@ -81,11 +81,17 @@ done
 # check if results directory already exist, wait for user input to continue
 if [ -d results ] 
   then 
-    read -p "The results directory already exists and might be overwritten. Do you want to abort (Y/N)? " -n 1 -r
-    echo    # (optional) move to a new line
+    read -p "The results directory already exists and might be overwritten. Do you want to abort (Y/N)? " -n 1 -r 
+    echo    # new line
     if [[ $REPLY =~ ^[Yy]$ ]]
      then
       exit 1
+    else
+     rm -r results/ 2>&1 | tee -a "$log"
+     if [ -d data ]
+     then
+       rm -r data/ 2>&1 | tee -a "$log"
+     fi
     fi
 fi
 
