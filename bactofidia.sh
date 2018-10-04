@@ -78,6 +78,17 @@ do
    fi
 done
 
+# check if results directory already exist, wait for user input to continue
+if [ -d results ] 
+  then 
+    read -p "The results directory already exists and might be overwritten. Do you want to abort (Y/N)? " -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ $REPLY =~ ^[Yy]$ ]]
+     then
+      exit 1
+    fi
+fi
+
 
 # check if conda is installed, if not found attempt to install in a temporary folder
 
