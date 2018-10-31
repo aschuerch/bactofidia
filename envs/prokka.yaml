@@ -1,0 +1,3 @@
+name: prokka
+dependencies:
+  - prokka=1.13.3
