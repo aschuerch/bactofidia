@@ -38,7 +38,7 @@ if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
 ## Packages and versions are specified in envs/packages.yml.             ## 
 ## See bioconda.github.io for available packages.                        ##
 ## Command line parameters for individual tools can be adjusted in       ##
-## config.yaml                                                           ##
+## config/config.yaml                                                    ##
 ##                                                                       ##
 ## Version Aug2018                                                       ##
 ###########################################################################"
@@ -81,9 +81,9 @@ done
 # check if results directory already exist, wait for user input to continue
 if [ -d results ] 
   then 
-    read -p "The results directory already exists and will be overwritten. Do you want to abort (Y/N)? " -n 1 -r 
+    read -p "The results directory already exists and will be overwritten. Do you want to continue (Y/N)? " -n 1 -r 
     echo    # new line
-    if [[ $REPLY =~ ^[Yy]$ ]]
+    if [[ $REPLY =~ ^[Nn]$ ]]
      then
       exit 1
     else
@@ -133,9 +133,9 @@ length=$(zcat "${files[0]}" | awk '{if(NR%4==2) print length($1)}' | sort | uniq
 # determine which config file according to read length (only 251 and 151 implemented a the moment)
 
 if [[ "$length" == 151 ]];then
-  configfile=config.yaml
+  configfile=config/config.yaml
 elif [[ "$length" == 251 ]]; then
-  configfile=config_miseq.yaml
+  configfile=config/config_miseq.yaml
 else
   echo 'Sequence length is '"$length"', please provide a custom config file (e.g. config_custom.yaml): '
   read -r configfile
