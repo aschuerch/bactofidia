@@ -1,5 +1,5 @@
 image:
-  name: ubuntu
+  name: centos
   entrypoint: ["/bin/bash"]
 
 
