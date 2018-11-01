@@ -153,10 +153,11 @@ rule mlst:
     conda:
         "envs/perl.yaml"
     params:
-        mlst = config["mlst"]["params"]
+        mlst = config["mlst"]["params"],
+        outconfig = "config/mlst.output.config"
     shell:
-        "mlst {params.mlst} {input} > {output.out}"
-        "&& cp {output.out} {output.mqcoutput}"
+        "mlst {params.mlst} {input} > {output.out} "
+        "&& cat {params.outconfig} > {output.mqcoutput} && cat {output.out} >> {output.mqcoutput}"
 
 rule quast:
     input:
@@ -200,6 +201,7 @@ rule map:
         "envs/bactofidia.yaml"
     shell:
         "bbmap.sh in={input.in_R1} in2={input.in_R2} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
+        "&& sed -i 's/\#//g' {output.covstats_detail}"
 
 rule sum:
     input:
@@ -207,9 +209,11 @@ rule sum:
     output:
         out = "stats/CoverageStatistics_summary.tsv",
         mqcoutput = "tmp/sum_mqc.tsv"
+    params:
+        config = "conf/coverage.output.config"
     shell:
-        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\\@@g'| sed 's@\.txt@@g' >> {output.out}"
-        "&& cp {output.out} {output.mqcoutput}"
+        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\\@@g'| sed 's@\.txt@@g' | sed 's@Extra@@g'>> {output.out}"
+        "&& cat {params.config} > {output.mqcoutput} && cat {output.out} >> {output.mqcoutput}"
 
 rule multiqc:
     input:
