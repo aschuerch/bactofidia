@@ -157,7 +157,7 @@ rule mlst:
         outconfig = "config/mlst.output.config"
     shell:
         "mlst {params.mlst} {input} > {output.out} "
-        "&& cat {params.outconfig} > {output.mqcoutput} && cat {output.out} >> {output.mqcoutput}"
+        "&& cat {params.outconfig} > {output.mqcoutput} && sed 's@\-\t\-@\-\t\-\t\-\t\-\t\-\t\-\t\-\t\-\t\-@g' {output.out} >> {output.mqcoutput}"
 
 rule quast:
     input:
@@ -183,11 +183,12 @@ rule resfinder:
     conda:
         "envs/perl.yaml"
     params:
-        p = config["abricate"]["params"]
+        p = config["abricate"]["params"],
+        outconfig = "config/resfinder.output.config"
     shell:
         "abricate {params.p} {input} > {output.out}" 
         "&& sed -i 's/scaffolds\///g' {output.out}"
-        "&& cp {output.out} {output.mqcoutput}"
+        "&& cat {params.outconfig} > {output.mqcoutput} && sed 's@#@@g' {output.out} >> {output.mqcoutput}" 
 
 rule map:
     input:
@@ -212,7 +213,7 @@ rule sum:
     params:
         config = "config/coverage.output.config"
     shell:
-        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\\@@g'| sed 's@\.txt@@g' | sed 's@Extra@@g'| sed 's@\\\\@@g'>> {output.out}"
+        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\@@g'| sed 's@\.txt@@g' | sed 's@Extra@@g'>> {output.out}"
         "&& cat {params.config} > {output.mqcoutput} && cat {output.out} >> {output.mqcoutput}"
 
 rule multiqc:
