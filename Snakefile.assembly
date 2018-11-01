@@ -208,11 +208,11 @@ rule sum:
         expand("stats/Extra/CoverageStatistics_{sample}.txt", sample=SAMPLES)
     output:
         out = "stats/CoverageStatistics_summary.tsv",
-        mqcoutput = "tmp/sum_mqc.tsv"
+        mqcoutput = "tmp/Coverage_mqc.tsv"
     params:
-        config = "conf/coverage.output.config"
+        config = "config/coverage.output.config"
     shell:
-        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\\@@g'| sed 's@\.txt@@g' | sed 's@Extra@@g'>> {output.out}"
+        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\\@@g'| sed 's@\.txt@@g' | sed 's@Extra@@g'| sed 's@\\\\@@g'>> {output.out}"
         "&& cat {params.config} > {output.mqcoutput} && cat {output.out} >> {output.mqcoutput}"
 
 rule multiqc:
@@ -221,7 +221,7 @@ rule multiqc:
         expand("tmp/{sample}/report.html", sample=SAMPLES),
         expand("stats/Extra/CoverageStatistics_{sample}.txt", sample=SAMPLES),
         expand("stats/annotated/{sample}/{sample}.gff", sample=SAMPLES),
-        "tmp/sum_mqc.tsv",
+        "tmp/Coverage_mqc.tsv",
         "tmp/MLST_mqc.tsv",
         "tmp/ResFinder_mqc.tsv"
     output:
