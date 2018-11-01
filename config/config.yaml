@@ -9,7 +9,7 @@ minlen: 500
 mincov: 10
 
 # remove temporary files after successful analysis. no/yes
-remove_temp: no
+remove_temp: yes
 
 seqtk: # trimming 
   params: -q 0.01

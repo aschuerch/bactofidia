@@ -27,5 +27,8 @@ mlst:  # multi-locus sequence typing on WGS
 abricate: # resistance gene detection
   params: --nopath --minid=90
 
+prokka: # annotation
+  params: --force 
+
 multiqc: #reporting
-  params: -f
+  params: --zip-data-dir --ignore-samples *gff --force
