@@ -9,7 +9,7 @@ minlen: 500
 mincov: 10
 
 # remove temporary files after successful analysis. no/yes
-remove_temp: yes
+remove_temp: no
 
 seqtk: # trimming 
   params: -q 0.01
@@ -27,5 +27,9 @@ mlst:  # multi-locus sequence typing on WGS
 abricate: # resistance gene detection
   params: --nopath --minid=90
 
+prokka: # annotation
+  params: --force 
+
+
 multiqc: #reporting
-  params: -f
+  params: --zip-data-dir --ignore-samples *gff --force
