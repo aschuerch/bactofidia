@@ -26,8 +26,10 @@ git clone git@gitlab.com:aschuerch/bactofidia.git bactofidia_[myproject]
 
 where [myproject] is the name of your project.
 
-Move your paired-end read sequencing files (Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) to this directory, or symlink them. 
-The first underscore is regarded as the delimiter of the sample name. It's advisable to rename samples with underscores in their samplenames.
+Move or symlink your paired-end read sequencing files 
+(Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) to the bactofidia_[myproject] directory. 
+The first underscore in the sample names is regarded as the delimiter. 
+It's advisable to rename samples with underscores in their samplenames.
 Run the pipeline with
 
 
@@ -162,4 +164,3 @@ The pipeline can be tested with
 ```bash
 ./dryrun_bactofidia.sh
 ```
-
