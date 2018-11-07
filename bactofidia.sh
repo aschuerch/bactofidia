@@ -54,10 +54,10 @@ sleep 1
 
 ## Check for *fastq.gz files
 
-echo $1
 
-if [ $1 == """ALL""" ];then
-   echo all
+
+if [ "$1" == """ALL""" ];then
+   echo "All fastq.gz files will be processed"  2>&1 | tee -a "$log"
    files=(./*fastq.gz)
 else
    echo else
@@ -112,7 +112,7 @@ else
  conda config --add channels conda-forge
  conda config --add channels bioconda
  conda config --add channels defaults
- export PERL5LIB="~/tmp/Miniconda3/lib/perl5/site_perl/5.22.0"
+ export PERL5LIB=~/tmp/Miniconda3/lib/perl5/site_perl/5.22.0
 fi
 
 echo |  2>&1 tee -a "$log"
@@ -162,12 +162,10 @@ mkdir -p data
 
 for file in "${files[@]}"
  do
-  for i in "${file%%_*}";
-    do
-     echo "$i"
-     cat "$i"*R1*.fastq.gz > data/"$i"_R1.fastq.gz
-     cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz
-    done 
+  i="${file%%_*}"
+  echo "$i"
+  cat "$i"*R1*.fastq.gz > data/"$i"_R1.fastq.gz
+  cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz 
  done
 
 #check if it is on hpc (with sge scheduler)
