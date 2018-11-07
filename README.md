@@ -98,14 +98,30 @@ will give an explanation of the (limited) options.
 The output can be found in the 'results' directory which contains the following files representing the output of the different tools
 
 ```
-.
+results/
 ├── scaffolds
-│   └── Test.fna
+│   ├── Test.fna
+│   
 └── stats
+    ├── annotated
+    │   ├── Test
+    │      ├── Test.err
+    │      ├── Test.faa
+    │      ├── Test.ffn
+    │      ├── Test.fna
+    │      ├── Test.fsa
+    │      ├── Test.gbk
+    │      ├── Test.gff
+    │      ├── Test.log
+    │      ├── Test.sqn
+    │      ├── Test.tbl
+    │      ├── Test.tsv
+    │      └── Test.txt
+    │   
     ├── CoverageStatistics_summary.tsv
     ├── Extra
-    │   ├── Assembly_report.html
-    │   └── CoverageStatistics_Test.txt
+    │   ├── CoverageStatistics_Test.txt
+    │ 
     ├── MLST.tsv
     ├── MultiQC_report_data.zip
     ├── MultiQC_report.html
