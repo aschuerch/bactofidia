@@ -63,7 +63,8 @@ rule all:
         "stats/ResFinder.tsv",
         "stats/MLST.tsv",
         "stats/CoverageStatistics_summary.tsv",
-        expand ("scaffolds/{sample}.fna", sample=SAMPLES)
+        expand ("scaffolds/{sample}.fna", sample=SAMPLES),
+        expand ("stats/annotated/{sample}/{sample}.gff", sample=SAMPLES)
 
 rule fastqc:
     input:
@@ -85,7 +86,7 @@ rule trim:
     conda:
         "envs/bactofidia.yaml"
     params:
-       	p = config["seqtk"]["params"]
+        p = config["seqtk"]["params"]
     shell: 
        "seqtk trimfq {params.p} {input} > {output}"  
 
@@ -106,7 +107,7 @@ rule spades:
         "spades.py -1 {input.R1} -2 {input.R2} -o {params.outfolder} -k {params.kmer} --cov-cutoff {params.cov} {params.spadesparams}"
 
 
-rule rename:
+rule minlength:
     input:
         "tmp/assembly/{sample}/scaffolds.fasta"
     output:
@@ -119,46 +120,75 @@ rule rename:
     shell:
         "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
 
-      
+rule rename:
+    input:
+        "scaffolds/{sample}.fna"
+    output:
+        "tmp/{sample}.fna"
+    shell:
+        "cut -f 1,3 -d '_' {input} > {output}"
+
+
+rule prokka:
+    input:
+       "tmp/{sample}.fna"
+    output:
+       "stats/annotated/{sample}/{sample}.gff"
+    conda:
+        "envs/prokka.yaml"
+    params:
+        prokka = config["prokka"]["params"],
+        outdir = "stats/annotated/{sample}",
+        prefix = "{sample}",
+        strain = "{sample}"
+    shell:
+        "prokka --outdir {params.outdir} --strain {params.strain} --prefix {params.prefix} {params.prokka} {input}"
+ 
 rule mlst:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES)
     output:
-        "stats/MLST.tsv"
+        out = "stats/MLST.tsv",
+        mqcoutput = "tmp/MLST_mqc.tsv"
     conda:
         "envs/perl.yaml"
     params:
-        mlst = config["mlst"]["params"]
+        mlst = config["mlst"]["params"],
+        outconfig = "config/mlst.output.config"
     shell:
-        "mlst {params.mlst} {input} > {output}"
+        "mlst {params.mlst} {input} > {output.out} "
+        "&& cat {params.outconfig} > {output.mqcoutput} && sed 's@\-\t\-@\-\t\-\t\-\t\-\t\-\t\-\t\-\t\-\t\-@g' {output.out} >> {output.mqcoutput}"
 
 rule quast:
     input:
-        expand("scaffolds/{sample}.fna", sample=SAMPLES)      
+        "scaffolds/{sample}.fna",
+        gff = "stats/annotated/{sample}/{sample}.gff"
     output:
-        html = "tmp/report.html",
-        html2 = "stats/Extra/Assembly_report.html"
+        html = "tmp/{sample}/report.html"
     conda:
         "envs/quast.yaml"
     params:
-        outfolder = "tmp/",
-        p = config["QUAST"]["params"]
+        outfolder = "tmp/{sample}",
+        p = config["QUAST"]["params"],
+        out1 = "tmp/{sample}/report.hml"
     shell:
         "quast {params.p} -o {params.outfolder} {input}"
-        "&& cp {output.html} {output.html2} " 
 
 rule resfinder:
     input:
         expand("scaffolds/{sample}.fna", sample=SAMPLES) 
     output:
-        "stats/ResFinder.tsv"
+        out = "stats/ResFinder.tsv",
+        mqcoutput = "tmp/ResFinder_mqc.tsv"
     conda:
         "envs/perl.yaml"
     params:
-        p = config["abricate"]["params"]
+        p = config["abricate"]["params"],
+        outconfig = "config/resfinder.output.config"
     shell:
-        "abricate {params.p} {input} > {output}" 
-        "&& sed -i 's/scaffolds\///g' {output}"
+        "abricate {params.p} {input} > {output.out}" 
+        "&& sed -i 's/scaffolds\///g' {output.out}"
+        "&& cat {params.outconfig} > {output.mqcoutput} && sed 's@#@@g' {output.out} >> {output.mqcoutput}" 
 
 rule map:
     input:
@@ -172,24 +202,38 @@ rule map:
         "envs/bactofidia.yaml"
     shell:
         "bbmap.sh in={input.in_R1} in2={input.in_R2} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
+        "&& sed -i 's/\#//g' {output.covstats_detail}"
 
 rule sum:
     input:
         expand("stats/Extra/CoverageStatistics_{sample}.txt", sample=SAMPLES)
     output:
-        "stats/CoverageStatistics_summary.tsv"
+        out = "stats/CoverageStatistics_summary.tsv",
+        mqcoutput = "tmp/Coverage_mqc.tsv"
+    params:
+        config = "config/coverage.output.config"
     shell:
-        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\\@@g'| sed 's@\.txt@@g' >> {output}"
-
+        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\\\@@g'| sed 's@\.txt@@g' | sed 's@Extra@@g' >> {output.out}"
+        "&& cat {params.config} > {output.mqcoutput} && cat {output.out} >> {output.mqcoutput}"
 
 rule multiqc:
     input:
         expand("tmp/{sample}_R1_fastqc.html", sample=SAMPLES),
-        "tmp/report.html",
-        expand("stats/Extra/CoverageStatistics_{sample}.txt", sample=SAMPLES)
+        expand("tmp/{sample}/report.html", sample=SAMPLES),
+        expand("stats/Extra/CoverageStatistics_{sample}.txt", sample=SAMPLES),
+        expand("stats/annotated/{sample}/{sample}.gff", sample=SAMPLES),
+        "tmp/Coverage_mqc.tsv",
+        "tmp/MLST_mqc.tsv",
+        "tmp/ResFinder_mqc.tsv"
     output:
         "stats/MultiQC_report.html"
     conda:
         "envs/bactofidia.yaml"
+    params:
+        tmp = "tmp/",
+        stats = "stats/",
+        title = "bactofidia-"+timestamp,
+        p = config["multiqc"]["params"],
+        prokka = "--cl_config 'config.prokka_fn_snames: True'"
     shell:
-        "multiqc tmp/ -n {output}"
+        "multiqc  --title {params.title} {params.p} {params.prokka} -n {output} {params.tmp} {params.stats}" 
