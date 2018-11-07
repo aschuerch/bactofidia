@@ -56,7 +56,7 @@ Do not interrupt this process!
 For debugging or testing purposes, the pipeline itself can be dry-run with 
 
 ```bash
-./dryrun.sh
+./dryrun_bactofidia.sh
 ```
 
 The pipeline takes compressed sequencing files (.fastq.gz) which must be 
@@ -155,11 +155,11 @@ Sometimes the snakemake workflow will give you an error due to an already runnin
 In this case, unlock the snakemake instance with
 
 ```bash
-./unlock.sh
+./unlock_bactofidia.sh
 ```
 The pipeline can be tested with
 
 ```bash
-./dryrun.sh
+./dryrun_bactofidia.sh
 ```
 
