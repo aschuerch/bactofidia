@@ -12,7 +12,7 @@ mincov: 10
 remove_temp: yes
 
 seqtk: # trimming 
-  params: -q 0.01
+  params: -q 0.001
 
 SPAdes: # assembly
   params: --only-assembler --careful --threads 8
