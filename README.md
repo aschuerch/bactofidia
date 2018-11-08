@@ -21,7 +21,7 @@ the script will attempt to install the latest miniconda version in a temporary d
 Clone this repository with
 
 ```bash
-git clone git@gitlab.com:aschuerch/bactofidia.git bactofidia_[myproject]
+git clone https://gitlab.com/aschuerch/bactofidia.git bactofidia_[myproject]
 ```
 
 where [myproject] is the name of your project.
