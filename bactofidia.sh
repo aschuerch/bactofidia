@@ -200,7 +200,7 @@ echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$
  --restart-times 5\
  --use-conda \
  --cluster \
- 'qsub -V -cwd -l h_vmem=32 -l h_rt=04:00:00 -e log/ -o log/ ' \
+ 'qsub -V -cwd -l h_vmem=32G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 2>&1| tee -a "$log"
 
 #job to send an e-mail
