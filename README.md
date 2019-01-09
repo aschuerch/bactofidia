@@ -101,11 +101,18 @@ The output can be found in the 'results' directory which contains the following 
 
 ```
 results/
+|
+├── configs
+│   ├── ... # contains all configuration definitions, e.g. parameter choices
+│ 
+├── envs
+│   ├── ... # contains all environment definitions, e.g. used versions of programs|
+│ 
 ├── scaffolds
-│   ├── Test.fna
+│   ├── Test.fna   # scaffolds
 │   
 └── stats
-    ├── annotated
+    ├── annotated  # results of PROKKA
     │   ├── Test
     │      ├── Test.err
     │      ├── Test.faa
@@ -120,14 +127,14 @@ results/
     │      ├── Test.tsv
     │      └── Test.txt
     │   
-    ├── CoverageStatistics_summary.tsv
+    ├── CoverageStatistics_summary.tsv # Summary of coverage for all sample
     ├── Extra
-    │   ├── CoverageStatistics_Test.txt
+    │   ├── CoverageStatistics_Test.txt # Coverage details on each sample
     │ 
-    ├── MLST.tsv
-    ├── MultiQC_report_data.zip
-    ├── MultiQC_report.html
-    └── ResFinder.tsv
+    ├── MLST.tsv # MLST results in table format
+    ├── MultiQC_report_data.zip # Contains data to generate the MultiQC report
+    ├── MultiQC_report.html # Check this file first for overview of quality
+    └── ResFinder.tsv # Resistance genes per sample in table format
 ```
 
 Opening the MultiQC_report.html in a browser is a good starting point to judge quality of data and assembly.
