@@ -8,7 +8,7 @@ minlen: 500
 # minimum average coverage of contigs (to filter out low frequency contamination)
 mincov: 10
 
-# remove temporary files after successful analysis. no/yes
+# remove temporary files after successful analysis. yes/no
 remove_temp: yes
 
 seqtk: # trimming 
@@ -33,3 +33,6 @@ prokka: # annotation
 
 multiqc: #reporting
   params: --zip-data-dir --ignore-samples *gff --force
+
+fastp: # quality trimming
+  params: -q 20 -j tmp/fastq.json -h tmp/fastp.html

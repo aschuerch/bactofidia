@@ -82,20 +82,23 @@ rule fastqc:
 
 rule trim:
     input:
-        "data/{sample}_{r}.fastq.gz"
+        r1 = "data/{sample}_R1.fastq.gz",
+        r2 = "data/{sample}_R2.fastq.gz"
     output:
-        "tmp/{sample}_{r}.fastq"
+        r1 = "tmp/{sample}_R1.fastq.gz",
+        r2 = "tmp/{sample}_R2.fastq.gz"
     conda:
-        "envs/bactofidia.yaml"
+        "envs/fastp.yaml"
     params:
-        p = config["seqtk"]["params"]
-    shell: 
-       "seqtk trimfq {params.p} {input} > {output}"  
+        p = config["fastp"]["params"]
+    shell:
+        "fastp {params.p} --in1 {input.r1} --in2 {input.r2} --out1 {output.r1} --out2 {output.r2}"
+
 
 rule spades:
     input: 
-        R1="tmp/{sample}_R1.fastq",
-        R2="tmp/{sample}_R2.fastq"
+        R1="tmp/{sample}_R1.fastq.gz",
+        R2="tmp/{sample}_R2.fastq.gz"
     output:
         "tmp/assembly/{sample}/scaffolds.fasta"
     conda:
@@ -195,8 +198,8 @@ rule resfinder:
 rule map:
     input:
         ref = "scaffolds/{sample}.fna",
-        in_R1 = "tmp/{sample}_R1.fastq",
-        in_R2 = "tmp/{sample}_R2.fastq"
+        in_R1 = "tmp/{sample}_R1.fastq.gz",
+        in_R2 = "tmp/{sample}_R2.fastq.gz"
     output:
         covstats_detail = "tmp/CoverageStatistics_{sample}_scaffolds.txt",
         covstats = "stats/Extra/CoverageStatistics_{sample}.txt"
