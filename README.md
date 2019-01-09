@@ -102,7 +102,7 @@ The output can be found in the 'results' directory which contains the following 
 ```
 results/
 |
-├── configs
+├── config
 │   ├── ... # contains all configuration definitions, e.g. parameter choices
 │ 
 ├── envs
@@ -142,8 +142,8 @@ Opening the MultiQC_report.html in a browser is a good starting point to judge q
 
 ## Adjusting command line parameters
 
-Command line parameters for the different tools can be adjusted in the config.yaml or config_miseq.yaml file or 
-in the Snakefile.assembly directly. For many cases, the default parameters should be sufficient.
+Command line parameters for the different tools can be adjusted in the config.yaml or config_miseq.yaml file in the config/ directory, 
+or in the Snakefile.assembly directly. For many cases, the default parameters should be sufficient.
 
 
 ## Using different package versions
