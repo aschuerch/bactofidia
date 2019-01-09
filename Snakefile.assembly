@@ -49,6 +49,8 @@ onsuccess:
         pass
     for dir in ["stats", "scaffolds"]:
         shutil.move(dir, "results/"+dir)
+    for dir in ["config", "envs"]:
+        shutil.copytree (dir, "results/"+dir)
     print("Workflow finished!")
     return
  
