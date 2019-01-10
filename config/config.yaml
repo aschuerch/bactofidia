@@ -9,7 +9,7 @@ minlen: 500
 mincov: 10
 
 # remove temporary files after successful analysis. yes/no
-remove_temp: yes
+remove_temp: no
 
 seqtk: # trimming 
   params: -q 0.01
@@ -35,4 +35,4 @@ multiqc: #reporting
   params: --zip-data-dir --ignore-samples *gff --force
 
 fastp: # quality trimming
-  params: -q 20 -j tmp/fastq.json -h tmp/fastp.html
+  params: -q 30 -j tmp/fastp.json -h tmp/fastp.html
