@@ -85,8 +85,8 @@ rule trim:
         r1 = "data/{sample}_R1.fastq.gz",
         r2 = "data/{sample}_R2.fastq.gz"
     output:
-        r1 = "tmp/{sample}_R1.fastq.gz",
-        r2 = "tmp/{sample}_R2.fastq.gz"
+        r1 = "tmp/{sample}_R1.fastq",
+        r2 = "tmp/{sample}_R2.fastq"
     conda:
         "envs/fastp.yaml"
     params:
@@ -97,8 +97,8 @@ rule trim:
 
 rule spades:
     input: 
-        R1="tmp/{sample}_R1.fastq.gz",
-        R2="tmp/{sample}_R2.fastq.gz"
+        R1="tmp/{sample}_R1.fastq",
+        R2="tmp/{sample}_R2.fastq"
     output:
         "tmp/assembly/{sample}/scaffolds.fasta"
     conda:
@@ -198,8 +198,8 @@ rule resfinder:
 rule map:
     input:
         ref = "scaffolds/{sample}.fna",
-        in_R1 = "tmp/{sample}_R1.fastq.gz",
-        in_R2 = "tmp/{sample}_R2.fastq.gz"
+        in_R1 = "tmp/{sample}_R1.fastq",
+        in_R2 = "tmp/{sample}_R2.fastq"
     output:
         covstats_detail = "tmp/CoverageStatistics_{sample}_scaffolds.txt",
         covstats = "stats/Extra/CoverageStatistics_{sample}.txt"
