@@ -12,8 +12,6 @@ before_script:
   - conda config --add channels conda-forge
   - conda config --add channels bioconda
   - conda config --add channels defaults
-  - conda config --show channels
-  # to view configurations current state
 
 job1:
   script: "python test/test.py"
