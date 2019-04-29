@@ -32,4 +32,3 @@ prokka: # annotation
 
 multiqc: #reporting
   params: --zip-data-dir --ignore-samples *gff --force
-
