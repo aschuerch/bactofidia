@@ -143,7 +143,7 @@ fi
 
 
 # Check and activate snakemake or create new environment
-source activate snakemake || conda create -y -n snakemake snakemake python=3.5 && source activate snakemake
+source activate snakemake || conda create -y -n snakemake snakemake=5.2.2 python=3.5 && source activate snakemake
 
 # Write to log
 
