@@ -30,6 +30,5 @@ abricate: # resistance gene detection
 prokka: # annotation
   params: --force 
 
-
 multiqc: #reporting
   params: --zip-data-dir --ignore-samples *gff --force
