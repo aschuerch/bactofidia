@@ -32,6 +32,3 @@ prokka: # annotation
 
 multiqc: #reporting
   params: --zip-data-dir --ignore-samples *gff --force
-
-fastp: # quality trimming
-  params: -q 20 -j tmp/fastq.json -h tmp/fastp.html
