@@ -51,6 +51,10 @@ onsuccess:
         shutil.move(dir, "results/"+dir)
     for dir in ["config", "envs"]:
         shutil.copytree (dir, "results/"+dir)
+
+    for dir in ["results"]:
+        shutil.move(dir, timestamp+"_results")
+
     print("Workflow finished!")
     return
  
