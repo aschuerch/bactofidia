@@ -204,10 +204,12 @@ rule map:
     output:
         covstats_detail = "tmp/CoverageStatistics_{sample}_scaffolds.txt",
         covstats = "stats/Extra/CoverageStatistics_{sample}.txt"
+    params:         
+        p = config["bbmap"]["params"]
     conda:
         "envs/bactofidia.yaml"
     shell:
-        "bbmap.sh in={input.in_R1} in2={input.in_R2} ref={input.ref} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
+        "bbmap.sh in={input.in_R1} in2={input.in_R2} ref={input.ref}  {params.p} covstats={output.covstats_detail} >> {output.covstats} 2>&1 " 
         "&& sed -i 's/\#//g' {output.covstats_detail}"
 
 rule sum:
