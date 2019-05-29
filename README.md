@@ -15,6 +15,8 @@ and creates virtual software environments with the software versions that are us
 bactofidia runs under bash and relies on software available from [bioconda](https://bioconda.github.io) and a conda installation. 
 If conda is not present, 
 the script will attempt to install the latest miniconda version in a temporary directory.
+If executed on an SGE cluster, a singularity installation is necessary
+
 
 ## Usage 
 
