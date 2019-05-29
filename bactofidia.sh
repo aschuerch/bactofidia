@@ -189,7 +189,7 @@ if command -v qstat > /dev/null; then
 
 echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$log" 
 
-#command on cluster (SGE)
+#command on cluster (SGE), with singularity
  snakemake \
  --snakefile Snakefile.assembly \
  --latency-wait 60 \
@@ -199,6 +199,7 @@ echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$
  --keep-going \
  --restart-times 5\
  --use-conda \
+ --use-singularity \
  --cluster \
  'qsub -V -cwd -l h_vmem=32G -l h_rt=04:00:00 -e log/ -o log/ ' \
  --jobs 100 2>&1| tee -a "$log"
@@ -214,7 +215,7 @@ qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
 
 else
 
-#if not on a cluster
+#if not on a cluster, without singularity
 echo "snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds --keep-going --config configfile=""$configfile"
 snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds  --keep-going --config configfile="$configfile"
 
