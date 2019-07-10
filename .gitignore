@@ -11,4 +11,4 @@ trimmed/
 .snakemake
 ref/
 tmp/
-
+*_results/
