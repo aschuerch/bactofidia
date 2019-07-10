@@ -12,7 +12,7 @@ and creates virtual software environments with the software versions that are us
 
 ## Dependencies
 
-bactofidia runs under bash and relies on software available from [bioconda](https://bioconda.github.io) and a (mini)conda (<4.4) installation. 
+bactofidia runs under bash and relies on software available from [bioconda](https://bioconda.github.io) and a (mini)conda installation. 
 If conda is not present, the script will attempt to install a compatible miniconda version in a temporary directory.
 
 ## Usage 
@@ -26,9 +26,12 @@ git clone https://gitlab.com/aschuerch/bactofidia.git bactofidia_[myproject]
 where [myproject] is the name of your project.
 
 Copy or symlink your paired-end read sequencing files 
-(Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) to the bactofidia_[myproject] directory. 
+(Sample1_R1.fastq.gz, Sample1_R2.fastq.gz, Sample2_R1.fastq.gz and Sample2_R2.fastq.gz) to the bactofidia_[myproject] directory.
+After succesful execution of the pipeline, these files will be removed from this folder. Make sure they have been stored elsewhere.
+
+
 The first underscore in the sample names is regarded as the delimiter for the sample name.
-It's advisable to rename samples with underscores in their samplenames.
+Avoid other underscores in the samplenames.
 
 Run the pipeline with
 
@@ -106,7 +109,7 @@ results/
 │   ├── ... # contains all configuration definitions, e.g. parameter choices
 │ 
 ├── envs
-│   ├── ... # contains all environment definitions, e.g. used versions of programs|
+│   ├── ... # contains all environment definitions, e.g. used versions of programs
 │ 
 ├── scaffolds
 │   ├── Test.fna   # scaffolds
