@@ -12,6 +12,8 @@ before_script:
   - conda config --add channels conda-forge
   - conda config --add channels bioconda
   - conda config --add channels defaults
+  - conda install --yes openjdk
+  - conda clean --index-cache --tarballs --packages --yes
 
 job1:
   script: "python test/test.py"
