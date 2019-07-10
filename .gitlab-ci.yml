@@ -13,7 +13,6 @@ before_script:
   - conda config --add channels bioconda
   - conda config --add channels defaults
   - conda install --yes openjdk
-  - conda install --yes snakemake
 
 job1:
   script: "python test/test.py"
