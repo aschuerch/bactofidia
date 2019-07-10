@@ -1,4 +1,8 @@
 name: bactofidia
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
 dependencies:
   - bbmap=37.62
   - multiqc=1.6a0

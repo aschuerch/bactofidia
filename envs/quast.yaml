@@ -1,3 +1,7 @@
 name: quast
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
 dependencies:
   - quast=3.2
