@@ -43,6 +43,10 @@ onsuccess:
             shutil.rmtree ("ref")
         except:
             pass
+        try:
+            shutil.rm ("*fastq.gz")
+        except:
+            pass
     try:
         os.mkdir("results")
     except:
