@@ -44,7 +44,8 @@ onsuccess:
         except:
             pass
         try:
-            os.remove ("*fastq.gz")
+            for file in glob.glob ("*fastq.gz"):
+              os.remove (file)
         except:
             pass
     try:
