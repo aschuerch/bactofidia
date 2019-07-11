@@ -1,8 +1,4 @@
 name: perlapps
-channels:
-  - defaults
-  - bioconda
-  - conda-forge
 dependencies:
   - abricate=0.8
   - mlst=2.10
