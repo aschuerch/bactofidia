@@ -44,7 +44,7 @@ onsuccess:
         except:
             pass
         try:
-            shutil.rm ("*fastq.gz")
+            os.remove ("*fastq.gz")
         except:
             pass
     try:
