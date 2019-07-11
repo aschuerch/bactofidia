@@ -1,4 +1,4 @@
-image: docker:continuumio/miniconda3:4.3.31
+image: continuumio/miniconda3:4.4.10
 
 before_script:
   - export PATH="/opt/conda/bin:/usr/local/bin:/usr/bin:/bin:"
