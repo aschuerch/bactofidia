@@ -225,7 +225,7 @@ rule sum:
     params:
         config = "config/coverage.output.config"
     shell:
-        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\\\@@g'| sed 's@\.txt@@g' | sed 's@Extra@@g' >> {output.out}"
+        "grep 'Average coverage' {input} | sed 's@CoverageStatistics\_@@g' | sed 's@\:Average coverage\:@@g' | sed 's@stats@@g' | sed 's@\\\\@@g'| sed 's@\.txt@@g' | sed 's@Extra@@g' | sed 's@\/\/@@g' >> {output.out}"
         "&& cat {params.config} > {output.mqcoutput} && cat {output.out} >> {output.mqcoutput}"
 
 rule multiqc:
