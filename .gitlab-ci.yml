@@ -9,6 +9,7 @@ before_script:
   - conda config --add channels conda-forge
   - conda config --add channels bioconda
    #useful for debugging any issues with conda
+  - conda create --yes snakemake snakemake=5.2.2
   - conda info -a
 
 job1:
