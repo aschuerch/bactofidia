@@ -6,8 +6,8 @@ before_script:
   - export ANACONDA_HOME=/opt/conda
   - export PATH=/opt/conda/bin:$PATH
   - conda config --add channels defaults
-  - conda config --add channels conda-forge
   - conda config --add channels bioconda
+  - conda config --add channels conda-forge
    #useful for debugging any issues with conda
   - conda create --yes -n snakemake snakemake=5.2.2
   - conda info -a
