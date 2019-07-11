@@ -102,7 +102,7 @@ if command -v conda > /dev/null; then
  echo  2>&1| tee -a "$log"
 else
  echo "Miniconda missing. Installing...." 
- wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+ wget https://repo.continuum.io/miniconda/Miniconda3-4.3.31-Linux-x86_64.sh
  chmod +x Miniconda3-latest-Linux-x86_64.sh
  mkdir -p ~/tmp
  ./Miniconda3-latest-Linux-x86_64.sh -b -p ~/tmp/Miniconda3
