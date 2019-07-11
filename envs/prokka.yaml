@@ -4,5 +4,5 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - openjdk
+  - openjdk=11
   - prokka=1.13.3
