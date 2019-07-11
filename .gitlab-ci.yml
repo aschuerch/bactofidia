@@ -1,17 +1,15 @@
-image: "python:3.5"
+image: "continuumio/miniconda3:4.3.31"
 
 before_script:
-  - apt-get -qq update && apt-get -qq install less
-  - wget https://repo.continuum.io/miniconda/Miniconda3-4.3.31-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  # Useful for debugging any issues with conda
-  - conda info -a
+  - export PATH="/opt/conda/bin:/usr/local/bin:/usr/bin:/bin:"
+  - unset CONDA_DEFAULT_ENV
+  - export ANACONDA_HOME=/opt/conda
+  - export PATH=/opt/conda/bin:$PATH
+  - conda config --add channels defaults
   - conda config --add channels conda-forge
   - conda config --add channels bioconda
-  - conda config --add channels defaults
+   #useful for debugging any issues with conda
+  - conda info -a
 
 job1:
   script: "python test/test.py"
