@@ -4,5 +4,5 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - perl-file-path
+  - perl-file-slurp
   - mlst=2.10
