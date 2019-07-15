@@ -15,9 +15,7 @@ stdout = process.communicate()[0]
 print ('STDOUT:{}'.format(stdout))
 rc = process.returncode
 
-os.remove ("Test_R1.fastq.gz")
-os.remove ("Test_R2.fastq.gz")
 
 # exit with exitcode of subprocess bactofidia
 sys.exit(rc)
-    
+
