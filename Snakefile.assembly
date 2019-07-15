@@ -162,7 +162,7 @@ rule mlst:
         out = "stats/MLST.tsv",
         mqcoutput = "tmp/MLST_mqc.tsv"
     conda:
-        "envs/perl.yaml"
+        "envs/mlst.yaml"
     params:
         mlst = config["mlst"]["params"],
         outconfig = "config/mlst.output.config"
