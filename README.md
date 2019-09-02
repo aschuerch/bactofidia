@@ -104,7 +104,9 @@ The output can be found in the 'results' directory which contains the following 
 
 ```
 results/
-|
+├── assembly_graphs
+│   ├── ... # contains the assembly graphs of each scaffold in gfa format
+│
 ├── config
 │   ├── ... # contains all configuration definitions, e.g. parameter choices
 │ 
