@@ -52,7 +52,7 @@ onsuccess:
         os.mkdir("results")
     except:
         pass
-    for dir in ["stats", "scaffolds"]:
+    for dir in ["stats", "scaffolds", "assembly_graphs"]:
         shutil.move(dir, "results/"+dir)
     for dir in ["config", "envs"]:
         shutil.copytree (dir, "results/"+dir)
@@ -75,6 +75,7 @@ rule all:
         "stats/MLST.tsv",
         "stats/CoverageStatistics_summary.tsv",
         expand ("scaffolds/{sample}.fna", sample=SAMPLES),
+        expand ("assembly_graphs/{sample}.gfa", sample=SAMPLES),
         expand ("stats/annotated/{sample}/{sample}.gff", sample=SAMPLES)
 
 rule fastqc:
@@ -106,7 +107,8 @@ rule spades:
         R1="tmp/{sample}_R1.fastq",
         R2="tmp/{sample}_R2.fastq"
     output:
-        "tmp/assembly/{sample}/scaffolds.fasta"
+        "tmp/assembly/{sample}/scaffolds.fasta",
+        "tmp/assembly/{sample}/assembly_graph_with_scaffolds.gfa",
     conda:
         "envs/spades.yaml"
     params:
@@ -130,6 +132,14 @@ rule minlength:
         versiontag = "{sample}_"+timestamp
     shell:
         "seqtk seq -L {params.minlen} {input} | sed  s/NODE/{params.versiontag}/g > {output}"
+
+rule graph:
+    input:
+        "tmp/assembly/{sample}/assembly_graph_with_scaffolds.gfa",
+    output:
+        "assembly_graphs/{sample}.gfa"
+    shell:
+        "cp {input} {output}"
 
 rule rename:
     input:
