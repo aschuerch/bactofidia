@@ -6,4 +6,6 @@ channels:
 dependencies:
   - bbmap=37.62
   - multiqc=1.6a0
+  - trim-galore=0.6.2
+  - pigz=2.4
   - seqtk=1.3
