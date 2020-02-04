@@ -11,7 +11,7 @@ mincov: 10
 # remove temporary files after successful analysis. yes/no
 remove_temp: yes
 
-trim-galore: # trimming #the '-j 8' argument sets multi-threading for 8 cores.
+trim-galore: # trimming 
   params: --quality 20  --nextera  --dont_gzip  --length 20 --paired --output_dir 
 
 SPAdes: # assembly
