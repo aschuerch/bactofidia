@@ -78,29 +78,45 @@ rule all:
         expand ("assembly_graphs/{sample}.gfa", sample=SAMPLES),
         expand ("stats/annotated/{sample}/{sample}.gff", sample=SAMPLES)
 
-rule fastqc:
-    input:
-        "data/{sample}_R1.fastq.gz"
-    output:
-        "tmp/{sample}_R1_fastqc.html",
-        temp = "data/{sample}_R1.fastq"
-    conda:
-        "envs/fastqc.yaml"
-    shell:
-        "zcat {input} >> {output.temp} "
-        "&& fastqc {output.temp} -o tmp"
 
-rule trim:
+rule trimming:
     input:
-        "data/{sample}_{r}.fastq.gz"
+        J1="data/{sample}_R1.fastq.gz",
+	J2="data/{sample}_R2.fastq.gz"
     output:
-        "tmp/{sample}_{r}.fastq"
+        "tmp/{sample}_R1_val_1.fq",
+	"tmp/{sample}_R2_val_2.fq"
     conda:
         "envs/bactofidia.yaml"
     params:
-        p = config["seqtk"]["params"]
+        p = config["trim-galore"]["params"]
     shell: 
-       "seqtk trimfq {params.p} {input} > {output}"  
+        "trim_galore {params.p} 'tmp' {input.J1} {input.J2}"
+
+rule change_name:
+    input:
+        T1="tmp/{sample}_R1_val_1.fq",
+        T2="tmp/{sample}_R2_val_2.fq"
+    output:
+        O1="tmp/{sample}_R1.fastq",
+        O2="tmp/{sample}_R2.fastq"
+    conda:
+        "envs/bactofidia.yaml"
+    shell:
+        """      
+        mv {input.T1} {output.O1} 
+        mv {input.T2} {output.O2}
+        """
+
+rule fastqc:
+    input:
+        "tmp/{sample}_R1.fastq"
+    output:
+        "tmp/{sample}_R1_fastqc.html",
+    conda:
+        "envs/fastqc.yaml"
+    shell:
+        "fastqc {input} -o tmp"
 
 rule spades:
     input: 
