@@ -80,7 +80,7 @@ This will run the pipeline on the included test files.
 
 Currently it runs:
  - quality check before trimming using [fastqc](http://bioconda.github.io/recipes/fastqc/README.html)
- - trimming with [seqtk](http://bioconda.github.io/recipes/seqtk/README.html)
+ - trimming with [trimgalore](http://bioconda.github.io/recipes/trimgalore/README.html)
  - assembly with [spades](http://bioconda.github.io/recipes/spades/README.html)
  - mlst with [mlst](http://bioconda.github.io/recipes/mlst/README.html)
  - resistance gene determination with [abricate](http://bioconda.github.io/recipes/abricate/README.html) using the [resfinder database](https://cge.cbs.dtu.dk/services/ResFinder/)
