@@ -218,7 +218,7 @@ rule resfinder:
         out = "stats/ResFinder.tsv",
         mqcoutput = "tmp/ResFinder_mqc.tsv"
     conda:
-        "envs/perl.yaml"
+        "envs/abricate.yaml"
     params:
         p = config["abricate"]["params"],
         outconfig = "config/resfinder.output.config"
