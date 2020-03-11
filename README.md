@@ -13,7 +13,7 @@ and creates virtual software environments with the software versions that are us
 ## Dependencies
 
 bactofidia runs under bash and relies on software available from [bioconda](https://bioconda.github.io) and a (mini)conda installation. 
-If conda is not present, the script will attempt to install miniconda in a temporary directory.
+If conda is not present, the script will suggest a miniconda installation.
 
 ## Usage 
 
@@ -31,7 +31,7 @@ After succesful execution of the pipeline, these files will be removed from this
 
 
 The first underscore in the sample names is regarded as the delimiter for the sample name.
-Avoid other underscores in the samplenames.
+Avoid other underscores in the sample names.
 
 Run the pipeline with
 
@@ -53,7 +53,7 @@ The config.yaml or config_miseq.yaml files in the config/ directory can be adjus
 The different versions of the packages that are run are defined in the `envs/` directory. 
 
 The first time bactofidia is run, it generates all virtual environments which can take a considerable time depending on the speed of your internet connection.
-Do not interrupt this process!
+**Do not interrupt this process!**
 
 
 ## De-bugging and testing
