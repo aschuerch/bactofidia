@@ -3,6 +3,7 @@
 
 <img src="config/noun_Snake_1753915_B30083.png" width="300px" style="display: block; margin: auto;" />
 
+Primary repo and development on https://gitlab.com/aschuerch/bactofidia.git
 
 ### Basic microbial WGS analysis pipeline
 
