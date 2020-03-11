@@ -143,8 +143,7 @@ fi
 
 
 # Check and activate snakemake or create new environment
-source activate snakemake || conda create -y -n snakemake snakemake=5.2.2 python=3.5 && source activate snakemake
-
+source activate snakemake || conda activate snakemake || conda create -y -n snakemake snakemake=5.2.2 python=3.5 && source activate snakemake || conda activate snakemake
 # Write to log
 
 echo 2>&1 |tee -a "$log"
