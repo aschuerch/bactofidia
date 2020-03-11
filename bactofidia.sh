@@ -7,7 +7,7 @@
 
 ########################################
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
-##Optimized for use on a HPC with SGE scheduler
+##Optimized for use on a HPC with SLURM scheduler
 ##aschuerch 032020
 ########################################
 
@@ -174,19 +174,17 @@ if command -v qstat > /dev/null; then
 
 echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$log" 
 
-#command on cluster (SGE)
+#command on cluster (SLURM)
  snakemake \
  --snakefile Snakefile.assembly \
- --latency-wait 60 \
+ --profile config/slurm
  --config configfile="$configfile" \
  --verbose \
  --forceall \
  --keep-going \
- --restart-times 5\
+ --restart-times 3\
  --use-conda \
- --cluster \
- 'qsub -V -cwd -l h_vmem=32G -l h_rt=04:00:00 -e log/ -o log/ ' \
- --jobs 100 2>&1| tee -a "$log"
+ --jobs 10 2>&1| tee -a "$log"
 
 #job to send an e-mail
 job=log/bactofidia_done.sh
