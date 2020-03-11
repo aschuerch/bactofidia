@@ -1,9 +1,10 @@
-#!/bin/bash
+#!/bin/bash -i
 
-source activate snakemake
+conda activate snakemake \
+|| conda create -y -n snakemake snakemake python=3.5 \
+&& conda activate snakemake
 
 if command -v qstat > /dev/null; then
-
 
 snakemake \
   --snakefile Snakefile.assembly \
@@ -24,5 +25,5 @@ snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds  --config 
 
 fi
 
-source deactivate
+conda deactivate
 

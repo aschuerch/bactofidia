@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -i
 
 ##to debug
 #set -e
