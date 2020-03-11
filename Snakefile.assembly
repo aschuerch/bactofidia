@@ -1,7 +1,3 @@
-shell.prefix("set -o pipefail; ")
-shell.executable("/bin/bash")
-shell.prefix("source ~/.bashrc; ")
-
 import shutil
 import glob
 import os
