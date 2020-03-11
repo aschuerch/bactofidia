@@ -1,8 +1,13 @@
 #!/bin/bash -i
 
-conda activate snakemake \
-|| conda create -y -n snakemake snakemake python=3.5 \
-&& conda activate snakemake
+# Check if snakemake is found or install directly into base 
+if command -v snakemake > /dev/null; then ##version?
+echo "snakemake found"
+else
+echo 
+echo "snakemake will be installed" 
+conda install -y snakemake
+fi
 
 if command -v qstat > /dev/null; then
 

@@ -128,10 +128,6 @@ echo "$length" 2>&1| tee -a "$log"
 echo "$configfile" "will be used as configfile"   2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
 
-
-# Check and activate snakemake or create new environment
-#conda activate snakemake || conda create -y -n snakemake snakemake python=3.5 && conda activate snakemake
-
 # Check if snakemake is found or install directly into base 
 if command -v snakemake > /dev/null; then ##version?
 echo 2>&1 |tee -a "$log"
