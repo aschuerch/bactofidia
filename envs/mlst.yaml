@@ -1,4 +1,4 @@
-name: perlapps
+name: mlst
 channels:
   - defaults
   - bioconda

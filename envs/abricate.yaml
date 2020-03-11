@@ -1,0 +1,3 @@
+name: abricate
+dependencies:
+  - abricate=0.8
