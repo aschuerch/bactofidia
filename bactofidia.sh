@@ -1,14 +1,14 @@
-#!/bin/bash
+#!/bin/bash -i
 
 ##to debug
 #set -e
-#set -v 
+#set -v
 #set -x
 
 ########################################
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
 ##Optimized for use on a HPC with SGE scheduler
-##aschuerch 082018
+##aschuerch 032020
 ########################################
 
 
@@ -40,7 +40,7 @@ if [ $# -eq 0 -o "$1" == "-h" -o "$1" == "--help" ]; then
 ## Command line parameters for individual tools can be adjusted in       ##
 ## config/config.yaml                                                    ##
 ##                                                                       ##
-## Version Aug2018                                                       ##
+## Version March2020                                                     ##
 ###########################################################################"
     exit
 fi
@@ -78,48 +78,28 @@ do
    fi
 done
 
-# check if results directory already exist, wait for user input to continue
-if [ -d results ] 
-  then 
-    read -p "The results directory already exists and will be overwritten. Do you want to continue (Y/N)? " -n 1 -r 
-    echo    # new line
-    if [[ $REPLY =~ ^[Nn]$ ]]
-     then
-      exit 1
-    else
-     rm -r results/ 2>&1 | tee -a "$log"
-     if [ -d data ]
-     then
-       rm -r data/ 2>&1 | tee -a "$log"
-     fi
-    fi
-fi
-
-
-# check if conda is installed, if not found attempt to install in a temporary folder
+#Check if conda is installed, if not found attempt to install in a temporary folder
 
 if command -v conda > /dev/null; then
  echo  2>&1| tee -a "$log"
+ echo 
+ echo "conda found" | tee -a "$log"
 else
- echo "Miniconda missing. Installing...." 
- wget https://repo.continuum.io/miniconda/Miniconda3-4.3.31-Linux-x86_64.sh
- chmod +x Miniconda3-latest-Linux-x86_64.sh
- mkdir -p ~/tmp
- ./Miniconda3-latest-Linux-x86_64.sh -b -p ~/tmp/Miniconda3
- rm Miniconda3-latest-Linux-x86_64.sh
- export PATH=~/tmp/Miniconda3/bin:$PATH 
- export PYTHONPATH=~/tmp/Miniconda3/pkgs/
- conda config --add channels defaults
- conda config --add channels bioconda
- conda config --add channels conda-forge
- export PERL5LIB=~/tmp/Miniconda3/lib/perl5/site_perl/5.22.0
+ echo
+ echo "conda missing"
+ echo "Install Miniconda with" 
+ echo
+ echo "    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+ echo "    chmod +x Miniconda3-latest-Linux-x86_64.sh"
+ echo "    ./Miniconda3-latest-Linux-x86_64.sh"
+ echo "and follow the prompts."
+ echo "After installation, configure the channels with"
+ echo
+ echo "    conda config --add channels defaults"
+ echo "    conda config --add channels bioconda"
+ echo "    conda config --add channels conda-forge"
+ exit 1
 fi
-
-echo |  2>&1 tee -a "$log"
-echo "The results will be generated in this location: " 2>&1| tee -a "$log"
-echo "$(pwd)"/results 2>&1| tee -a "$log"
-echo |  2>&1 tee -a "$log"
-sleep 1
 
 echo "The logfiles will be generated here: " 2>&1 | tee -a "$log"
 echo "$(pwd)"/log  2>&1| tee -a "$log"
@@ -141,17 +121,22 @@ else
   read -r configfile
 fi
 
-
-# Check and activate snakemake or create new environment
-source activate snakemake || conda create -y -n snakemake snakemake=5.2.2 python=3.5 && source activate snakemake
-
 # Write to log
-
 echo 2>&1 |tee -a "$log"
 echo "Read length was determined as: " 2>&1| tee -a "$log"
 echo "$length" 2>&1| tee -a "$log"
 echo "$configfile" "will be used as configfile"   2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
+
+# Check if snakemake is found or install directly into base 
+if command -v snakemake > /dev/null; then ##version?
+echo 2>&1 |tee -a "$log"
+echo "snakemake found" 2>&1 |tee -a "$log"
+else
+echo 2>&1 |tee -a "$log"
+echo "snakemake will be installed" 2>&1 |tee -a "$log"
+conda install -y snakemake
+fi
 
 
 sleep 1

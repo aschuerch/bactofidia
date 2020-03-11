@@ -1,7 +1,7 @@
 # bactofidia
                                                                                                                                                                              
 
-<img src="noun_Snake_1753915_B30083.png" width="300px" style="display: block; margin: auto;" />
+<img src="config/noun_Snake_1753915_B30083.png" width="300px" style="display: block; margin: auto;" />
 
 
 ### Basic microbial WGS analysis pipeline
@@ -12,8 +12,8 @@ and creates virtual software environments with the software versions that are us
 
 ## Dependencies
 
-bactofidia runs under bash and relies on software available from [bioconda](https://bioconda.github.io) and a (mini)conda (<4.7) installation. 
-If conda is not present, the script will attempt to install a compatible miniconda version in a temporary directory.
+bactofidia runs under bash and relies on software available from [bioconda](https://bioconda.github.io) and a (mini)conda installation. 
+If conda is not present, the script will attempt to install miniconda in a temporary directory.
 
 ## Usage 
 

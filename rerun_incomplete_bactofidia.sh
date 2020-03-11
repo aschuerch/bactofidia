@@ -1,9 +1,15 @@
-#!/bin/bash
+#!/bin/bash -i
 
-source activate snakemake
+# Check if snakemake is found or install directly into base 
+if command -v snakemake > /dev/null; then ##version?
+echo "snakemake found"
+else
+echo 
+echo "snakemake will be installed" 
+conda install -y snakemake
+fi
 
 if command -v qstat > /dev/null; then
-
 
 snakemake \
   --snakefile Snakefile.assembly \
@@ -24,5 +30,5 @@ snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds  --config 
 
 fi
 
-source deactivate
+conda deactivate
 
