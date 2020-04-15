@@ -7,8 +7,10 @@
 
 ########################################
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
-##Optimized for use on a HPC with SLURM scheduler
-##aschuerch 032020
+##Run on a HPC with SLURM scheduler by requesting a node with sufficient memory 
+## screen -S [session_name]
+## srun --time=24:00:00 --mem=32G --pty bash --output=log/ --error log/
+##aschuerch 042020
 ########################################
 
 
@@ -155,47 +157,47 @@ for file in "${files[@]}"
 
 #check if it is on hpc (with sge scheduler)
 
-if command -v qstat > /dev/null; then
+#if command -v qstat > /dev/null; then
 
 #get e-mail to send the confirmation to
- emaildict=/hpc/dla_mm/data/shared_data/bactofidia_config/email.txt
- if [[ -e "$emaildict" ]]; then
-   echo 'Email file found' 2>&1| tee -a "$log"
-   while read name mail
-    do
-      if [[ "$name" == "$(whoami)" ]]; then
-       email="$mail"
-      fi 
-    done < "$emaildict"
- else
-   echo 'please provide your e-mail '
-   read -p email
- fi
+# emaildict=/hpc/dla_mm/data/shared_data/bactofidia_config/email.txt
+# if [[ -e "$emaildict" ]]; then
+#   echo 'Email file found' 2>&1| tee -a "$log"
+#   while read name mail
+ #   do
+  #    if [[ "$name" == "$(whoami)" ]]; then
+  #     email="$mail"
+  #    fi 
+  #  done < "$emaildict"
+# else
+#   echo 'please provide your e-mail '
+#   read -p email
+# fi
 
-echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$log" 
+#echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$log" 
 
 #command on cluster (SLURM)
- snakemake \
- --snakefile Snakefile.assembly \
- --profile config/slurm
- --config configfile="$configfile" \
- --verbose \
- --forceall \
- --keep-going \
- --restart-times 3\
- --use-conda \
- --jobs 10 2>&1| tee -a "$log"
+# snakemake \
+# --snakefile Snakefile.assembly \
+# --profile config/slurm
+# --config configfile="$configfile" \
+# --verbose \
+# --forceall \
+# --keep-going \
+# --restart-times 3\
+# --use-conda \
+# --jobs 10 2>&1| tee -a "$log"
 
 #job to send an e-mail
-job=log/bactofidia_done.sh
-touch "$job"
-echo "#!/bin/bash" > "$job"
-echo "sleep 1" > "$job"
+#job=log/bactofidia_done.sh
+#touch "$job"
+#echo "#!/bin/bash" > "$job"
+#echo "sleep 1" > "$job"
 
-echo qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
-qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
+#echo qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
+#qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
 
-else
+#else
 
 #if not on a cluster
 echo "snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds --keep-going --config configfile=""$configfile"
@@ -211,4 +213,4 @@ else
   exit 1
 fi
 
-fi
+#fi
