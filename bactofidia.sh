@@ -134,6 +134,7 @@ echo 2>&1 |tee -a "$log"
 if command -v snakemake > /dev/null; then ##version?
 echo 2>&1 |tee -a "$log"
 echo "snakemake found" 2>&1 |tee -a "$log"
+conda update -y snakemake
 else
 echo 2>&1 |tee -a "$log"
 echo "snakemake will be installed" 2>&1 |tee -a "$log"
@@ -158,8 +159,8 @@ for file in "${files[@]}"
 
 # run the snakemake pipeline
 
-echo "snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds --keep-going --config configfile=""$configfile"
-snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds  --keep-going --config configfile="$configfile"
+echo "snakemake --snakefile Snakefile.assembly --cores all --use-conda --printshellcmds --keep-going --config configfile=""$configfile"
+snakemake --snakefile Snakefile.assembly --use-conda  --cores all --printshellcmds  --keep-going --config configfile="$configfile"
 
 #for the CI
 if [ $? -eq 0 ]
