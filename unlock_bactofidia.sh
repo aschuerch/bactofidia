@@ -17,6 +17,7 @@ for i in tmp data stats results log
  rm -r "$i"
  done
 
+conda activate snakemake
 
 snakemake --snakefile Snakefile.assembly --unlock --config configfile=config/config.yaml
 

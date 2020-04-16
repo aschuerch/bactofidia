@@ -88,8 +88,8 @@ if command -v conda > /dev/null; then
  echo "conda found" | tee -a "$log"
 else
  echo
- echo "conda missing"
- echo "Install Miniconda with" 
+ echo "conda missing."
+ echo "Install Miniconda with:" 
  echo
  echo "    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
  echo "    chmod +x Miniconda3-latest-Linux-x86_64.sh"
@@ -155,51 +155,9 @@ for file in "${files[@]}"
   cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz 
  done
 
-#check if it is on hpc (with sge scheduler)
 
-#if command -v qstat > /dev/null; then
+# run the snakemake pipeline
 
-#get e-mail to send the confirmation to
-# emaildict=/hpc/dla_mm/data/shared_data/bactofidia_config/email.txt
-# if [[ -e "$emaildict" ]]; then
-#   echo 'Email file found' 2>&1| tee -a "$log"
-#   while read name mail
- #   do
-  #    if [[ "$name" == "$(whoami)" ]]; then
-  #     email="$mail"
-  #    fi 
-  #  done < "$emaildict"
-# else
-#   echo 'please provide your e-mail '
-#   read -p email
-# fi
-
-#echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$log" 
-
-#command on cluster (SLURM)
-# snakemake \
-# --snakefile Snakefile.assembly \
-# --profile config/slurm
-# --config configfile="$configfile" \
-# --verbose \
-# --forceall \
-# --keep-going \
-# --restart-times 3\
-# --use-conda \
-# --jobs 10 2>&1| tee -a "$log"
-
-#job to send an e-mail
-#job=log/bactofidia_done.sh
-#touch "$job"
-#echo "#!/bin/bash" > "$job"
-#echo "sleep 1" > "$job"
-
-#echo qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
-#qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
-
-#else
-
-#if not on a cluster
 echo "snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds --keep-going --config configfile=""$configfile"
 snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds  --keep-going --config configfile="$configfile"
 
@@ -213,4 +171,3 @@ else
   exit 1
 fi
 
-#fi

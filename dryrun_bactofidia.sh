@@ -10,6 +10,8 @@ conda install -y snakemake
 fi
 
 #dryrun
+conda activate snakemake
+
 snakemake -np  --snakefile Snakefile.assembly --config configfile=config/config.yaml
 
 conda deactivate
