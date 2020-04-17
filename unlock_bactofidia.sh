@@ -7,7 +7,7 @@ echo "snakemake found"
 else
 echo 
 echo "snakemake will be installed" 
-conda install -y snakemake
+conda install -y snakemake=5.14.0
 fi
 
 
@@ -17,7 +17,4 @@ for i in tmp data stats results log
  rm -r "$i"
  done
 
-
-snakemake --snakefile Snakefile.assembly --unlock --config configfile=config/config.yaml
-
-conda deactivate
+snakemake --snakefile Snakefile.assembly  --cores all --unlock --config configfile=config/config.yaml

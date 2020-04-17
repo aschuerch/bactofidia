@@ -6,10 +6,9 @@ echo "snakemake found"
 else
 echo
 echo "snakemake will be installed"
-conda install -y snakemake
+conda install -y snakemake=5.14.0
 fi
 
 #dryrun
-snakemake -np  --snakefile Snakefile.assembly --config configfile=config/config.yaml
 
-conda deactivate
+snakemake -np  --snakefile Snakefile.assembly  --cores all --config configfile=config/config.yaml

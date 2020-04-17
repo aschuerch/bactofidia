@@ -5,6 +5,7 @@ before_script:
   - unset CONDA_DEFAULT_ENV
   - export ANACONDA_HOME=/opt/conda
   - export PATH=/opt/conda/bin:$PATH
+  - conda update -n base -c defaults conda
   - conda config --add channels defaults
   - conda config --add channels bioconda
   - conda config --add channels conda-forge

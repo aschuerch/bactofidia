@@ -177,3 +177,10 @@ The pipeline can be tested with
 ```bash
 ./dryrun_bactofidia.sh
 ```
+
+To re-run parts of the pipeline, try
+
+```bash
+./rerun_incomplete.sh
+```
+

@@ -7,8 +7,10 @@
 
 ########################################
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
-##Optimized for use on a HPC with SGE scheduler
-##aschuerch 032020
+## Run on a HPC with SLURM scheduler by requesting a node with sufficient memory 
+## screen -S [session_name]
+## srun --time=24:00:00 --mem=32G --gres=tmpspace:4 --pty bash
+##aschuerch 04-2020
 ########################################
 
 
@@ -55,7 +57,6 @@ sleep 1
 ## Check for *fastq.gz files
 
 
-
 if [ "$1" == """ALL""" ];then
    echo "All fastq.gz files will be processed"  2>&1 | tee -a "$log"
    files=(./*fastq.gz)
@@ -86,8 +87,8 @@ if command -v conda > /dev/null; then
  echo "conda found" | tee -a "$log"
 else
  echo
- echo "conda missing"
- echo "Install Miniconda with" 
+ echo "conda missing."
+ echo "Install Miniconda with:" 
  echo
  echo "    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
  echo "    chmod +x Miniconda3-latest-Linux-x86_64.sh"
@@ -128,6 +129,7 @@ echo "$length" 2>&1| tee -a "$log"
 echo "$configfile" "will be used as configfile"   2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
 
+
 # Check if snakemake is found or install directly into base 
 if command -v snakemake > /dev/null; then ##version?
 echo 2>&1 |tee -a "$log"
@@ -135,7 +137,7 @@ echo "snakemake found" 2>&1 |tee -a "$log"
 else
 echo 2>&1 |tee -a "$log"
 echo "snakemake will be installed" 2>&1 |tee -a "$log"
-conda install -y snakemake
+conda install -y snakemake=5.14.0
 fi
 
 
@@ -153,55 +155,11 @@ for file in "${files[@]}"
   cat "$i"*R2*.fastq.gz > data/"$i"_R2.fastq.gz 
  done
 
-#check if it is on hpc (with sge scheduler)
 
-if command -v qstat > /dev/null; then
+# run the snakemake pipeline
 
-#get e-mail to send the confirmation to
- emaildict=/hpc/dla_mm/data/shared_data/bactofidia_config/email.txt
- if [[ -e "$emaildict" ]]; then
-   echo 'Email file found' 2>&1| tee -a "$log"
-   while read name mail
-    do
-      if [[ "$name" == "$(whoami)" ]]; then
-       email="$mail"
-      fi 
-    done < "$emaildict"
- else
-   echo 'please provide your e-mail '
-   read -p email
- fi
-
-echo 'An e-mail will be sent to '"$email"' upon job completion.' 2>&1| tee -a "$log" 
-
-#command on cluster (SGE)
- snakemake \
- --snakefile Snakefile.assembly \
- --latency-wait 60 \
- --config configfile="$configfile" \
- --verbose \
- --forceall \
- --keep-going \
- --restart-times 5\
- --use-conda \
- --cluster \
- 'qsub -V -cwd -l h_vmem=32G -l h_rt=04:00:00 -e log/ -o log/ ' \
- --jobs 100 2>&1| tee -a "$log"
-
-#job to send an e-mail
-job=log/bactofidia_done.sh
-touch "$job"
-echo "#!/bin/bash" > "$job"
-echo "sleep 1" > "$job"
-
-echo qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
-qsub -e "$(pwd)"/log/ -o "$(pwd)"/log/ -m ae -M "$email" "$job"
-
-else
-
-#if not on a cluster
-echo "snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds --keep-going --config configfile=""$configfile"
-snakemake --snakefile Snakefile.assembly --use-conda --printshellcmds  --keep-going --config configfile="$configfile"
+echo "snakemake --snakefile Snakefile.assembly --cores all --use-conda --printshellcmds --keep-going --config configfile=""$configfile"
+snakemake --snakefile Snakefile.assembly --use-conda  --cores all --printshellcmds  --keep-going --config configfile="$configfile"
 
 #for the CI
 if [ $? -eq 0 ]
@@ -213,4 +171,3 @@ else
   exit 1
 fi
 
-fi
