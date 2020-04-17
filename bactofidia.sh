@@ -7,10 +7,10 @@
 
 ########################################
 ##Script to call snakefile for bacterial paired-end WGS Illumina data
-##Run on a HPC with SLURM scheduler by requesting a node with sufficient memory 
+## Run on a HPC with SLURM scheduler by requesting a node with sufficient memory 
 ## screen -S [session_name]
-## srun --time=24:00:00 --mem=32G --pty bash --output=log/ --error log/
-##aschuerch 042020
+## srun --time=24:00:00 --mem=32G --gres=tmpspace:4 --pty bash
+##aschuerch 04-2020
 ########################################
 
 
@@ -55,7 +55,6 @@ touch "$log"
 sleep 1
 
 ## Check for *fastq.gz files
-
 
 
 if [ "$1" == """ALL""" ];then
@@ -130,15 +129,15 @@ echo "$length" 2>&1| tee -a "$log"
 echo "$configfile" "will be used as configfile"   2>&1| tee -a "$log"
 echo 2>&1 |tee -a "$log"
 
+
 # Check if snakemake is found or install directly into base 
 if command -v snakemake > /dev/null; then ##version?
 echo 2>&1 |tee -a "$log"
 echo "snakemake found" 2>&1 |tee -a "$log"
-conda update -y snakemake
 else
 echo 2>&1 |tee -a "$log"
 echo "snakemake will be installed" 2>&1 |tee -a "$log"
-conda install -y snakemake
+conda install -y snakemake=5.14.0
 fi
 
 

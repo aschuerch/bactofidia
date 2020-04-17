@@ -6,7 +6,7 @@ echo "snakemake found"
 else
 echo
 echo "snakemake will be installed"
-conda install -y snakemake
+conda install -y snakemake=5.14.0
 fi
 
 #dryrun
