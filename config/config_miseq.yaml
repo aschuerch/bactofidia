@@ -11,6 +11,9 @@ mincov: 10
 # remove temporary files after successful analysis. yes/no
 remove_temp: yes
 
+trim-galore: # trimming
+  params: --quality 20 --dont_gzip  --length 20 --paired --output_dir
+
 seqtk: # trimming 
   params: -q 0.01
 
