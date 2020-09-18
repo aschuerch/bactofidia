@@ -12,7 +12,7 @@ mincov: 10
 remove_temp: yes
 
 trim-galore: # trimming 
-  params: --quality 20  --nextera  --dont_gzip  --length 20 --paired --output_dir 
+  params: --quality 20 --dont_gzip  --length 20 --paired --output_dir 
 
 SPAdes: # assembly
   params: --only-assembler --careful --threads 8
