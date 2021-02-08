@@ -24,10 +24,6 @@ onsuccess:
         except:
             pass
         try:
-            shutil.rmtree ("log")
-        except:
-            pass
-        try:
             dirs = glob.glob ("multiqc_report*")
             for dir in dirs:
                 shutil.rmtree (dir)
@@ -52,7 +48,7 @@ onsuccess:
         os.mkdir("results")
     except:
         pass
-    for dir in ["stats", "scaffolds", "assembly_graphs"]:
+    for dir in ["stats", "scaffolds", "assembly_graphs", "log"]:
         shutil.move(dir, "results/"+dir)
     for dir in ["config", "envs"]:
         shutil.copytree (dir, "results/"+dir)
