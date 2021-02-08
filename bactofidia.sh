@@ -159,7 +159,7 @@ for file in "${files[@]}"
 # run the snakemake pipeline
 
 echo "snakemake --snakefile Snakefile.assembly --cores all --use-conda --printshellcmds --keep-going --config configfile=""$configfile"
-snakemake --snakefile Snakefile.assembly --use-conda  --cores all --printshellcmds  --keep-going --config configfile="$configfile"
+snakemake --snakefile Snakefile.assembly --use-conda  --cores all --printshellcmds  --keep-going --config configfile="$configfile" 2>&1 | tee -a "$log"
 
 #for the CI
 if [ $? -eq 0 ]
