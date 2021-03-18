@@ -21,4 +21,4 @@ log=$(pwd)/log/call_assembly.txt
 
 ## re-run the snakemake pipeline
 
-snakemake --snakefile Snakefile.assembly  --cores all --use-conda --printshellcmds  --config configfile=config/config.yaml --rerun-incomplete 2>&1 | tee -a "$log"
+snakemake --snakefile Snakefile.assembly --cores all --use-conda --printshellcmds --latency-wait 60 --config configfile=config/config.yaml --rerun-incomplete 2>&1 | tee -a "$log"
